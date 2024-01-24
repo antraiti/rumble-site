@@ -12,7 +12,7 @@ export default function InternalUpdate() {
                     <h2>Support For NON-Weekly events</h2>
                     <p>
                         This is something I hope will encourage some games and data outside of Wednesdays. When creating a new event on the events page there will no be a modal popup with settings to fill.
-                        There you can toggle "Weekly" off. Essentially that just means the matches are played not on our normal wednesday night magic. This will allow people to make events and play some pickup rumble whenever they want.
+                        There you can toggle Weekly off. Essentially that just means the matches are played not on our normal wednesday night magic. This will allow people to make events and play some pickup rumble whenever they want.
                     </p>
                 </article>
                 </div>

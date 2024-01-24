@@ -51,25 +51,25 @@ export default function MatchCard(matchObject: any) {
                         <td>
                             <select name="deckid" className="select bg-secondary w-full" value={performance.deckid} onChange={(e) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={null}></option>
-                                {decks.filter(d => d.userid == performance.userid).map(deck => (<option value={deck.id}>{deck.name}</option>))}
+                                {decks.filter(d => d.userid == performance.userid).map(deck => (<option value={deck.id} key={deck.id}>{deck.name}</option>))}
                             </select>
                         </td>
                         <td>
                             <select name="placement" className="select bg-secondary" value={performance.placement} onChange={(e) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={null}></option>
-                                {[...Array(matchInfo.performances.length).keys()].map(k => (<option value={k+1}>{k+1}</option>))}
+                                {[...Array(matchInfo.performances.length).keys()].map(k => (<option value={k+1} key={"perf"+k}>{k+1}</option>))}
                             </select>
                         </td>
                         <td>
                             <select name="order" className="select bg-secondary" value={performance.order} onChange={(e) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={null}></option>
-                                {[...Array(matchInfo.performances.length).keys()].map(k => (<option value={k+1}>{k+1}</option>))}
+                                {[...Array(matchInfo.performances.length).keys()].map(k => (<option value={k+1} key={"order"+k}>{k+1}</option>))}
                             </select>
                         </td>
                         <td>
                             <select name="killedbyuid" className="select bg-secondary" value={performance.killedby} onChange={(e) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={null}>Killed By</option>
-                                {matchInfo.performances.map(p => (<option value={p.userid}>{p.username}</option>))}
+                                {matchInfo.performances.map(p => (<option value={p.userid} key={"kb"+p.userid}>{p.username}</option>))}
                             </select>
                         </td>
                         {!matchInfo.match.start && <button name="delete" className="btn btn-outline btn-error w-5 h-16 m-0" onClick={(e) => matchObject.updateMatch(e, performance.id)}>X</button>}
@@ -81,7 +81,7 @@ export default function MatchCard(matchObject: any) {
                         <div tabIndex={0} role="button" className="btn btn-outline btn-info m-1 min-h-0 h-full mt-2">+</div>
                         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                         {matchObject.userlist.map(u => 
-                            (<li className="cursor-pointer" 
+                            (<li className="cursor-pointer" key={u.publicid}
                             onClick={(e) => matchObject.addPerformance(e.target.value, matchInfo.match.id)} 
                             value={u.publicid}>
                                 {u.username}
