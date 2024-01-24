@@ -16,6 +16,8 @@ async function loginUser(credentials: any) {
     .then(data => {
         if(data.status >= 400) {
             throw new Error("Server responds with error!");
+        } else if (data.status != 200) {
+            throw new Error("Invalid login");
         }
         return data.json();
     })
@@ -42,11 +44,11 @@ export default function SignIn() {
         
         if(userData?.username != null) {
             setLoginerror(false);
+            setUserData({...userData, rememberUser});
+            window.location.reload(); //would rather have a responsive way to handle this but havent found a clean react way
         } else {
             setLoginerror(true);
         }
-        setUserData({...userData, rememberUser});
-        window.location.reload(); //would rather have a responsive way to handle this but havent found a clean react way
       }
     return (
         <div className="hero min-h-screen bg-base-200">
