@@ -48,7 +48,7 @@ export default function UserData() {
   const [userToken] = useState(getUsertoken());
 
   const saveUserData = (userData: any) => {
-    Cookies.set('userdata', JSON.stringify(userData), { expires: 7 });
+    Cookies.set('userdata', JSON.stringify(userData), userData.rememberUser ? { expires: 90 }: {});
     setUserData(userData);
   };
 

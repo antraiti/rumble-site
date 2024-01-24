@@ -25,6 +25,7 @@ export default function SignIn() {
     const [loginerror, setLoginerror] = useState(false);
     const {setUserData, user} = userData();
     const router = useRouter();
+    const [rememberUser, setRememberUser] = useState(false);
 
     useEffect(() => {
         if(user) router.push('/');
@@ -44,7 +45,7 @@ export default function SignIn() {
         } else {
             setLoginerror(true);
         }
-        setUserData(userData);
+        setUserData({...userData, rememberUser});
         window.location.reload(); //would rather have a responsive way to handle this but havent found a clean react way
       }
     return (
@@ -71,8 +72,14 @@ export default function SignIn() {
                         <a href="#" className="label-text-alt link link-hover">Internal use only</a>
                     </label>
                     </div>
+                    <div className="form-control">
+                        <label className="label cursor-pointer">
+                            <span className="label-text">Remember me</span> 
+                            <input type="checkbox" checked={rememberUser} className="checkbox" onChange={(e: any) => setRememberUser(e.target.checked)}/>
+                        </label>
+                    </div>
                     <div className="form-control mt-6">
-                    <button type="submit" className="btn btn-primary">Login</button>
+                        <button type="submit" className="btn btn-primary">Login</button>
                     </div>
                 </form>
                 </div>

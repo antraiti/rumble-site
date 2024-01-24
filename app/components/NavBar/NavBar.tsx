@@ -21,7 +21,7 @@ export default function NavBar() {
                 <Link href="/" className="btn btn-ghost text-xl">Rumble MTG</Link>
                 <Link href="/rules" className="btn btn-ghost">Rules</Link>
                 <Link href="/banlist"  className="btn btn-ghost">Banlist</Link>
-                <Link href="/rules" className="btn btn-ghost">Deck Check</Link>
+                {/* <Link href="/rules" className="btn btn-ghost">Deck Check</Link> */}
             </div>
             <div className="navbar-end">
                 {!username &&
@@ -31,7 +31,7 @@ export default function NavBar() {
                 <div>
                 <Link href="/events" className="btn btn-ghost">Events</Link>
                 <Link href="/decks" className="btn btn-ghost">Decks</Link>
-                <Link href="/login" className="btn btn-ghost">Stats</Link>
+                {/* <Link href="/login" className="btn btn-ghost">Stats</Link> */}
                 <Link href="/login" className="btn btn-ghost">{username}</Link>
                 <div onClick={handleSignout} className="btn btn-ghost">Sign Out</div>
                 </div>}

@@ -59,7 +59,7 @@ async function getDeckInfo(token: string, id: number) {
 export default function DeckDetails({ params }: { params: { deckid: number }}) {
     const { userToken } = userData();
     const router = useRouter();
-    const [deckName, setDeckName] = useState("");
+    const [deckName, setDeckName] = useState(""); //splitting out these properties is bad and can be done
     const [deckCommander, setDeckCommander] = useState();
     const [deckPartner, setDeckPartner] = useState();
     const [deckCompanion, setDeckCompanion] = useState();
@@ -146,7 +146,8 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                                 )}
                     </div>
                 </div>
-                {deckPerformances && deckPerformances.length == 0 && <button onClick={() => deleteDeck()} className="btn btn-error shadow-xl">Delete Deck</button>}
+                {/* Using deckCommaner here as a placeholder, we just need to not display or calc until deck is loaded */}
+                {deckCommander  && deckPerformances.length == 0 && <button onClick={() => deleteDeck()} className="btn btn-error shadow-xl">Delete Deck</button>}
             </div>
         </div>
     );

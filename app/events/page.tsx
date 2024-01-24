@@ -88,13 +88,13 @@ export default function Events() {
 
   return (
     <div className="flex flex-col h-full w-full justify-around items-center align-middle"> 
-      <h1>New</h1>
+      <h1>Latest</h1>
       {events.length > 0 && isToday(events[events.length-1].time) ?
         (<EventCard key={events[events.length-1].id} eventInfo={events[events.length-1]} current={true}/>)
       :
-        (<button className='btn btn-outline btn-success m-5 w-1/2' onClick={()=>(document.getElementById('new_event_modal') as any | null).showModal()}>Create New Event</button>)
+        (<button className='btn btn-outline btn-success m-5 max-w-4xl' onClick={()=>(document.getElementById('new_event_modal') as any | null).showModal()}>Create New Event</button>)
       }
-      <h1>Archive</h1>
+      <h1 className='mt-10'>Archive</h1>
       {events && events?.slice(0).reverse().map((ev: any) => {
           return <EventCard key={ev.id} eventInfo={ev} current={isToday(ev.time)}/>
       })}
