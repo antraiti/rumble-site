@@ -79,13 +79,13 @@ export default function Decks() {
                 <button className="btn" onClick={() => router.push("/decks/newdeck")}>New Deck</button>
             </div>
         </div>
-        {decks?.slice(0).reverse().filter(deck => (deck[0]?.name + deck[1]?.name + deck[2]?.name +deck[3]?.name).toLowerCase().includes(searchValue.toLowerCase())).map((deck) => (
+        {decks?.slice(0).reverse().filter((deck: any) => (deck[0]?.name + deck[1]?.name + deck[2]?.name +deck[3]?.name).toLowerCase().includes(searchValue.toLowerCase())).map((deck: any) => (
             <DeckCard key={deck[0].id}
             deckInfo={deck[0]} 
             commanderInfo={deck[1]}
             partnerInfo={deck[2]} companionInfo={deck[3]} 
-            colorInfo={colors.find((c) => c.id === deck[0].identityid)}
-            performanceInfo={performances?.filter((p) => p.deckid === deck[0].id)}
+            colorInfo={colors.find((c: any) => c.id === deck[0].identityid)}
+            performanceInfo={performances?.filter((p: any) => p.deckid === deck[0].id)}
             ></DeckCard>
         ))}
     </div>

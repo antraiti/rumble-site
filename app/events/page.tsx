@@ -48,7 +48,7 @@ async function createEvent(token: string, data: NewEventData) {
     })
 
 }
-const isToday = (someDate) => {
+const isToday = (someDate: any) => {
   const today = new Date()
   const parsed = new Date(Date.parse(someDate))
   return parsed.getDate() === today.getDate() &&
@@ -58,7 +58,7 @@ const isToday = (someDate) => {
 
 export default function Events() {
   const { userToken } = userData();
-  const [events, setEvents]  = useState([]);
+  const [events, setEvents]  = useState<any>([]);
   const [newEventDetails, setNewEventDetails] = useState<NewEventData>({weekly: true, themed: false, themeid: -1, name: ""} as NewEventData);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function Events() {
       setEvents(items);
     });
   }
-  const updateEventDetails = (e) => {
+  const updateEventDetails = (e: any) => {
     setNewEventDetails((prev) => {
       return {
       ...prev,
@@ -82,7 +82,7 @@ export default function Events() {
   const createNewEvent = () => {
     createEvent(userToken, newEventDetails).then(res => {
       getEventList();
-      document.getElementById('new_event_modal').close()
+      (document?.getElementById('new_event_modal') as any | null).close() //this is really something... i hope it works
     })
   } 
 
@@ -92,10 +92,10 @@ export default function Events() {
       {events.length > 0 && isToday(events[events.length-1].time) ?
         (<EventCard key={events[events.length-1].id} eventInfo={events[events.length-1]} current={true}/>)
       :
-        (<button className='btn btn-outline btn-success m-5 w-1/2' onClick={()=>document.getElementById('new_event_modal').showModal()}>Create New Event</button>)
+        (<button className='btn btn-outline btn-success m-5 w-1/2' onClick={()=>(document.getElementById('new_event_modal') as any | null).showModal()}>Create New Event</button>)
       }
       <h1>Archive</h1>
-      {events && events?.slice(0).reverse().map(ev => {
+      {events && events?.slice(0).reverse().map((ev: any) => {
           return <EventCard key={ev.id} eventInfo={ev} current={isToday(ev.time)}/>
       })}
 

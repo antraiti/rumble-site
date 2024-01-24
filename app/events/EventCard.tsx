@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 
-export default function EventCard(eventObject) {
+export default function EventCard(eventObject: any) {
     const router = useRouter();
     const eventInfo = eventObject.eventInfo;
 

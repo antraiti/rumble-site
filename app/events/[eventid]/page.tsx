@@ -78,7 +78,7 @@ async function newMatch(token: string, id: number) {
         })
     }
 
-async function getUsers(token) {
+async function getUsers(token: string) {
     return fetch('/api/users', {
     method: 'GET',
     headers: {
@@ -93,7 +93,7 @@ async function getUsers(token) {
     })
 }
 
-async function updateMatchTimestamp(token, match, prop) {
+async function updateMatchTimestamp(token: string, match: number, prop: string) {
     return fetch('/api/match', {
     method: 'PUT',
     headers: {
@@ -103,7 +103,7 @@ async function updateMatchTimestamp(token, match, prop) {
     },
     body: JSON.stringify({'prop': prop, 'matchid': match})
     })
-    .then(data => {
+    .then((data: any) => {
         if(data.status >= 400) {
             throw new Error(data.message);
         }
@@ -112,7 +112,7 @@ async function updateMatchTimestamp(token, match, prop) {
   }
 
 export default function DeckDetails({ params }: { params: { eventid: number }}) {
-    const [eventDetails, setEventDetails] = useState();
+    const [eventDetails, setEventDetails] = useState<any>();
     const { user, userToken } = userData();
     const [ userList, setUserList ] = useState([]);
     const ws = useWebSocket();

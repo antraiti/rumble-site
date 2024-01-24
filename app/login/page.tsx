@@ -35,8 +35,8 @@ export default function SignIn() {
         e.preventDefault();
 
         const userData = await loginUser({
-          "username": username.value,
-          "password": password.value
+          "username": (document.getElementById("username") as any).value,
+          "password": (document.getElementById("password") as any).value
         });
         
         if(userData?.username != null) {

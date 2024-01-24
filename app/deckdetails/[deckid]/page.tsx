@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
 
-async function getDeckInfo(token, id) {
+async function getDeckInfo(token: string, id: number) {
     return fetch('/api/deck/'+id, {
     method: 'GET',
     headers: {
@@ -19,7 +19,7 @@ async function getDeckInfo(token, id) {
     })
   }
 
-  async function updateDeck(token, id, prop, val) {
+  async function updateDeck(token: string, id: number, prop: string, val: string) {
     return fetch('/api/deck/'+id, {
     method: 'PUT',
     headers: {
@@ -29,16 +29,15 @@ async function getDeckInfo(token, id) {
     },
     body: JSON.stringify({'prop': prop, 'val': val})
     })
-    .then(data => {
+    .then((data: any) => {
         if(data.status >= 400) {
             throw new Error(data.message);
         }
-        if(prop != 'name' && prop != 'picpos') window.location.reload(false); //refreshes page, ideally shouldnt be using this
         return data.json();
     })
   }
 
-  async function sendDeleteDeckRequest(token, id) {
+  async function sendDeleteDeckRequest(token: string, id: number) {
     return fetch('/api/deck/remove/'+id, {
     method: 'PUT',
     headers: {
@@ -68,7 +67,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
     const [deckLegality, setDeckLegality] = useState();
     const [deckLegalityMessages, setDeckLegalityMessages] = useState([]);
     const [deckPerformances, setDeckPerformances] = useState([]);
-    const [ctimer, setCtimer] = useState(null);
+    const [ctimer, setCtimer] = useState<any | null>(null);
 
     useEffect(() => {
         getDeckInfo(userToken, params.deckid).then((item) => {
@@ -90,7 +89,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
         });
     }
 
-    function changeDelay(prop, val) {
+    function changeDelay(prop: string, val: string) {
         if (ctimer) {
           clearTimeout(ctimer);
           setCtimer(null);
@@ -113,19 +112,19 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     <input type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
                     <select className="select select-bordered w-full m-5 max-w-m" value={deckCommander ?? undefined} onChange={e => updateDeck(userToken, params.deckid, "commander", e.target.value)}>
                         <option disabled selected>Commander</option>
-                        {cardList.map(card => 
+                        {cardList.map((card: any) => 
                                 <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                 )}
                     </select>
                     <select className="select select-bordered w-full m-5 max-w-m" value={deckPartner ?? undefined} onChange={e => updateDeck(userToken, params.deckid, "partner", e.target.value)}>
                         <option disabled selected>Partner</option>
-                        {cardList.map(card => 
+                        {cardList.map((card: any) => 
                                 <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                 )}
                     </select>
                     <select className="select select-bordered w-full m-5 max-w-m" value={deckCompanion ?? undefined} onChange={e => updateDeck(userToken, params.deckid, "companion", e.target.value)}>
                         <option disabled selected>Companion</option>
-                        {cardList.map(card => 
+                        {cardList.map((card: any) => 
                                 <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                 )}
                     </select>
@@ -134,12 +133,12 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     <h1>Sideboard</h1>
                     <select className="select select-bordered w-full m-5 max-w-m" onChange={e => updateDeck(userToken, params.deckid, "sideboard", e.target.value)}>
                         <option disabled selected>Add Card</option>
-                        {cardList.map(card => 
+                        {cardList.map((card: any) => 
                                 <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                 )}
                     </select>
                     <div className="grid grid-flow-col auto-cols-max">
-                        {cardList.filter((card) => card[0].issideboard).map(card => 
+                        {cardList.filter((card: any) => card[0].issideboard).map((card: any) => 
                                 <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-accent h-10 m-2">
                                     <h1 className="mx-5">{card[1].name}</h1>
                                     <button className="btn btn-error btn-outline btn-sm" onClick={e => updateDeck(userToken, params.deckid, "-sideboard", card[0].cardid)}>x</button>

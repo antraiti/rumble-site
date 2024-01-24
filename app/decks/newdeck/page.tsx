@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import userData from "../../util/UserData"
 
 
-async function getUsers(token) {
+async function getUsers(token: string) {
     return fetch('/api/users', {
     method: 'GET',
     headers: {
@@ -19,7 +19,7 @@ async function getUsers(token) {
     })
   }
 
-  async function SubmitDeck(token, di) {
+  async function SubmitDeck(token: string, di: any) {
     console.log("submitting deck")
     return fetch('/api/deck', {
     method: 'POST',
@@ -30,7 +30,7 @@ async function getUsers(token) {
     },
     body: JSON.stringify(di)
     })
-    .then(data => {
+    .then((data: any) => {
         if(data.status >= 400) {
             throw new Error(data.message);
         } else {
@@ -79,7 +79,7 @@ export default function NewDeck() {
                 <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5">
                     <h1>New Deck</h1>
                     <select className="select select-bordered w-full m-5 max-w-m" value={deckUser}>
-                        {users && users.map(usr => 
+                        {users && users.map((usr: any) => 
                                 <option key={usr.publicid} value={usr.publicid}>{usr.username}</option>
                                 )}
                     </select>

@@ -1,6 +1,6 @@
 import { useRouter } from "next/navigation";
 
-export default function DeckCard(deckObject) {
+export default function DeckCard(deckObject: any) {
     const deckInfo = deckObject.deckInfo;
     const colorInfo = deckObject.colorInfo;
     const deckCommander = deckObject.commanderInfo;
@@ -59,7 +59,7 @@ export default function DeckCard(deckObject) {
                         <div className="stat-title">Avg. Placement</div>
                         <div className="stat-value">{
                             performanceInfo.length > 0 ?
-                        (performanceInfo.reduce((total, next) => total + next.placement, 0) / performanceInfo.length).toFixed(2) :
+                        (performanceInfo.reduce((total: number, next: any) => total + next.placement, 0) / performanceInfo.length).toFixed(2) :
                         ""
                         }</div>
                     </div>

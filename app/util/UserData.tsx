@@ -43,7 +43,7 @@ export default function UserData() {
       return null;
   };
 
-  const [user, setUserData] = useState(getUserData());
+  const [user, setUserData] = useState<any>(getUserData());
   const [userName] = useState(getUsername());
   const [userToken] = useState(getUsertoken());
 
