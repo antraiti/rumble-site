@@ -51,7 +51,7 @@ export default function DeckCard(deckObject: any) {
                         <div className="stat-title">Winrate</div>
                         <div className="stat-value">{
                             performanceInfo.length > 0 ?
-                        (performanceInfo.filter((p: any) => p.placement == 1)).length/(performanceInfo.length) :
+                        ((performanceInfo.filter((p: any) => p.placement == 1)).length/(performanceInfo.length)*100).toFixed(2)+"%" :
                         ""
                         }</div>
                     </div>

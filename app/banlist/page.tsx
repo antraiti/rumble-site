@@ -8,7 +8,7 @@ export default function Banlist() {
 
     return (
         <div className="flex flex-col">
-            <div className="card mx-auto bg-primary shadow-xl m-5 p-5 w-3/4">
+            <div className="card mx-auto bg-primary shadow-xl m-5 p-5 w-3/4 max-w-4xl">
                 <h1 className="mx-auto font-bold text-2xl mb-2">Banned Cards</h1>
                 <p>
                     For Rumble we approach banning from a few different angles. Most notibly coming from other formats you will notice that many fast mana and high priced cards are banned.
