@@ -81,13 +81,17 @@ export default function MatchCard(matchObject: any) {
                         <div tabIndex={0} role="button" className="btn btn-outline btn-info m-1 min-h-0 h-full mt-2">+</div>
                         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                         {matchObject.userlist.map((u: any) => 
-                            (<li className="cursor-pointer" key={u.publicid}
+                            (<button className="cursor-pointer hover:bg-primary h-8" key={u.publicid}
                             onClick={(e: any) => matchObject.addPerformance(e.target.value, matchInfo.match.id)} 
                             value={u.publicid}>
                                 {u.username}
-                            </li>))}
+                            </button>))}
                         </ul>
                   </div>}
+                  {!matchInfo.match.start &&
+                  <div tabIndex={0} role="button" className="btn btn-outline btn-info m-1 min-h-0 h-full mt-2" onClick={(e: any) => matchObject.requestMatchJoin(matchInfo.match.id)}>
+                    Join Me
+                </div>}
                 </div>
         </div>
     );

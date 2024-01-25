@@ -42,7 +42,7 @@ async function updatePerformance(token: string, id: number, key: any, val: any |
         })
     }
 
-async function addPerformance(token: string, user: number, match: number) {
+async function addPerformance(token: string, user: string, match: number) {
     return fetch(`/api/performance/`, {
         method: 'POST',
         headers: {
@@ -113,7 +113,8 @@ async function updateMatchTimestamp(token: string, match: number, prop: string) 
 
 export default function DeckDetails({ params }: { params: { eventid: number }}) {
     const [eventDetails, setEventDetails] = useState<any>();
-    const { user, userToken } = userData();
+    const { user, userName, userToken } = userData();
+    const pubid = user.publicid;
     const [ userList, setUserList ] = useState([]);
     const ws = useWebSocket();
 
@@ -137,6 +138,7 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     const updateMatch = (e: any, perfid: number) => {
+        console.log(`${perfid}`);
         updatePerformance(userToken, perfid, e.target.name, e.target.value).then(() => {
             ws?.send("buh");
             updateEventDetails();
@@ -158,8 +160,15 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
         })
     }
 
-    const requestNewPerformance = (userid: number, matchid: number) => {
-        addPerformance(userToken, userid, matchid).then(() => {
+    const requestNewPerformance = (pid: string, matchid: number) => {
+        addPerformance(userToken, pid, matchid).then(() => {
+            ws?.send("buh");
+            updateEventDetails();
+        })
+    }
+
+    const requestMatchJoin = (matchid: number) => {
+        addPerformance(userToken, (((userList.find((u: any)=> u.username == userName)) as any).publicid), matchid).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })
@@ -177,7 +186,8 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
                     updateMatch={updateMatch} 
                     userlist={userList}
                     addPerformance={requestNewPerformance}
-                    updateTimestamp={requestMatchTimestampUpdate}/>
+                    updateTimestamp={requestMatchTimestampUpdate}
+                    requestMatchJoin={requestMatchJoin}/>
                 ))}
             </div>
         </div>
