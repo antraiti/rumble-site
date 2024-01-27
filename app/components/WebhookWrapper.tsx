@@ -3,9 +3,9 @@
 import { WebSocketProvider } from 'next-ws/client';
 
 
-export function WebHookWrapper({children}: any) {
+export function WebHookWrapper({children, connectionurl}: any) {
     return  <WebSocketProvider
-        url={`ws://${process.env.LOCAL_URL}/api/ws`}
+        url={`ws://${connectionurl}/api/ws`}
         // ... other props
     >
     {children}

@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en" data-theme="mytheme" className='bg-base-200'>
       <body className='bg-base-200'>
         <NavBar/>
-        <WebHookWrapper>
+        <WebHookWrapper connectionurl={process.env.HOST_URL}>
           {children}
         </WebHookWrapper>
       </body>

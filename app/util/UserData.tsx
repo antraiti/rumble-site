@@ -22,6 +22,17 @@ export default function UserData() {
         return null
   };
 
+  const getUserId = () => {
+    const userData = Cookies.get('userdata');
+    if(!userData)
+      return null
+    const id = JSON.parse(userData).id;
+    if(id)
+        return id
+    else
+        return null
+  };
+
   const getUsertoken = () => {
     const userData = Cookies.get('userdata');
     if(!userData)
@@ -29,6 +40,17 @@ export default function UserData() {
     const token = JSON.parse(userData).token;
     if(token)
         return token
+    else
+        return null
+  };
+
+  const getUserAdmin = () => {
+    const userData = Cookies.get('userdata');
+    if(!userData)
+      return null
+    const admin = JSON.parse(userData).isadmin;
+    if(admin)
+        return admin
     else
         return null
   };
@@ -46,6 +68,8 @@ export default function UserData() {
   const [user, setUserData] = useState<any>(getUserData());
   const [userName] = useState(getUsername());
   const [userToken] = useState(getUsertoken());
+  const [userId] = useState(getUserId());
+  const [isAdmin] = useState(getUserAdmin());
 
   const saveUserData = (userData: any) => {
     Cookies.set('userdata', JSON.stringify(userData), userData.rememberUser ? { expires: 90 }: {});
@@ -56,7 +80,9 @@ export default function UserData() {
     setUserData: saveUserData,
     user,
     userName,
+    userId,
     userToken,
+    isAdmin,
     removeUserData
   }
 }

@@ -36,12 +36,12 @@ export default function SignIn() {
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
-
+        console.log((document.getElementById("username") as any).value + " " + (document.getElementById("password") as any).value);
         const userData = await loginUser({
           "username": (document.getElementById("username") as any).value,
           "password": (document.getElementById("password") as any).value
         });
-        
+        console.log(userData);
         if(userData?.username != null) {
             setLoginerror(false);
             setUserData({...userData, rememberUser});

@@ -2,16 +2,20 @@
 import Link from "next/link";
 import userData from "../../util/UserData"
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function NavBar() {
     const { userName, removeUserData, user} = userData();
     const [username, setUsername] = useState();
+    const router = useRouter();
+    
     useEffect(() => {
         setUsername(userName);
     }, [user]);
 
     function handleSignout(){
         removeUserData();
+        router.push("/login");
         window.location.reload();
     }
 
@@ -31,8 +35,8 @@ export default function NavBar() {
                 <div>
                 <Link href="/events" className="btn btn-ghost">Events</Link>
                 <Link href="/decks" className="btn btn-ghost">Decks</Link>
-                {/* <Link href="/login" className="btn btn-ghost">Stats</Link> */}
-                <Link href="/login" className="btn btn-ghost">{username}</Link>
+                <Link href="/stats" className="btn btn-ghost">Stats</Link> 
+                <Link href="/profile" className="btn btn-ghost">{username}</Link>
                 <div onClick={handleSignout} className="btn btn-ghost">Sign Out</div>
                 </div>}
             </div>

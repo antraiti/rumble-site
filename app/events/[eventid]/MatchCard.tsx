@@ -1,6 +1,9 @@
+'use client'
 
+import UserData from "@/app/util/UserData";
 
 export default function MatchCard(matchObject: any) {
+    const { userId } = UserData(); 
     const matchInfo = matchObject.matchInfo;
     const decks = matchObject.decks;
 
@@ -45,34 +48,34 @@ export default function MatchCard(matchObject: any) {
                     </tr>
                     </thead>
                     <tbody>
-                    {matchInfo.performances.map((performance: any) => (<tr key={performance.username} className={performance.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
+                    {matchInfo.performances.map((performance: any) => (<tr key={performance.id} className={performance.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
                         <td className="p-0"><img className=" h-16 w-full object-cover rounded-lg" src={getCommanderImageUrl(decks.find((d: any) => d.id == performance.deckid))}></img></td>
                         <td>{performance.username}</td>
                         <td>
-                            <select name="deckid" className="select bg-secondary w-full" value={performance.deckid} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="deckid" className="select bg-secondary w-full" value={performance.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
-                                {decks.filter((d: any) => d.userid == performance.userid).map((deck: any) => (<option value={deck.id} key={deck.id}>{deck.name}</option>))}
+                                {decks.filter((d: any) => d.userid == performance.userid && d.islegal).map((deck: any) => (<option value={deck.id} key={deck.id}>{deck.name}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select name="placement" className="select bg-secondary" value={performance.placement} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="placement" className="select bg-secondary" value={performance.placement ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {Array.from(Array(matchInfo.performances.length).keys()).map(k => (<option value={k+1} key={"perf"+k}>{k+1}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select name="order" className="select bg-secondary" value={performance.order} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="order" className="select bg-secondary" value={performance.order ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {Array.from(Array(matchInfo.performances.length).keys()).map(k => (<option value={k+1} key={"order"+k}>{k+1}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select name="killedbyuid" className="select bg-secondary" value={performance.killedby} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="killedbyuid" className="select bg-secondary" value={performance.killedby ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}>Killed By</option>
-                                {matchInfo.performances.map((p: any) => (<option value={p.userid} key={"kb"+p.userid}>{p.username}</option>))}
+                                {matchInfo.performances.map((p: any) => (<option value={p.userid} key={"kb"+p.id}>{p.username}</option>))}
                             </select>
                         </td>
-                        {!matchInfo.match.start && <button name="delete" className="btn btn-outline btn-error w-5 h-16 m-0" onClick={(e: any) => matchObject.updateMatch(e, performance.id)}>X</button>}
+                        {!matchInfo.match.start && <td className="w-5 p-0"><button name="delete" className="btn btn-outline btn-error w-5 h-16 m-0" onClick={(e: any) => matchObject.updateMatch(e, performance.id)}>X</button></td>}
                     </tr>))}
                     </tbody>
                 </table>
@@ -81,14 +84,15 @@ export default function MatchCard(matchObject: any) {
                         <div tabIndex={0} role="button" className="btn btn-outline btn-info m-1 min-h-0 h-full mt-2">+</div>
                         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                         {matchObject.userlist.map((u: any) => 
-                            (<button className="cursor-pointer hover:bg-primary h-8" key={u.publicid}
+                            (<button className="cursor-pointer hover:bg-primary h-8" key={u.id}
                             onClick={(e: any) => matchObject.addPerformance(e.target.value, matchInfo.match.id)} 
-                            value={u.publicid}>
+                            value={u.id}>
                                 {u.username}
                             </button>))}
                         </ul>
                   </div>}
-                  {!matchInfo.match.start &&
+                  {!matchInfo.match.start && 
+                  !matchInfo.performances.find((p: any) => p.userid == userId) && 
                   <div tabIndex={0} role="button" className="btn btn-outline btn-info m-1 min-h-0 h-full mt-2" onClick={(e: any) => matchObject.requestMatchJoin(matchInfo.match.id)}>
                     Join Me
                 </div>}

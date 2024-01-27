@@ -113,8 +113,7 @@ async function updateMatchTimestamp(token: string, match: number, prop: string) 
 
 export default function DeckDetails({ params }: { params: { eventid: number }}) {
     const [eventDetails, setEventDetails] = useState<any>();
-    const { user, userName, userToken } = userData();
-    const pubid = user.publicid;
+    const { user, userName, userToken, userId } = userData();
     const [ userList, setUserList ] = useState([]);
     const ws = useWebSocket();
 
@@ -153,22 +152,21 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     const requestMatchTimestampUpdate = (matchid: number, prop: string) => {
-        console.log(`${matchid} ${prop}`);
         updateMatchTimestamp(userToken, matchid, prop).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })
     }
 
-    const requestNewPerformance = (pid: string, matchid: number) => {
-        addPerformance(userToken, pid, matchid).then(() => {
+    const requestNewPerformance = (userid: string, matchid: number) => {
+        addPerformance(userToken, userid, matchid).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })
     }
 
     const requestMatchJoin = (matchid: number) => {
-        addPerformance(userToken, (((userList.find((u: any)=> u.username == userName)) as any).publicid), matchid).then(() => {
+        addPerformance(userToken, userId, matchid).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })
@@ -177,10 +175,10 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     return(
         <div className="bg-base-200 h-full">
             <div className="flex flex-col w-full max-w-6xl justify-center mx-auto">
-                <button className="btn btn-outline btn-success max-w-2xl mx-auto w-full mt-5" onClick={() => requestNewMatch()}>Create Match</button>
+                <button key={"newmatchbutton"} className="btn btn-outline btn-success max-w-2xl mx-auto w-full mt-5" onClick={() => requestNewMatch()}>Create Match</button>
                 {eventDetails && eventDetails.matches.slice(0).reverse().map((match: any) => (
                     <MatchCard 
-                    key={match.id} 
+                    key={match.match.id} 
                     matchInfo={match} 
                     decks={eventDetails.decks} 
                     updateMatch={updateMatch} 
