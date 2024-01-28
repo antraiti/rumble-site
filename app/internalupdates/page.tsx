@@ -10,7 +10,9 @@ export default function InternalUpdate() {
                 <article className="prose">
                     <h1>1/28/2024</h1>
                     <p>
-                        Latest Updates add basic profile and stat pages as well as some fixes accross the board. araiti.com will also be usable now without needing the 3000 port number and will be up 24/7.
+                        Latest Updates add basic profile and stat pages as well as some fixes accross the board. 
+                        araiti.com will also be usable now without needing the 3000 port number and will be up 24/7.
+                        We will be using this domain until the site is full ready to switch to.
                     </p>
                     <h2>Profile Page</h2>
                     <p>
