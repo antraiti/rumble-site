@@ -1,6 +1,33 @@
 export default function InternalUpdate() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-3xl">
+            <div role="alert" className="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>PLEASE LOG OUT AND BACK IN IF YOU HAVENT ON THIS NEW VERSION. I updated some of the cookie data and things wont work until you log out and back in!</span>
+            </div>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                <article className="prose">
+                    <h1>1/28/2024</h1>
+                    <p>
+                        Latest Updates add basic profile and stat pages as well as some fixes accross the board. araiti.com will also be usable now without needing the 3000 port number and will be up 24/7.
+                    </p>
+                    <h2>Profile Page</h2>
+                    <p>
+                        If you click on your name when logged in you now goto your profile page. Right now you are just able to change your password (please use carefully i dont want to have to keep reseting passwords for people)
+                    </p>
+                    <h2>Stats Pages</h2>
+                    <p>
+                        I've started on the stats (kinda). For right now you can goto the stats tab and see some basic user stats for yourself. 
+                        The side nav doesnt work yet but will be hooked up since we will have stat pages for all different types of things in the future.
+                        IF YOUR STATS PAGE ISNT LOADING RE-LOG OUT AND IN. I upgraded the cookie data and youll need to re-login to get it to work
+                    </p>
+                    <h2>Fixes</h2>
+                    <p>- Matches will now auto select who goes first</p>
+                    <p>- Dropdown to add users to matches should work now (ive also added a join me button to shortcut adding yourself)</p>
+                </article>
+                </div>
+            </div>
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                 <article className="prose">
