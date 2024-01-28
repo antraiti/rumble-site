@@ -116,10 +116,12 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     const { user, userName, userToken, userId } = userData();
     const [ userList, setUserList ] = useState([]);
     const ws = useWebSocket();
+    const themedweekly = eventDetails?.event.weekly && eventDetails?.event.themed;
 
     useEffect(() => {
         ws?.addEventListener('message', receivedUpdate);
         updateEventDetails();
+    console.log(eventDetails);
         getUsers(userToken).then(items => {
             setUserList(items);
         });
@@ -173,21 +175,32 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     return(
-        <div className="bg-base-200 h-full">
-            <div className="flex flex-col w-full max-w-6xl justify-center mx-auto">
-                <button key={"newmatchbutton"} className="btn btn-outline btn-success max-w-2xl mx-auto w-full mt-5" onClick={() => requestNewMatch()}>Create Match</button>
-                {eventDetails && eventDetails.matches.slice(0).reverse().map((match: any) => (
-                    <MatchCard 
-                    key={match.match.id} 
-                    matchInfo={match} 
-                    decks={eventDetails.decks} 
-                    updateMatch={updateMatch} 
-                    userlist={userList}
-                    addPerformance={requestNewPerformance}
-                    updateTimestamp={requestMatchTimestampUpdate}
-                    requestMatchJoin={requestMatchJoin}/>
-                ))}
-            </div>
-        </div>
+          <div className="bg-base-200 h-full">
+              <div className="flex flex-col w-full max-w-6xl justify-center mx-auto">
+                  <div className="card shadow-xl bg-base-100 h-20 m-3">
+                    <div className="flex justify-between">
+                      <div className="mx-5">
+                        <h2 className="h-5">{themedweekly ? eventDetails?.event.name.split(":")[0] : " "}</h2>
+                        <h1 className="text-4xl italic font-bold">{themedweekly ? eventDetails?.event.name.split(": ")[1] : eventDetails?.event.name}</h1>
+                      </div>
+                      <div className="mx-5">
+                        <h2>{eventDetails?.event.themed ? "Themed" : "No Theme"}</h2>
+                      </div>
+                    </div>
+                  </div>
+                  <button key={"newmatchbutton"} className="btn btn-outline btn-success max-w-2xl mx-auto w-full mt-5" onClick={() => requestNewMatch()}>Create Match</button>
+                  {eventDetails && eventDetails.matches.slice(0).reverse().map((match: any) => (
+                      <MatchCard 
+                      key={match.match.id} 
+                      matchInfo={match} 
+                      decks={eventDetails.decks} 
+                      updateMatch={updateMatch} 
+                      userlist={userList}
+                      addPerformance={requestNewPerformance}
+                      updateTimestamp={requestMatchTimestampUpdate}
+                      requestMatchJoin={requestMatchJoin}/>
+                  ))}
+              </div>
+          </div>
     );
 }

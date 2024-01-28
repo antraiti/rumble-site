@@ -22,7 +22,7 @@ export default function MatchCard(matchObject: any) {
     }
 
     return (
-        <div className="bg-primary rounded-xl m-5 flex flex-col">
+        <div className="bg-primary rounded-xl m-5 flex flex-col shadow-xl">
             <div className="flex h-10 bg-secondary m-2 rounded-xl shadow-xl">
                 <div className="flex w-full items-center justify-between">
                   <h3 className="mx-5">{matchInfo.match.name}</h3>
