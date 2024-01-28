@@ -18,7 +18,7 @@ export default function InternalUpdate() {
                     </p>
                     <h2>Stats Pages</h2>
                     <p>
-                        I've started on the stats (kinda). For right now you can goto the stats tab and see some basic user stats for yourself. 
+                        Ive started on the stats (kinda). For right now you can goto the stats tab and see some basic user stats for yourself. 
                         The side nav doesnt work yet but will be hooked up since we will have stat pages for all different types of things in the future.
                         IF YOUR STATS PAGE ISNT LOADING RE-LOG OUT AND IN. I upgraded the cookie data and youll need to re-login to get it to work
                     </p>
