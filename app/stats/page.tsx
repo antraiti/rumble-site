@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import UserData from "../util/UserData";
 
 async function getUserStats(token: string, userid: number) {
-  return fetch(`/api/stats/user/${userid}`, {
+  return fetch(`api/stats/user/${userid}`, {
   method: 'GET',
   headers: {
       'Accept': 'application/json',
       'Content-Type': 'application/json',
-      'x-access-token': token
+      'x-access-token': token,
+	'Cache-Control': 'no-store'
   }})
   .then(data => {
       if(data.status >= 400) {
