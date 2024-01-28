@@ -43,7 +43,7 @@ export default function StatsHome() {
         </div>
         <div className="stat">
             <div className="stat-title">Avg. Placement</div>
-            <div className="stat-value">{userStats?.averageplacement?.toFixed(2) ?? ""}</div>
+            <div className="stat-value">{(userStats?.averageplacement ?? 0 > 0) ? userStats?.averageplacement?.toFixed(2) : "0"}</div>
         </div>
       </div>
     </div>
