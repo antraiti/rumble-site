@@ -28,6 +28,24 @@ async function getEvents(token: string) {
     })
 }
 
+async function getThemes(token: string) {
+  return fetch('api/themes', {
+  method: 'GET',
+  headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      'x-access-token': token
+  }})
+  .then(data => {
+      if(data.status >= 400) {
+          throw new Error("Server responds with error!");
+      } else if (data.status === 204) {
+          return [];
+      }
+      return data.json();
+  })
+}
+
 async function createEvent(token: string, data: NewEventData) {
   return fetch('api/events', {
     method: 'POST',
@@ -59,10 +77,14 @@ const isToday = (someDate: any) => {
 export default function Events() {
   const { userToken } = userData();
   const [events, setEvents]  = useState<any>([]);
+  const [themeList, setThemeList]  = useState<any>([]);
   const [newEventDetails, setNewEventDetails] = useState<NewEventData>({weekly: true, themed: false, themeid: -1, name: ""} as NewEventData);
 
   useEffect(() => {
       getEventList();
+      getThemes(userToken).then(items => {
+        setThemeList(items);
+      });
     }, []);
   
   const getEventList = () => {
@@ -121,11 +143,14 @@ export default function Events() {
               <span className="label-text">Theme</span>
               <select name="themeid" value={newEventDetails?.themeid} onChange={e => updateEventDetails(e)} className="select select-bordered w-full max-w-xs">
                 <option value={-1}>Select Theme</option>
+                {themeList.map((theme: any) =>{
+                  return <option value={theme.id}>{theme.name}</option>
+                })}
               </select>
             </label>}
             <div className="divider"></div>
             {(!newEventDetails?.weekly || newEventDetails?.themed) && <div><label className="cursor-pointer label">
-              <span className="label-text">Custom Name</span>
+              <span className="label-text">{newEventDetails?.weekly ? "Weekly X:" : "Custom Name"}</span>
               <input type="text" name="name" value={newEventDetails?.name} onChange={e => updateEventDetails(e)} className="input input-bordered w-full max-w-xs"/>
               </label>
               <div className="divider"></div>

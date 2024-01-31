@@ -23,7 +23,7 @@ export default function MatchCard(matchObject: any) {
 
     return (
         <div className="bg-primary rounded-xl m-5 flex flex-col shadow-xl">
-            <div className="flex h-10 bg-secondary m-2 rounded-xl shadow-xl">
+            <div className="flex h-10 bg-secondary m-2 rounded-xl shadow-xl bg-gradient-to-r from-secondary via-neutral to-accent">
                 <div className="flex w-full items-center justify-between">
                   <h3 className="mx-5">{matchInfo.match.name}</h3>
                   <div className="flex items-center mx-1">
@@ -36,7 +36,7 @@ export default function MatchCard(matchObject: any) {
                 </div>
             </div>
             <div className="mx-5 mb-5">
-                <table className="table bg-secondary">
+                <table className="table bg-gradient-to-r from-secondary via-neutral to-accent">
                     <thead>
                     <tr>
                         <th>Commander</th>
@@ -52,25 +52,25 @@ export default function MatchCard(matchObject: any) {
                         <td className="p-0"><img className=" h-16 w-full object-cover rounded-lg" src={getCommanderImageUrl(decks.find((d: any) => d.id == performance.deckid))}></img></td>
                         <td>{performance.username}</td>
                         <td>
-                            <select name="deckid" className="select bg-secondary w-full" value={performance.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="deckid" className="select select-ghost w-full" value={performance.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {decks.filter((d: any) => d.userid == performance.userid && d.islegal).map((deck: any) => (<option value={deck.id} key={deck.id}>{deck.name}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select name="placement" className="select bg-secondary" value={performance.placement ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="placement" className="select select-ghost" value={performance.placement ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {Array.from(Array(matchInfo.performances.length).keys()).map(k => (<option value={k+1} key={"perf"+k}>{k+1}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select name="order" className="select bg-secondary" value={performance.order ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="order" className="select select-ghost" value={performance.order ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {Array.from(Array(matchInfo.performances.length).keys()).map(k => (<option value={k+1} key={"order"+k}>{k+1}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select name="killedbyuid" className="select bg-secondary" value={performance.killedby ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="killedbyuid" className="select select-ghost" value={performance.killedby ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}>Killed By</option>
                                 {matchInfo.performances.map((p: any) => (<option value={p.userid} key={"kb"+p.id}>{p.username}</option>))}
                             </select>

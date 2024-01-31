@@ -121,7 +121,6 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     useEffect(() => {
         ws?.addEventListener('message', receivedUpdate);
         updateEventDetails();
-    console.log(eventDetails);
         getUsers(userToken).then(items => {
             setUserList(items);
         });
@@ -139,7 +138,6 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     const updateMatch = (e: any, perfid: number) => {
-        console.log(`${perfid}`);
         updatePerformance(userToken, perfid, e.target.name, e.target.value).then(() => {
             ws?.send("buh");
             updateEventDetails();
@@ -175,7 +173,7 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     return(
-          <div className="bg-base-200 h-full">
+          <div className="bg-base-200 min-h-screen" data-theme={eventDetails?.event.themed && eventDetails?.theme?.stylename ? eventDetails?.theme.stylename : "mytheme"}>
               <div className="flex flex-col w-full max-w-6xl justify-center mx-auto">
                   <div className="card shadow-xl bg-base-100 h-20 m-3">
                     <div className="flex justify-between">
@@ -184,7 +182,7 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
                         <h1 className="text-4xl italic font-bold">{themedweekly ? eventDetails?.event.name.split(": ")[1] : eventDetails?.event.name}</h1>
                       </div>
                       <div className="mx-5">
-                        <h2>{eventDetails?.event.themed ? "Themed" : "No Theme"}</h2>
+                        <h2>{eventDetails?.event.themed ? eventDetails?.theme?.name : "No Theme"}</h2>
                       </div>
                     </div>
                   </div>
