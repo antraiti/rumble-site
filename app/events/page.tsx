@@ -144,7 +144,7 @@ export default function Events() {
               <select name="themeid" value={newEventDetails?.themeid} onChange={e => updateEventDetails(e)} className="select select-bordered w-full max-w-xs">
                 <option value={-1}>Select Theme</option>
                 {themeList.map((theme: any) =>{
-                  return <option value={theme.id}>{theme.name}</option>
+                  return <option key={theme.id} value={theme.id}>{theme.name}</option>
                 })}
               </select>
             </label>}
