@@ -66,7 +66,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
     const [cardList, setCardList] = useState([]);
     const [deckLegality, setDeckLegality] = useState();
     const [deckLegalityMessages, setDeckLegalityMessages] = useState([]);
-    const [deckPerformances, setDeckPerformances] = useState([]);
+    const [deckPerformances, setDeckPerformances] = useState([""]);
     const [ctimer, setCtimer] = useState<any | null>(null);
 
     useEffect(() => {
@@ -146,8 +146,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                                 )}
                     </div>
                 </div>
-                {/* Using deckCommaner here as a placeholder, we just need to not display or calc until deck is loaded */}
-                {deckCommander  && deckPerformances.length == 0 && <button onClick={() => deleteDeck()} className="btn btn-error shadow-xl">Delete Deck</button>}
+                {deckPerformances.length == 0 && <button onClick={() => deleteDeck()} className="btn btn-error shadow-xl">Delete Deck</button>}
             </div>
         </div>
     );

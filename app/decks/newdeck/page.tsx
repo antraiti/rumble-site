@@ -43,7 +43,7 @@ async function getUsers(token: string) {
 export default function NewDeck() {
     const [users, setUsers] = useState([]);
     const router = useRouter();
-    const { user, userToken } = userData();
+    const { user, userToken, isAdmin } = userData();
     const [deckList, setDeckList] = useState("");
     const [deckUser, setDeckUser] = useState();
     const [deckName, setDeckName] = useState("");
@@ -78,14 +78,14 @@ export default function NewDeck() {
             <div className="flex flex-col justify-items-center max-w-3xl m-3 mx-auto">
                 <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5">
                     <h1>New Deck</h1>
-                    <select className="select select-bordered w-full m-5 max-w-m" value={deckUser}>
+                    {isAdmin && <select className="select select-bordered w-full m-5 max-w-m" value={deckUser} onChange={(e: any) => setDeckUser(e.target.value)}>
                         {users && users.map((usr: any) => 
-                                <option key={usr.publicid} value={usr.publicid}>{usr.username}</option>
+                                <option key={usr.id} value={usr.id}>{usr.username}</option>
                                 )}
-                    </select>
-                    <input onChange={e => setDeckName(e.target.value)} type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m"/>
-                    <textarea onChange={e => setDeckList(e.target.value)} className="textarea textarea-bordered w-full m-5 max-w-m h-96" placeholder="Decklist..."></textarea>
-                    <button className="btn btn-success w-full" onClick={() => finalizeDeck()}>Submit</button>
+                    </select>}
+                    <input disabled={submitted} onChange={e => setDeckName(e.target.value)} type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m"/>
+                    <textarea disabled={submitted} onChange={e => setDeckList(e.target.value)} className="textarea textarea-bordered w-full m-5 max-w-m h-96" placeholder="Decklist..."></textarea>
+                    <button className="btn btn-success w-full" onClick={() => finalizeDeck()} disabled={submitted}>Submit</button>
                 </div>
             </div>
         </div>);

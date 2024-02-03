@@ -31,22 +31,48 @@ export default function StatsHome() {
   }, []);
   
   return(
-    <div>
+    <div className="max-w-6xl w-full">
       <h1 className="text-4xl font-bold italic">{userName}</h1>
-      <div className="stats flex mt-auto">
-        <div className="stat">
-            <div className="stat-title">Games Played</div>
-            <div className="stat-value">{userStats?.matchesplayed}</div>
+      <div className="stats flex flex-col mt-auto">
+        <div className="flex justify-between">
+          <div className="stat">
+              <div className="stat-title">Games Played</div>
+              <div className="stat-value">{userStats?.matchesplayed}</div>
+          </div>
+          <div className="stat">
+              <div className="stat-title">Matches Won</div>
+              <div className="stat-value">{userStats?.matcheswon}</div>
+          </div>
+          <div className="stat">
+              <div className="stat-title">Avg. Placement</div>
+              <div className="stat-value">{(userStats?.averageplacement ?? 0 > 0) ? userStats?.averageplacement?.toFixed(2) : "0"}</div>
+          </div>
         </div>
-        <div className="stat">
-            <div className="stat-title">Matches Won</div>
-            <div className="stat-value">{userStats?.matcheswon}</div>
-        </div>
-        <div className="stat">
-            <div className="stat-title">Avg. Placement</div>
-            <div className="stat-value">{(userStats?.averageplacement ?? 0 > 0) ? userStats?.averageplacement?.toFixed(2) : "0"}</div>
+        <div className="divider  border-hidden"/>
+        <div className="flex justify-around border-hidden">
+          <ColorStat name="White" playcount={userStats?.colorplaycount.w} winrate={userStats?.colorwinrates.w.toFixed(2) * 100 + "%"} imgname="W.svg"/>
+          <ColorStat name="Blue" playcount={userStats?.colorplaycount.u} winrate={userStats?.colorwinrates.u.toFixed(2) * 100 + "%"} imgname="U.svg"/>
+          <ColorStat name="Red" playcount={userStats?.colorplaycount.r} winrate={userStats?.colorwinrates.r.toFixed(2) * 100 + "%"} imgname="R.svg"/>
+          <ColorStat name="Green" playcount={userStats?.colorplaycount.g} winrate={userStats?.colorwinrates.g.toFixed(2) * 100 + "%"} imgname="G.svg"/>
+          <ColorStat name="Black" playcount={userStats?.colorplaycount.b} winrate={userStats?.colorwinrates.b.toFixed(2) * 100 + "%"} imgname="B.svg"/>
+          <ColorStat name="Colorless" playcount={userStats?.colorplaycount.c} winrate={userStats?.colorwinrates.c.toFixed(2) * 100 + "%"} imgname="C.svg"/>
         </div>
       </div>
     </div>
   );
+}
+
+function ColorStat(props: any){
+  return(<div>
+    <div className="flex flex-col shadow-xl">
+            <div className="flex justify-evenly">
+                <img className="h-8 w-8 self-center" src={props.imgname}></img>
+                <div className="text-5xl font-bold">{props.playcount}</div>
+            </div>
+            <div className="stat">
+                <div className="stat-title">Winrate</div>
+                <div className="stat-value">{props.winrate}</div>
+            </div>
+        </div>
+  </div>);
 }

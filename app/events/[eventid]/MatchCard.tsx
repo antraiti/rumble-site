@@ -6,6 +6,7 @@ export default function MatchCard(matchObject: any) {
     const { userId } = UserData(); 
     const matchInfo = matchObject.matchInfo;
     const decks = matchObject.decks;
+    console.log(decks);
 
     function getCommanderImageUrl(deckCommander: any) {
         if (!deckCommander?.commander) {
@@ -48,13 +49,19 @@ export default function MatchCard(matchObject: any) {
                     </tr>
                     </thead>
                     <tbody>
-                    {matchInfo.performances.map((performance: any) => (<tr key={performance.id} className={performance.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
-                        <td className="p-0"><img className=" h-16 w-full object-cover rounded-lg" src={getCommanderImageUrl(decks.find((d: any) => d.id == performance.deckid))}></img></td>
+                    {matchInfo?.performances?.map((performance: any) => (<tr key={performance.id} className={performance?.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
+                        <td className="p-0">
+                            <div className="tooltip w-full" data-tip={(performance.deckid != null ? (decks.find((d: any) => d[0].id == performance.deckid)[1]).name : "")}>
+                                <a href={performance.deckid != null ? ("https://scryfall.com/card/"+(decks.find((d: any) => d[0].id == performance.deckid)[0].commander)) : ""}>
+                                    <img className=" h-16 w-full object-cover rounded-lg" src={getCommanderImageUrl(performance.deckid != null ? decks.find((d: any) => d[0].id == performance.deckid)[0] : null)}></img>
+                                </a>    
+                            </div>
+                        </td>
                         <td>{performance.username}</td>
                         <td>
-                            <select name="deckid" className="select select-ghost w-full" value={performance.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="deckid" className="select select-ghost w-full" value={performance?.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
-                                {decks.filter((d: any) => d.userid == performance.userid && d.islegal).map((deck: any) => (<option value={deck.id} key={deck.id}>{deck.name}</option>))}
+                                {decks.filter((d: any) => d[0].userid == performance.userid && d[0].islegal).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name} - ${new Date(deck[0].lastupdated).toDateString()}`}</option>))}
                             </select>
                         </td>
                         <td>
