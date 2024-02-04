@@ -32,12 +32,12 @@ export default function DeckCard(deckObject: any) {
         <div onClick={() => GotoDeckDetails()} className="card cursor-pointer card-side bg-base-100 shadow-xl m-3 h-40 max-w-7xl mx-auto hover:shadow-accent">
             <figure className="w-1/4"><img src={getCommanderImageUrl()} alt={deckCommander?.name}/></figure>
             <div className="flex flex-col w-5 bg-gray-300">
-                {colorInfo.red && <div className="flex flex-1 bg-red-300"><img className="flex-1" src="R.svg"/></div>}
-                {colorInfo.blue && <div className="flex flex-1 bg-sky-200"><img className="flex-1" src="U.svg"/></div>}
-                {colorInfo.white && <div className="flex flex-1 bg-amber-100"><img className="flex-1" src="W.svg"/></div>}
-                {colorInfo.green && <div className="flex flex-1 bg-green-300"><img className="flex-1" src="G.svg"/></div>}
-                {colorInfo.black && <div className="flex flex-1 bg-gray-300"><img className="flex-1" src="B.svg"/></div>}
-                {colorInfo.name == "colorless" && <img className="flex-1" src="C.svg"/>}
+                {colorInfo?.red && <div className="flex flex-1 bg-red-300"><img className="flex-1" src="R.svg"/></div>}
+                {colorInfo?.blue && <div className="flex flex-1 bg-sky-200"><img className="flex-1" src="U.svg"/></div>}
+                {colorInfo?.white && <div className="flex flex-1 bg-amber-100"><img className="flex-1" src="W.svg"/></div>}
+                {colorInfo?.green && <div className="flex flex-1 bg-green-300"><img className="flex-1" src="G.svg"/></div>}
+                {colorInfo?.black && <div className="flex flex-1 bg-gray-300"><img className="flex-1" src="B.svg"/></div>}
+                {colorInfo?.name == "colorless" && <img className="flex-1" src="C.svg"/>}
             </div>
             <div className="flex-1 flex-col">
             <article className="prose text-center max-w-none"><h1 className="text-2xl text-center">{deckInfo?.name}</h1></article>
