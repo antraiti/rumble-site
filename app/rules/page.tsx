@@ -10,7 +10,7 @@ export default function Rules() {
                     <li>All cards in the deck must be in the color identity of your commander(s)</li>
                     <li>One copy of any card, except basic lands</li>
                     <li>Decks may not contain any copies of cards on the banlist (see below)</li>
-                    <li>Decks may also have sideboards of up to 5 cards</li> </article>
+                    <li>Decks may also have sideboards of up to 7 cards</li> </article>
                 </div>
             </div>
             <div className="card bg-base-100 shadow-xl mt-6">
