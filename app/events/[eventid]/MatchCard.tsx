@@ -1,12 +1,20 @@
 'use client'
 
 import UserData from "@/app/util/UserData";
+import { useEffect, useState } from "react";
 
 export default function MatchCard(matchObject: any) {
     const { userId } = UserData(); 
     const matchInfo = matchObject.matchInfo;
     const decks = matchObject.decks;
+    const [matchtime, setMatchtime] = useState<number>(0);
     console.log(decks);
+
+    useEffect(() => {
+        setTimeout(() => {
+            setMatchtime(Date.now() - (new Date(matchInfo.match.start)).getTime());
+        }, 1000)
+    }, [matchtime])
 
     function getCommanderImageUrl(deckCommander: any) {
         if (!deckCommander?.commander) {
@@ -30,6 +38,7 @@ export default function MatchCard(matchObject: any) {
                   <div className="flex items-center mx-1">
                     {!matchInfo.match.start && <button className="btn btn-outline btn-success h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "start")}>Start</button>}
                     {matchInfo.match.start && <h3 className="mx-5">{(new Date(matchInfo.match.start)).toLocaleTimeString()}</h3>}
+                    {matchInfo.match.start && !matchInfo.match.end && <h3>{Math.floor((Math.floor((matchtime)/1000))/60/60)}:{Math.floor((Math.floor((matchtime)/1000))/60)}:{((Math.floor((matchtime)/1000)) % 60) > 9 ? ((Math.floor((matchtime)/1000)) % 60) : "0" + ((Math.floor((matchtime)/1000)) % 60)}</h3>}
                     {(!matchInfo.match.end && matchInfo.match.start) && <button className="btn btn-outline btn-warning h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "end")}>End</button>}
                     {matchInfo.match.end && <h3 className="mx-5">{(new Date(matchInfo.match.end)).toLocaleTimeString()}</h3>}
                     {!matchInfo.match.start && <button className="btn btn-outline btn-error h-8 min-h-0" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "delete")}>X</button>}
@@ -61,7 +70,7 @@ export default function MatchCard(matchObject: any) {
                         <td>
                             <select name="deckid" className="select select-ghost w-full" value={performance?.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
-                                {decks.filter((d: any) => d[0].userid == performance.userid && d[0].islegal).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name} - ${new Date(deck[0].lastupdated).toDateString()}`}</option>))}
+                                {decks.filter((d: any) => d[0].userid == performance.userid && d[0].islegal).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name}`}</option>))}
                             </select>
                         </td>
                         <td>

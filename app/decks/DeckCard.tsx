@@ -41,7 +41,10 @@ export default function DeckCard(deckObject: any) {
             </div>
             <div className="flex-1 flex-col">
             <article className="prose text-center max-w-none"><h1 className="text-2xl text-center">{deckInfo?.name}</h1></article>
-                <article className="prose text-center max-w-none"><p className="text-xl text-center">{deckCommander?.name}{deckPartner?.name && (" // " + deckPartner?.name)}</p></article>
+                <article className="prose text-center max-w-none">
+                    <div className="badge badge-outline text-m text-center">{deckCommander?.name}</div>
+                    {deckPartner?.name && <div className="badge badge-outline text-m text-center">{deckPartner?.name}</div>}
+                </article>
                 <div className="stats flex mt-auto">
                     <div className="stat">
                         <div className="stat-title">Games Played</div>
