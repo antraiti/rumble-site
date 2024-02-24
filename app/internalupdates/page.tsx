@@ -1,9 +1,24 @@
 export default function InternalUpdate() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-3xl">
-            <div role="alert" className="alert alert-info">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <span>PLEASE LOG OUT AND BACK IN IF YOU HAVENT ON THIS NEW VERSION. I updated some of the cookie data and things wont work until you log out and back in!</span>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                <article className="prose">
+                    <h1>2/24/2024</h1>
+                    <p>
+                        Various fixes. Change to ability for historical match edits.
+                    </p>
+                    <h2>Historical Match Edits</h2>
+                    <p>
+                        Any match that happened over 24 hours in the past will require an admin to edit now. This is just to avoid any accidental edits to old events when viewing.
+                    </p>
+                    <h2>Fixes</h2>
+                    <p>- Deck details page will update properly when edits are made</p>
+                    <p>- Match timer minutes will display properly when above an hour</p>
+                    <p>- Sideboard cards will display properly on deck details page</p>
+                    <p>- Added back restriction of needing to end match to select first place</p>
+                </article>
+                </div>
             </div>
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
