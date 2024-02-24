@@ -62,6 +62,17 @@ const config: Config = {
         "warning": "#279400",
         "error": "#279400",
         },
+      willbo: {
+        "primary": "#47899E",
+        "secondary": "#CF4037",
+        "accent": "#47929E",
+        "neutral": "#64A8B7",
+        "base-100": "#bcbebf",
+        "info": "#fef08a",
+        "success": "#000000",
+        "warning": "#000000",
+        "error": "#000000",
+      },
     }],
   },
 }
