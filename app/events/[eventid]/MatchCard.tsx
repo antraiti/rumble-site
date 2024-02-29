@@ -14,7 +14,7 @@ export default function MatchCard(matchObject: any) {
     useEffect(() => {
         setTimeout(() => {
             setMatchtime(Date.now() - (new Date(matchInfo.match.start)).getTime());
-            setCanedit(Date.now() - (new Date(matchInfo.match.start)).getHours() < 25);
+            //setCanedit(Date.now() - (new Date(matchInfo.match.start)).getHours() < 25);
         }, 1000)
     }, [matchtime])
 

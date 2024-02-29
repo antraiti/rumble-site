@@ -29,15 +29,16 @@ export default function NavBar() {
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                         <Link href="/rules" className="btn btn-ghost justify-start">Rules</Link>
                         <Link href="/banlist"  className="btn btn-ghost justify-start">Banlist</Link>
+                        <div className="divider"/>
                         {!username &&
-                        <Link href="login" className="btn">Sign In</Link>
+                        <Link href="login" className="btn btn-ghost">Sign In</Link>
                         }
                         {username &&
                         <div>
-                        <Link href="/events" className="btn btn-ghost">Events</Link>
-                        <Link href="/decks" className="btn btn-ghost">Decks</Link>
-                        <Link href="/stats" className="btn btn-ghost">Stats</Link> 
-                        <Link href="/profile" className="btn btn-ghost">{username}</Link>
+                        <Link href="/events" className="btn btn-ghost justify-start">Events</Link>
+                        <Link href="/decks" className="btn btn-ghost justify-start">Decks</Link>
+                        <Link href="/stats" className="btn btn-ghost justify-start">Stats</Link> 
+                        <Link href="/profile" className="btn btn-ghost justify-start">{username}</Link>
                         <div onClick={handleSignout} className="btn btn-ghost">Sign Out</div>
                         </div>}
                     </ul>
