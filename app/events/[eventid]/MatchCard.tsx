@@ -9,7 +9,6 @@ export default function MatchCard(matchObject: any) {
     const decks = matchObject.decks;
     const [matchtime, setMatchtime] = useState<number>(0);
     const [canedit, setCanedit] = useState<boolean>(true);
-    console.log(decks);
 
     useEffect(() => {
         setTimeout(() => {
@@ -40,7 +39,7 @@ export default function MatchCard(matchObject: any) {
                   <div className="flex items-center mx-1">
                     {!matchInfo.match.start && <button className="btn btn-outline btn-success h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "start")}>Start</button>}
                     {matchInfo.match.start && <h3 className="mx-5">{(new Date(matchInfo.match.start)).toLocaleTimeString()}</h3>}
-                    {matchInfo.match.start && !matchInfo.match.end && <h3>{Math.floor((Math.floor((matchtime)/1000))/60/60)}:{(Math.floor((Math.floor((matchtime)/1000))/60)) % 60}:{((Math.floor((matchtime)/1000)) % 60) > 9 ? ((Math.floor((matchtime)/1000)) % 60) : "0" + ((Math.floor((matchtime)/1000)) % 60)}</h3>}
+                    {matchInfo.match.start && !matchInfo.match.end && <h3>{Math.floor((Math.floor((matchtime)/1000))/60/60)}:{(Math.floor((Math.floor((matchtime)/1000))/60)) % 60}:{((Math.floor((matchtime)/1000)) % 60) > 9 ? ((Math.floor((matchtime)/1000)) % 60) : "0" + ((Math.floor((matchtime)/1000)) % 60).toFixed(2)}</h3>}
                     {(!matchInfo.match.end && matchInfo.match.start) && <button className="btn btn-outline btn-warning h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "end")}>End</button>}
                     {matchInfo.match.end && <h3 className="mx-5">{(new Date(matchInfo.match.end)).toLocaleTimeString()}</h3>}
                     {!matchInfo.match.start && <button className="btn btn-outline btn-error h-8 min-h-0" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "delete")}>X</button>}
@@ -63,20 +62,20 @@ export default function MatchCard(matchObject: any) {
                     {matchInfo?.performances?.map((performance: any) => (<tr key={performance.id} className={performance?.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
                         <td className="p-0">
                             <div className="tooltip w-full" data-tip={(performance.deckid != null ? (decks.find((d: any) => d[0].id == performance.deckid)[1])?.name : "")}>
-                                <a href={performance.deckid != null ? ("https://scryfall.com/card/"+(decks.find((d: any) => d[0].id == performance.deckid)[0].commander)) : ""}>
+                                <a href={performance.deckid != null ? `/deck/${performance.deckid}` : ""} target="_blank">
                                     <img className=" h-16 w-full object-cover rounded-lg" src={getCommanderImageUrl(performance.deckid != null ? decks.find((d: any) => d[0].id == performance.deckid)[0] : null)}></img>
                                 </a>    
                             </div>
                         </td>
                         <td>{performance.username}</td>
                         <td>
-                            <select disabled={!canedit && !isAdmin} name="deckid" className="select select-ghost w-full" value={performance?.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="deckid" className="select select-ghost w-full" value={performance?.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {decks.filter((d: any) => d[0].userid == performance.userid && d[0].islegal).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name}`}</option>))}
                             </select>
                         </td>
                         <td>
-                            <select disabled={!canedit && !isAdmin} name="placement" className="select select-ghost" value={performance.placement ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                            <select name="placement" className="select select-ghost" value={performance.placement ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
                                 {matchInfo.match.end ? Array.from(Array(matchInfo.performances.length).keys()).map(k => (<option value={k+1} key={"perf"+k}>{k+1}</option>))
                                 : Array.from(Array(matchInfo.performances.length-1).keys()).map(k => (<option value={k+2} key={"perf"+k}>{k+2}</option>))}

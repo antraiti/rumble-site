@@ -40,7 +40,7 @@ export default function StatsGlobal() {
           </div>
           <div className="stat">
               <div className="stat-title">Average Match Duration</div>
-              <div className="stat-value">{`${Math.floor(globalStats?.averagematchtime/60) > 60 ? Math.floor(globalStats?.averagematchtime/3600) + ":" : ""}${Math.floor(globalStats?.averagematchtime/60)}:${(globalStats?.averagematchtime%60).toFixed(0)}`}</div>
+              <div className="stat-value">{`${Math.floor(globalStats?.averagematchtime/60) > 60 ? Math.floor(globalStats?.averagematchtime/3600) + ":" : ""}${Math.floor(globalStats?.averagematchtime/60)%60}:${(globalStats?.averagematchtime%60).toFixed(0)}`}</div>
           </div>
           <div className="stat">
               <div className="stat-title">Average Match Size</div>
@@ -49,12 +49,12 @@ export default function StatsGlobal() {
         </div>
         <div className="divider  border-hidden"/>
         <div className="flex justify-around border-hidden">
-          <ColorStat name="White" playcount={globalStats?.colorplaycount.w} winrate={globalStats?.colorwinrates.w.toFixed(2) * 100 + "%"} imgname="W.svg"/>
-          <ColorStat name="Blue" playcount={globalStats?.colorplaycount.u} winrate={globalStats?.colorwinrates.u.toFixed(2) * 100 + "%"} imgname="U.svg"/>
-          <ColorStat name="Red" playcount={globalStats?.colorplaycount.r} winrate={globalStats?.colorwinrates.r.toFixed(2) * 100 + "%"} imgname="R.svg"/>
-          <ColorStat name="Green" playcount={globalStats?.colorplaycount.g} winrate={globalStats?.colorwinrates.g.toFixed(2) * 100 + "%"} imgname="G.svg"/>
-          <ColorStat name="Black" playcount={globalStats?.colorplaycount.b} winrate={globalStats?.colorwinrates.b.toFixed(2) * 100 + "%"} imgname="B.svg"/>
-          <ColorStat name="Colorless" playcount={globalStats?.colorplaycount.c} winrate={globalStats?.colorwinrates.c.toFixed(2) * 100 + "%"} imgname="C.svg"/>
+          <ColorStat name="White" playcount={globalStats?.colorplaycount.w} winrate={(globalStats?.colorwinrates.w * 100).toFixed(2) + "%"} imgname="W.svg"/>
+          <ColorStat name="Blue" playcount={globalStats?.colorplaycount.u} winrate={(globalStats?.colorwinrates.u * 100).toFixed(2) + "%"} imgname="U.svg"/>
+          <ColorStat name="Red" playcount={globalStats?.colorplaycount.r} winrate={(globalStats?.colorwinrates.r * 100).toFixed(2) + "%"} imgname="R.svg"/>
+          <ColorStat name="Green" playcount={globalStats?.colorplaycount.g} winrate={(globalStats?.colorwinrates.g * 100).toFixed(2) + "%"} imgname="G.svg"/>
+          <ColorStat name="Black" playcount={globalStats?.colorplaycount.b} winrate={(globalStats?.colorwinrates.b * 100).toFixed(2) + "%"} imgname="B.svg"/>
+          <ColorStat name="Colorless" playcount={globalStats?.colorplaycount.c} winrate={(globalStats?.colorwinrates.c * 100).toFixed(2) + "%"} imgname="C.svg"/>
         </div>
       </div>
     </div>

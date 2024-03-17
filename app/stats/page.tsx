@@ -50,12 +50,12 @@ export default function StatsHome() {
         </div>
         <div className="divider  border-hidden"/>
         <div className="flex justify-around border-hidden">
-          <ColorStat name="White" playcount={userStats?.colorplaycount.w} winrate={userStats?.colorwinrates.w.toFixed(2) * 100 + "%"} imgname="W.svg"/>
-          <ColorStat name="Blue" playcount={userStats?.colorplaycount.u} winrate={userStats?.colorwinrates.u.toFixed(2) * 100 + "%"} imgname="U.svg"/>
-          <ColorStat name="Red" playcount={userStats?.colorplaycount.r} winrate={userStats?.colorwinrates.r.toFixed(2) * 100 + "%"} imgname="R.svg"/>
-          <ColorStat name="Green" playcount={userStats?.colorplaycount.g} winrate={userStats?.colorwinrates.g.toFixed(2) * 100 + "%"} imgname="G.svg"/>
-          <ColorStat name="Black" playcount={userStats?.colorplaycount.b} winrate={userStats?.colorwinrates.b.toFixed(2) * 100 + "%"} imgname="B.svg"/>
-          <ColorStat name="Colorless" playcount={userStats?.colorplaycount.c} winrate={userStats?.colorwinrates.c.toFixed(2) * 100 + "%"} imgname="C.svg"/>
+          <ColorStat name="White" playcount={userStats?.colorplaycount.w} winrate={(userStats?.colorwinrates.w * 100).toFixed(2) + "%"} imgname="W.svg"/>
+          <ColorStat name="Blue" playcount={userStats?.colorplaycount.u} winrate={(userStats?.colorwinrates.u * 100).toFixed(2) + "%"} imgname="U.svg"/>
+          <ColorStat name="Red" playcount={userStats?.colorplaycount.r} winrate={(userStats?.colorwinrates.r * 100).toFixed(2) + "%"} imgname="R.svg"/>
+          <ColorStat name="Green" playcount={userStats?.colorplaycount.g} winrate={(userStats?.colorwinrates.g * 100).toFixed(2) + "%"} imgname="G.svg"/>
+          <ColorStat name="Black" playcount={userStats?.colorplaycount.b} winrate={(userStats?.colorwinrates.b * 100).toFixed(2) + "%"} imgname="B.svg"/>
+          <ColorStat name="Colorless" playcount={userStats?.colorplaycount.c} winrate={(userStats?.colorwinrates.c * 100).toFixed(2) + "%"} imgname="C.svg"/>
         </div>
       </div>
     </div>
