@@ -18,17 +18,11 @@ export default function MatchCard(matchObject: any) {
     }, [matchtime])
 
     function getCommanderImageUrl(deckCommander: any) {
-        if (!deckCommander?.commander) {
+        if (!deckCommander?.image) {
         return 'https://cards.scryfall.io/art_crop/front/0/e/0eb0e8e7-266f-441e-b1cd-12b8ec3f7d71.jpg'; // Imp's Mischief UwU
         }
     
-        const commanderId = deckCommander.commander;
-        let url = 'https://cards.scryfall.io/art_crop/front';
-        url += '/' + commanderId.substring(0, 1);
-        url += '/' + commanderId.substring(1, 2) + '/';
-        url += commanderId + '.jpg';
-    
-        return url;      
+        return deckCommander?.image;      
     }
 
     return (

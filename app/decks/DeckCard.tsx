@@ -11,17 +11,11 @@ export default function DeckCard(deckObject: any) {
     const router = useRouter();
     
     function getCommanderImageUrl() {
-        if (!deckCommander) {
+        if (!deckInfo || !deckInfo.image) {
         return 'https://cards.scryfall.io/art_crop/front/0/e/0eb0e8e7-266f-441e-b1cd-12b8ec3f7d71.jpg'; // Imp's Mischief UwU
         }
     
-        const commanderId = deckCommander.id;
-        let url = 'https://cards.scryfall.io/art_crop/front';
-        url += '/' + commanderId.substring(0, 1);
-        url += '/' + commanderId.substring(1, 2) + '/';
-        url += commanderId + '.jpg';
-    
-        return url;      
+        return deckInfo.image;      
     }
 
     function GotoDeckDetails() {
