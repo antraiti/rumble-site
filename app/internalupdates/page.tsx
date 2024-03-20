@@ -13,9 +13,9 @@ export default function InternalUpdate() {
                         Now clicking on the deck/commander image in the match screen will bring you to a page for the decklist. The commander is highlighted and any watchlist cards are indicated with a yellow logo.
                         Future plans to make this publicly accessible for people not logged in as well as sortable/searchable etc.
                     </p>
-                    <h2>Switched to Oracle ID's</h2>
+                    <h2>Switched to Oracle IDs</h2>
                     <p>
-~                        Cards are now using scryfall oracle id's -which we shouldve from the start-. This was a rough conversion to do so let me know if theres anything weird with cards or commanders.
+~                        Cards are now using scryfall oracle ids -which we shouldve from the start-. This was a rough conversion to do so let me know if theres anything weird with cards or commanders.
                          This also led to the creation of the new Printing table which will internally let us store different card print options and in the future let you decide which print is displayed for your cards/deck etc
                     </p>
                     <h2>Fixes</h2>
