@@ -4,6 +4,29 @@ export default function InternalUpdate() {
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                 <article className="prose">
+                    <h1>3/20/2024</h1>
+                    <p>
+                        Deck page addition. Various fixes and backend upgrades.
+                    </p>
+                    <h2>Deck Display Page</h2>
+                    <p>
+                        Now clicking on the deck/commander image in the match screen will bring you to a page for the decklist. The commander is highlighted and any watchlist cards are indicated with a yellow logo.
+                        Future plans to make this publicly accessible for people not logged in as well as sortable/searchable etc.
+                    </p>
+                    <h2>Switched to Oracle ID's</h2>
+                    <p>
+~                        Cards are now using scryfall oracle id's -which we shouldve from the start-. This was a rough conversion to do so let me know if theres anything weird with cards or commanders.
+                         This also led to the creation of the new Printing table which will internally let us store different card print options and in the future let you decide which print is displayed for your cards/deck etc
+                    </p>
+                    <h2>Fixes</h2>
+                    <p>- I think timer is fixed</p>
+                    <p>- Only legendary creatures/walkers selectable for commander/partner/companion now. hopefully this helps with selection</p>
+                </article>
+                </div>
+            </div>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                <article className="prose">
                     <h1>2/24/2024</h1>
                     <p>
                         Various fixes. Change to ability for historical match edits.
