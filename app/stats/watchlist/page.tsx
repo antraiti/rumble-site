@@ -34,7 +34,7 @@ export default function StatsGlobal() {
         {
             watchlistStats?.map((wls: any) =>
             {
-                return <div className="flex">
+                return <div className="flex" key={wls.id}>
                         <div className="w-72">{wls.name}</div>
                         <div className="w-48">Appearances: {wls.playcount}</div>
                         <div className="w-24">Wins: {wls.wincount}</div>
