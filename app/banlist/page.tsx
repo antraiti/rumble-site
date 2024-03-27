@@ -147,7 +147,7 @@ export default function Banlist() {
                 )) : banlist.filter((card: any) => card.name.toLocaleLowerCase().includes(bansearch.toLocaleLowerCase() ?? "")).map((card: any) => 
                 {
                     return <div className="bg-secondary h-6 w-64 rounded-md m-1" key={card.id}>
-                                    <a href={card.id} className="p-2 hover:font-bold">{card.name}</a>
+                                    <a href={`https://scryfall.com/search?q=oracleid=${card.id}`} className="p-2 hover:font-bold">{card.name}</a>
                             </div>
                 })}
                 </div>
@@ -165,7 +165,7 @@ export default function Banlist() {
                     {watchlist.map((card: any) => 
                     {
                         return <div className="bg-secondary h-6 w-64 rounded-md m-1" key={card.id}>
-                                        <a href={card.id} className="p-2 hover:font-bold">{card.name}</a>
+                                        <a href={`https://scryfall.com/search?q=oracleid=${card.id}`} className="p-2 hover:font-bold">{card.name}</a>
                                 </div>
                     })}
                 </div>

@@ -29,15 +29,37 @@ export default function MatchCard(matchObject: any) {
         <div className="bg-primary rounded-xl m-5 flex flex-col shadow-xl">
             <div className="flex h-10 bg-secondary m-2 rounded-xl shadow-xl bg-gradient-to-r from-secondary via-neutral to-accent">
                 <div className="flex w-full items-center justify-between">
-                  <h3 className="mx-5">{matchInfo.match.name}</h3>
-                  <div className="flex items-center mx-1">
+                    <div className="flex items-center ">
+                        <div className="dropdown shadow">
+                            <div tabIndex={0} role="button" className="btn btn-ghost w-5">=</div>
+                            <ul tabIndex={0} className="dropdown-content shadow z-[1] bg-secondary menu w-48">
+                                <li>
+                                    <details>
+                                        <summary>Power</summary>
+                                        <ul className="bg-secondary">
+                                        <li><a href="#" onClick={()=>matchObject.setMatchPower(matchInfo.match.id, "Casual")}>Casual</a></li>
+                                        <li><a href="#" onClick={()=>matchObject.setMatchPower(matchInfo.match.id, "Normal")}>Normal</a></li>
+                                        <li><a href="#" onClick={()=>matchObject.setMatchPower(matchInfo.match.id, "Competitive")}>Competitive</a></li>
+                                        </ul>
+                                    </details>
+                                </li>
+                            </ul>
+                        </div>
+                        <h2 className="mx-5 text-xl font-bold">{matchInfo.match.name}</h2>
+                        {matchInfo.match.power != 0 && <div className="badge badge-outline">
+                            {matchInfo.match.power == 1 ? "Competitive" :
+                             matchInfo.match.power == -1 ? "Casual" :
+                             "Normal"}
+                        </div>}
+                    </div>
+                    <div className="flex items-center mx-1">
                     {!matchInfo.match.start && <button className="btn btn-outline btn-success h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "start")}>Start</button>}
                     {matchInfo.match.start && <h3 className="mx-5">{(new Date(matchInfo.match.start)).toLocaleTimeString()}</h3>}
                     {matchInfo.match.start && !matchInfo.match.end && <h3>{Math.floor((Math.floor((matchtime)/1000))/60/60)}:{((Math.floor((Math.floor((matchtime)/1000))/60)) % 60).toString().padStart(2,"0")}:{((Math.floor((matchtime)/1000)) % 60).toString().padStart(2,"0")}</h3>}
                     {(!matchInfo.match.end && matchInfo.match.start) && <button className="btn btn-outline btn-warning h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "end")}>End</button>}
                     {matchInfo.match.end && <h3 className="mx-5">{(new Date(matchInfo.match.end)).toLocaleTimeString()}</h3>}
                     {!matchInfo.match.start && <button className="btn btn-outline btn-error h-8 min-h-0" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "delete")}>X</button>}
-                  </div>
+                    </div>
                 </div>
             </div>
             <div className="mx-5 mb-5">

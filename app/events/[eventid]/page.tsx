@@ -93,7 +93,7 @@ async function getUsers(token: string) {
     })
 }
 
-async function updateMatchTimestamp(token: string, match: number, prop: string) {
+async function updateMatchProperty(token: string, match: number, prop: string) {
     return fetch('/api/match', {
     method: 'PUT',
     headers: {
@@ -152,7 +152,7 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     const requestMatchTimestampUpdate = (matchid: number, prop: string) => {
-        updateMatchTimestamp(userToken, matchid, prop).then(() => {
+        updateMatchProperty(userToken, matchid, prop).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })
@@ -167,6 +167,13 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
 
     const requestMatchJoin = (matchid: number) => {
         addPerformance(userToken, userId, matchid).then(() => {
+            ws?.send("buh");
+            updateEventDetails();
+        })
+    }
+
+    const setMatchPower = (matchid: number, powername: number) => {
+        updateMatchProperty(userToken, matchid, powername.toString()).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })
@@ -196,7 +203,8 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
                       userlist={userList}
                       addPerformance={requestNewPerformance}
                       updateTimestamp={requestMatchTimestampUpdate}
-                      requestMatchJoin={requestMatchJoin}/>
+                      requestMatchJoin={requestMatchJoin}
+                      setMatchPower={setMatchPower}/>
                   ))}
               </div>
           </div>
