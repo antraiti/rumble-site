@@ -4,6 +4,29 @@ export default function InternalUpdate() {
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                 <article className="prose">
+                    <h1>3/27/2024</h1>
+                    <p>
+                        Banlist endpoints. Watchlist added to banlist. Match power selection added. Various fixes.
+                    </p>
+                    <h2>Match Power Selction</h2>
+                    <p>
+                        Now on the left of a match title there will be a button for a dropdown menu. Currently the only thing in this menu will be the ability to specify a matches power (normal, casual, competitive).
+                        Hopefully this will help tag matches and allow us to get more insight in the future on certain cards impact accross the different play types.
+                    </p>
+                    <h2>Banlist endpoints / Watchlist Added to Banlist Page</h2>
+                    <p>
+                        The public banlist page now pulls from the api for both the banlist and watchlist to allow realtime updates. Future plans are to add more reasoning and info to each card as well.
+                    </p>
+                    <h2>Fixes</h2>
+                    <p>- Some random links</p>
+                    <p>- Some time display stuff</p>
+                    <p>- Yorion companion legality issue</p>
+                </article>
+                </div>
+            </div>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                <article className="prose">
                     <h1>3/20/2024</h1>
                     <p>
                         Deck page addition. Various fixes and backend upgrades.
