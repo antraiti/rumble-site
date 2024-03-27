@@ -1,10 +1,50 @@
 'use client'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
- //we will want to move this to server rendering ideally so that it catches in google searches or somethign
+async function getBanlist() {
+    return fetch('/api/cards/banlist', {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }})
+    .then(data => {
+        if(data.status >= 400) {
+            throw new Error("Server responds with error!");
+        }
+        return data.json();
+    })
+}
+async function getWatchlist() {
+    return fetch('/api/cards/watchlist', {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }})
+    .then(data => {
+        if(data.status >= 400) {
+            throw new Error("Server responds with error!");
+        }
+        return data.json();
+    })
+}
 
 export default function Banlist() {
     const [bansearch, setBansearch] = useState("");
+    const [loading, setLoading] = useState(true);
+    const [banlist, setBanlist] = useState<any | null>();
+    const [watchlist, setWatchlist] = useState<any | null>();
+
+    useEffect(() => {
+        getBanlist().then((items) => {
+            setBanlist(items);
+            setLoading(false);
+        });
+        getWatchlist().then(items => {
+            setWatchlist(items);
+        });
+      }, [])
 
     return (
         <div className="flex flex-col">
@@ -20,12 +60,13 @@ export default function Banlist() {
                 <a className="hover:font-bold" href="https://scryfall.com/search?as=grid&order=name&q=type%3Aconspiracy" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All (25) cards with the Card Type “Conspiracy”</a>
                 <a className="hover:font-bold" href="https://scryfall.com/search?as=grid&order=name&q=oracle%3A%22playing+for+ante%22" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All (9) cards that reference “playing for ante”</a>
             </div>
-            <div className="flex justify-center m-2 mx-auto w-full">
-                <input value={bansearch} type="text" placeholder="Search" className="input input-bordered max-w-md" onChange={(e: any) => setBansearch(e.target.value)}/>
+            <div className="flex justify-center m-2 mx-auto w-full px-10">
+                <input value={bansearch} type="text" placeholder="Search" className="input input-bordered flex-grow max-w-md" onChange={(e: any) => setBansearch(e.target.value)}/>
             </div>
-            <div className="flex max-w-6xl mx-auto">
+            <div className="flex max-w-6xl mx-auto pb-20">
                 <div className="grid w-full lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-1">
-                    {[
+                    {!banlist ? !loading && //If we cant hit api then use this fallback list of banned cards (this should be moved to a seperate file and loaded in for legibility)
+                    [
                     "Ancestral Recall#https://cards.scryfall.io/normal/front/2/3/2398892d-28e9-4009-81ec-0d544af79d2b.jpg?1614638829", 
                     "Ancient Tomb#https://cards.scryfall.io/normal/front/b/d/bd3d4b4b-cf31-4f89-8140-9650edb03c7b.jpg?1582753000", 
                     "Badlands#https://cards.scryfall.io/normal/front/7/3/73403d04-fe97-4830-8b80-16dd1a1a6cc1.jpg?1562918068", 
@@ -103,9 +144,34 @@ export default function Banlist() {
                     <div className="bg-secondary h-6 w-64 rounded-md m-1" key={cardinfo}>
                             <a href={cardinfo.split("#")[1]} className="p-2 hover:font-bold">{cardinfo.split("#")[0]}</a>
                     </div>
-                ))}
+                )) : banlist.filter((card: any) => card.name.toLocaleLowerCase().includes(bansearch.toLocaleLowerCase() ?? "")).map((card: any) => 
+                {
+                    return <div className="bg-secondary h-6 w-64 rounded-md m-1" key={card.id}>
+                                    <a href={card.id} className="p-2 hover:font-bold">{card.name}</a>
+                            </div>
+                })}
                 </div>
             </div>
+            { watchlist && <div>
+
+                <div className="card mx-auto bg-primary shadow-xl m-5 p-5 w-3/4 max-w-4xl">
+                <h1 className="mx-auto font-bold text-2xl mb-2">Watchlisted Cards</h1>
+                <p>
+                    The Watchlist is used for any cards that we have noticed can have significant impact on games or might be banworthy. We highlight these cards to help bring attention to them and to promote discussion and observation on their effect of the format.
+                </p>
+            </div>
+            <div className="flex max-w-6xl mx-auto pb-48">
+                <div className="grid w-full lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-1">
+                    {watchlist.map((card: any) => 
+                    {
+                        return <div className="bg-secondary h-6 w-64 rounded-md m-1" key={card.id}>
+                                        <a href={card.id} className="p-2 hover:font-bold">{card.name}</a>
+                                </div>
+                    })}
+                </div>
+            </div>
+            </div>
+            }
         </div>
     );
 }

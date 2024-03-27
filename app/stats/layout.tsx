@@ -23,6 +23,13 @@ export default function StatsLayout ({
                 </Link>
             </li>
           </div>
+          <div className="tooltip" data-tip="Watchlist Stats">
+            <li>
+                <Link className="w-full" href="/stats/watchlist">
+                  <img className="h-5 w-5" src="../eye.svg"></img>
+                </Link>
+            </li>
+          </div>
         </ul>
       </div>
       {children}

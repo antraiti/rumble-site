@@ -40,7 +40,7 @@ export default function StatsGlobal() {
           </div>
           <div className="stat">
               <div className="stat-title">Average Match Duration</div>
-              <div className="stat-value">{`${Math.floor(globalStats?.averagematchtime/60) > 60 ? Math.floor(globalStats?.averagematchtime/3600) + ":" : ""}${Math.floor(globalStats?.averagematchtime/60)%60}:${(globalStats?.averagematchtime%60).toFixed(0)}`}</div>
+              <div className="stat-value">{`${Math.floor(globalStats?.averagematchtime/60) > 60 ? Math.floor(globalStats?.averagematchtime/3600) + ":" : ""}${(Math.floor(globalStats?.averagematchtime/60)%60).toString().padStart(2,"0")}:${(globalStats?.averagematchtime%60).toFixed(0).padStart(2,"0")}`}</div>
           </div>
           <div className="stat">
               <div className="stat-title">Average Match Size</div>
