@@ -126,7 +126,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                         <h1 className="pb-5">Deck Image</h1>
                         <img className="pb-5" src={deckInfo?.image}/>
                         <div className="grid bg-base-200 grid-cols-2 overflow-y-scroll p-5 max-h-96">
-                            {printingList?.map((p: any) => {return <button className="btn h-full" onClick={e => sendDeckUpdate("image", p.artcrop)}><img className="w-full p-1" src={p.artcrop}/></button>})}
+                            {printingList?.map((p: any) => {return <button key={p.artcrop} className="btn h-full" onClick={e => sendDeckUpdate("image", p.artcrop)}><img className="w-full p-1" src={p.artcrop}/></button>})}
                         </div>
                     </div>
                 </div>

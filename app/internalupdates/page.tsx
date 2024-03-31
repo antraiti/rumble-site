@@ -1,6 +1,32 @@
 export default function InternalUpdate() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-3xl">
+            <div role="alert" className="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <span>PLEASE LOG OUT AND BACK IN IF YOU HAVENT ON THIS NEW VERSION. I updated some of the cookie data and things wont work until you log out and back in!</span>
+            </div>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                <article className="prose">
+                    <h1>3/31/2024</h1>
+                    <p>
+                        Deck Image Selection. Stats theme toggle. Various backend cleanups. (Also please re-login)
+                    </p>
+                    <h2>Deck Image Selection</h2>
+                    <p>
+                        Now on your deckinfo page you will be able to see your deck image and select any of the alternate art images for your commander to use as your deck image.
+                    </p>
+                    <h2>Stats theme toggle</h2>
+                    <p>
+                        Previously the stat pages were including themed night stats by default. Now there is a toggle to include that data but by default it will only be normal nontheme data.
+                    </p>
+                    <h2>Other stuff</h2>
+                    <p>- Added api info to cookie data so please re-login. Eventually trying to better handle cookie issues but thats future stuff.</p>
+                    <p>- Cleaned up some old code</p>
+                    <p>- Added caching for public endpoints to avoid some bad stuff</p>
+                </article>
+                </div>
+            </div>
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                 <article className="prose">
