@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import UserData from "../util/UserData";
 
-async function getUserStats(token: string, userid: number) {
-  return fetch(`api/stats/user/${userid}`, {
+async function getUserStats(token: string, userid: number, themed: boolean) {
+  return fetch(`api/stats/user/${userid}${"?themed="+themed}`, {
   method: 'GET',
   headers: {
       'Accept': 'application/json',
@@ -22,17 +22,30 @@ async function getUserStats(token: string, userid: number) {
 export default function StatsHome() {
   const {userToken, userName, userId} = UserData()
   const [userStats, setUserStats] = useState<any>();
+  const [includeThemed, setIncludeThemed] = useState<boolean>(false);
 
   useEffect(() => {
-    getUserStats(userToken, userId).then(items => {
+    getUserStats(userToken, userId, includeThemed).then(items => {
       setUserStats(items);
       console.log(items);
   });
-  }, []);
+  }, [includeThemed]);
+
+  function toggleThemed() {
+    setIncludeThemed(prev => !prev);
+  };
   
   return(
     <div className="max-w-6xl w-full">
-      <h1 className="text-4xl font-bold italic">{userName}</h1>
+      <div className="flex justify-between">
+        <h1 className="text-4xl font-bold italic">{userName}</h1>
+        <div className="form-control">
+          <label className="label cursor-pointer">
+            <span className="label-text px-2">Include Themed</span> 
+            <input type="checkbox" className="checkbox" checked={includeThemed} onChange={() => toggleThemed()}/>
+          </label>
+        </div>
+      </div>
       <div className="stats flex flex-col mt-auto">
         <div className="flex justify-between">
           <div className="stat">

@@ -1,7 +1,8 @@
 export async function GET(request: Request) {
     const res = await fetch(process.env.API_URL+'/banlist', {
         method: 'GET',
-        headers: request.headers})
+        headers: request.headers,
+        next: { revalidate: 10 }}) //10 second cache
         .then(data => {
             if(data.status >= 400) {
                 throw new Error("Server responds with error!");

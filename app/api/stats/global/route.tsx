@@ -1,7 +1,9 @@
 export async function GET(request: Request) {
-    const res = await fetch(process.env.API_URL+`/stats/global/simple`, {
+    const searchParams = new URLSearchParams(new URL(request.url).searchParams);
+    const res = await fetch(process.env.API_URL+`/stats/global/simple${searchParams.get('themed') ? "?themed="+searchParams.get('themed') : ""}`, {
         method: 'GET',
-        headers: request.headers})
+        headers: request.headers,
+        next: { revalidate: 60 }})
         .then(data => {
             if(data.status >= 400) {
                 throw new Error("Server responds with error!");

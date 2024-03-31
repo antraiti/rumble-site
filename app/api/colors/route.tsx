@@ -4,8 +4,8 @@ export async function GET(request: Request) {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-        }})
-        
+        },
+        next: { revalidate: 3600 }}) //hour cache
     if(res.ok)
         return Response.json(await res.json());
     else
