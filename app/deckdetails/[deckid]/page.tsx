@@ -117,15 +117,15 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
 
     return (
         <div className="bg-base-200 h-full">
-            <div className="flex justify-items-center max-w-7xl m-3 mx-auto">
             {!deckLegality && deckLegalityMessages && deckLegalityMessages.map((mes) => (
-                        <div role="alert" className="alert alert-error mx-auto m-3" key={mes}>Alert: {mes}</div>
+                        <div role="alert" className="alert alert-error mx-auto m-3 max-w-5xl" key={mes}>Alert: {mes}</div>
                     ))}
-                <div className="flex justify-between">
+            <div className="flex justify-items-center max-w-7xl m-3 mx-auto">
+                <div className="flex justify-between min-w-96">
                     <div className="card flex flex-col justify-start items-center shadow-xl bg-primary p-5 m-5 w-full">
                         <h1 className="pb-5">Deck Image</h1>
-                        <img className="pb-5" src={deckInfo?.image}/>
-                        <div className="grid bg-base-200 grid-cols-2 overflow-y-scroll p-5 max-h-96">
+                        <img className="pb-5 min-h-96" src={deckInfo?.image}/>
+                        <div className="grid bg-base-200 grid-cols-2 overflow-y-scroll p-5 max-h-96 min-w-72">
                             {printingList?.map((p: any) => {return <button key={p.artcrop} className="btn h-full" onClick={e => sendDeckUpdate("image", p.artcrop)}><img className="w-full p-1" src={p.artcrop}/></button>})}
                         </div>
                     </div>
