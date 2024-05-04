@@ -56,7 +56,7 @@ export default function MatchCard(matchObject: any) {
                     {!matchInfo.match.start && <button className="btn btn-outline btn-success h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "start")}>Start</button>}
                     {matchInfo.match.start && <h3 className="mx-5">{(new Date(matchInfo.match.start)).toLocaleTimeString()}</h3>}
                     {matchInfo.match.start && !matchInfo.match.end && <h3>{Math.floor((Math.floor((matchtime)/1000))/60/60)}:{((Math.floor((Math.floor((matchtime)/1000))/60)) % 60).toString().padStart(2,"0")}:{((Math.floor((matchtime)/1000)) % 60).toString().padStart(2,"0")}</h3>}
-                    {(!matchInfo.match.end && matchInfo.match.start) && <button className="btn btn-outline btn-warning h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "end")}>End</button>}
+                    {(!matchInfo.match.end && matchInfo.match.start) && <button disabled={matchInfo.performances.find((p: any) => p.order == null)} className="btn btn-outline btn-warning h-full min-h-0 mx-5" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "end")}>End</button>}
                     {matchInfo.match.end && <h3 className="mx-5">{(new Date(matchInfo.match.end)).toLocaleTimeString()}</h3>}
                     {!matchInfo.match.start && <button className="btn btn-outline btn-error h-8 min-h-0" onClick={() => matchObject.updateTimestamp(matchInfo.match.id, "delete")}>X</button>}
                     </div>

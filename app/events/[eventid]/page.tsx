@@ -117,6 +117,13 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     const [ userList, setUserList ] = useState([]);
     const ws = useWebSocket();
     const themedweekly = eventDetails?.event.weekly && eventDetails?.event.themed;
+    
+    function availablePlayers() {
+        return userList.filter((u: any) => 
+                        { 
+                            return !eventDetails.matches.filter((m: any) => !m.match.end)?.find((om: any) => om.performances?.find((p: any) => p.userid == u.id))
+                        });
+    }
 
     useEffect(() => {
         ws?.addEventListener('message', receivedUpdate);
@@ -200,7 +207,7 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
                       matchInfo={match} 
                       decks={eventDetails.decks} 
                       updateMatch={updateMatch} 
-                      userlist={userList}
+                      userlist={availablePlayers()}
                       addPerformance={requestNewPerformance}
                       updateTimestamp={requestMatchTimestampUpdate}
                       requestMatchJoin={requestMatchJoin}

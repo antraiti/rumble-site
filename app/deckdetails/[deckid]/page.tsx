@@ -142,13 +142,13 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                         </select>
                         <select className="select select-bordered w-full m-5 max-w-m" value={deckPartner ?? undefined} onChange={e => sendDeckUpdate("partner", e.target.value)}>
                             <option disabled selected>Partner</option>
-                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker"))).map((card: any) => 
+                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>
                         <select className="select select-bordered w-full m-5 max-w-m" value={deckCompanion ?? undefined} onChange={e => sendDeckUpdate("companion", e.target.value)}>
                             <option disabled selected>Companion</option>
-                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker"))).map((card: any) => 
+                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>

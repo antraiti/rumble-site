@@ -8,7 +8,7 @@ export default function StatsLayout ({
   return (
     <section className="flex mx-auto max-w-6xl p-5">
       <div>
-        <ul className="menu bg-secondary rounded-box mr-5">
+        <ul className="menu bg-secondary rounded-box mr-5 w-16">
           <div className="tooltip" data-tip="Your Stats">
             <li>
                 <Link className="w-full" href="/stats">
@@ -20,6 +20,13 @@ export default function StatsLayout ({
             <li>
                 <Link className="w-full" href="/stats/global">
                   <img className="h-5 w-5" src="../globe.svg"></img>
+                </Link>
+            </li>
+          </div>
+          <div className="tooltip" data-tip="Card Stats">
+            <li>
+                <Link className="w-full" href="/stats/cards">
+                  <img className="w-full" src="../card-view.svg"></img>
                 </Link>
             </li>
           </div>
