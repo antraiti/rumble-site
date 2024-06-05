@@ -59,7 +59,7 @@ export default function StatsCards() {
             <tbody>
             {cardsStats?.filter(cs => cs[1]["card"]["name"].toLowerCase().includes(searchText?.toLowerCase())).sort((a:any,b:any) => b[1]["count"]-a[1]["count"]).slice(0,20).map((crdstats: any) =>
             {
-              return <tr>
+              return <tr key={crdstats[0]}>
                 <td className="p-0"><img className="h-8 w-full object-cover p-0" src={printings?.find(p => p.cardid == crdstats[0]).artcrop}/></td>
                 <td>{crdstats[1]["card"]["name"]}</td>
                 <td>{crdstats[1]["card"]["cost"]}</td>
