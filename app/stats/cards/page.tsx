@@ -24,6 +24,10 @@ export default function StatsCards() {
     const [cardsStats, setCardsStats] = useState<any[]>([]);
     const [printings, setPrintings] = useState<any[]>([]);
     const [searchText, setSearchText] = useState<string>("");
+    const [pageNum, setPageNum] = useState<number>(0);
+    const [sortDir, setSortDir] = useState<boolean>(true);
+    const [sortCol, setSortCol] = useState<string>("plays");
+    const pageSize = 25;
 
     useEffect(() => {
         getCardsStats(userToken, userId).then(items => {
@@ -32,6 +36,45 @@ export default function StatsCards() {
             console.log(items);
     });
     }, []);
+
+    function sortPage(col: any) {
+      if(sortCol == col) {
+        setSortDir(prev => !prev);
+      } else {
+        setSortCol(col);
+        setSortDir(true);
+      }
+    }
+
+    function getSortVal(a:any,b:any){
+      switch(sortCol){
+        case("plays"):
+          if(sortDir)
+            return (b[1]["count"]-a[1]["count"]) ?? 1
+          else
+            return (a[1]["count"]-b[1]["count"]) ?? 1
+        case("wins"):
+          if(sortDir)
+            return (b[1]["wins"]-a[1]["wins"]) ?? 1
+          else
+            return (a[1]["wins"]-b[1]["wins"]) ?? 1
+        case("avgplacement"):
+          if(sortDir)
+            return (a[1]["placementtotal"]/a[1]["count"])-(b[1]["placementtotal"]/b[1]["count"]) ?? 1
+          else
+            return (b[1]["placementtotal"]/b[1]["count"])-(a[1]["placementtotal"]/a[1]["count"]) ?? 1
+        case("mv"):
+          if(sortDir)
+            return (b[1]["card"]["mv"]-a[1]["card"]["mv"]) ?? 1
+          else
+            return (a[1]["card"]["mv"]-b[1]["card"]["mv"]) ?? 1
+        case("name"):
+          if(sortDir)
+            return (b[1]["card"]["name"]>a[1]["card"]["name"]) ? -1 : 1
+          else
+            return (a[1]["card"]["name"]>b[1]["card"]["name"]) ? -1 : 1
+      }
+    }
 
     return(
       <div className="max-w-6xl w-full">
@@ -47,20 +90,20 @@ export default function StatsCards() {
             <thead>
               <tr>
                 <th></th>
-                <th>Name</th>
+                <th onClick={() => sortPage("name")}>Name</th>
                 <th>Cost</th>
-                <th>MV</th>
+                <th onClick={() => sortPage("mv")}>MV</th>
                 <th>Type</th>
-                <th>Plays</th>
-                <th>Wins</th>
-                <th>Avg. Placement</th>
+                <th onClick={() => sortPage("plays")}>Plays</th>
+                <th onClick={() => sortPage("wins")}>Wins</th>
+                <th onClick={() => sortPage("avgplacement")}>Avg. Placement</th>
               </tr>
             </thead>
             <tbody>
-            {cardsStats?.filter(cs => cs[1]["card"]["name"].toLowerCase().includes(searchText?.toLowerCase())).sort((a:any,b:any) => b[1]["count"]-a[1]["count"]).slice(0,20).map((crdstats: any) =>
+            {cardsStats?.filter(cs => cs[1]["card"]["name"].toLowerCase().includes(searchText?.toLowerCase())).sort((a:any,b:any) => getSortVal(a,b)!).slice(pageNum * pageSize,(pageNum * pageSize)+pageSize).map((crdstats: any) =>
             {
               return <tr key={crdstats[0]}>
-                <td className="p-0"><img className="h-8 w-full object-cover p-0" src={printings?.find(p => p.cardid == crdstats[0]).artcrop}/></td>
+                <td className="p-0"><img className="h-8 w-full object-cover p-0" src={crdstats[1]["artcrop"]}/></td>
                 <td>{crdstats[1]["card"]["name"]}</td>
                 <td>{crdstats[1]["card"]["cost"]}</td>
                 <td>{crdstats[1]["card"]["mv"]}</td>
@@ -73,15 +116,16 @@ export default function StatsCards() {
             </tbody>
           </table>
           <div className="flex flex-row w-full justify-between items-center">
-            <h3 className="text-sm">20 of {cardsStats?.length} Total</h3>
-            <div>
+            <h3 className="text-sm">{cardsStats?.length} Total</h3>
+            <div className="flex flex-row items-center">
               <div className="join">
-                <button className="join-item btn">First</button>
-                <button className="join-item btn">Prev</button>
+                <button className="join-item btn" onClick={() => setPageNum(0)}>First</button>
+                <button className="join-item btn" onClick={() => setPageNum(prev => Math.max(prev-1, 0))}>Prev</button>
               </div>
+              <h3  className="text-sm align-middle">Page {pageNum+1} of {Math.floor(cardsStats.length/pageSize)+1}</h3>
               <div className="join">
-                <button className="join-item btn">Next</button>
-                <button className="join-item btn">Last</button>
+                <button className="join-item btn" onClick={() => setPageNum(prev => Math.min(prev+1, Math.floor(cardsStats.length/pageSize)))}>Next</button>
+                <button className="join-item btn" onClick={() => setPageNum(Math.floor(cardsStats.length/pageSize))}>Last</button>
               </div>
             </div>
           </div>
