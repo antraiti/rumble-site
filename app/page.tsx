@@ -8,8 +8,8 @@ export default function Home() {
             <p className="py-6">The Alternative Multiplayer Format</p>
           </div>
           <div className="flex flex-col gap-5">
-            <button className="btn btn-secondary">Quick Start</button>
-            <button className="btn btn-secondary">Starter Decks</button>
+            <a href="/quickstart"><button className="btn w-full btn-secondary">Quick Start</button></a>
+            <a href="/starterdecks"><button className="btn w-full btn-secondary">Starter Decks</button></a>
           </div>
         </div>
       </div>
