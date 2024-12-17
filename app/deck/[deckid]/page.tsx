@@ -66,7 +66,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
     const [sideboard, setSideboard] = useState<any[]>([]);
     const [userlist, setUserlist] = useState<any | null>();
 
-    const copyToClipboard = () => {
+    const sendToClipboard = () => {
         var decktext = "";
         
         deckData.cardlist.map((card: any) => {
@@ -82,7 +82,33 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
             })
         }
 
-        navigator.clipboard.writeText(decktext)
+        copyToClipboard(decktext)
+    }
+
+    async function copyToClipboard(textToCopy: string) {
+        // Navigator clipboard api needs a secure context (https)
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(textToCopy);
+        } else {
+            // Use the 'out of viewport hidden text area' trick
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+                
+            // Move textarea out of the viewport so it's not visible
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+                
+            document.body.prepend(textArea);
+            textArea.select();
+    
+            try {
+                document.execCommand('copy');
+            } catch (error) {
+                console.error(error);
+            } finally {
+                textArea.remove();
+            }
+        }
     }
 
     useEffect(() => {
@@ -152,7 +178,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
             <h1 className="text-4xl italic font-bold">{deckData ? deckData?.deck.name : "loading"}</h1>
             <div className="flex gap-2">
             <div className="tooltip" data-tip="Copy Decklist to Clipboard">
-                <button className="btn btn-primary" onClick={() => copyToClipboard()}>Clipboard</button>
+                <button className="btn btn-primary" onClick={() => sendToClipboard()}>Clipboard</button>
             </div>
                 {userToken && <div className="tooltip" data-tip="Creates a Copy of this Deck on Your Account">
                     <button className="btn btn-primary" onClick={() => stealDeck(userToken, params.deckid).then(_ => router.push("/decks"))}>Steal</button>
