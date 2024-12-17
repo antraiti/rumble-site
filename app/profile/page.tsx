@@ -36,11 +36,34 @@ async function getUsers(token: string) {
     })
 }
 
+async function createNewUser(token: string, username: string, pass: string) {
+    return fetch(`/api/user`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'x-access-token': token
+        },
+        body: JSON.stringify({"username": username, "password": pass})
+        }).then(data => {
+            if(data.status >= 400) {
+                throw new Error("Server responds with error!");
+            } else if (data.status === 204) {
+                return [];
+            }
+            return data.json();
+        })
+}
+
 export default function Profile() {
     const { userToken, userName, isAdmin } = userData();
     const [pword, setPword] = useState("");
     const [userlist, setUserlist] = useState([]);
     const [selectedUser, setSelectedUser] = useState(userName);
+    const [newUsername, setNewUsername] = useState("");
+    const [newUserpassword, setNewUserpassword] = useState("");
+    const [creatingUser, setCreatingUser] = useState(false);
+    const [newUserMessage, setNewUserMessage] = useState("");
 
     useEffect(() => {
         getUsers(userToken).then(items => {
@@ -69,6 +92,15 @@ export default function Profile() {
                 </div>
             </div>
         </div>
+        {isAdmin && <div className="flex flex-col max-w-3xl bg-secondary shadow-xl mx-auto rounded-3xl m-5">
+            <div className="flex flex-col items-center w-full m-5 gap-5">
+                <>ADMIN: Create New User</>
+                {newUserMessage.length > 0 && <h1>{newUserMessage}</h1>}
+                <input type="text" placeholder="Username" className="input input-bordered mt-2" value={newUsername} onChange={(e: any) => setNewUsername(e.target.value)}/>
+                <input type="password" placeholder="New Password" className="input input-bordered mt-2" onChange={(e: any) => setNewUserpassword(e.target.value)}/>
+                <button disabled={!(newUsername.length > 0 && newUserpassword.length > 5 && !creatingUser)} className="btn btn-warning" onClick={() => { setCreatingUser(true);createNewUser(userToken, newUsername, newUserpassword).then(_ => {setCreatingUser(false); setNewUserMessage("User Created");}); setNewUserpassword("")}}>Create New User</button>
+            </div>
+        </div>}
     </div>
     );
 }

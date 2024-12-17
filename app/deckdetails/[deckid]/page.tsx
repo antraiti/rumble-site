@@ -154,6 +154,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>
+                        <button onClick={() => {router.push(`/deck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">View Deck</button>
                     </div>
                     <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5 w-full">
                         <h1>Sideboard</h1>

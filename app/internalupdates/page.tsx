@@ -1,10 +1,60 @@
 export default function InternalUpdate() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-3xl">
-            <div role="alert" className="alert alert-info">
+            {/* <div role="alert" className="alert alert-info">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 <span>PLEASE LOG OUT AND BACK IN IF YOU HAVENT ON THIS NEW VERSION. I updated some of the cookie data and things wont work until you log out and back in!</span>
+            </div> */}
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                    <article className="prose">
+                        <h1>12/17/2024</h1>
+                        <h2>Its been a minute...</h2>
+                        <p>
+                            With the site in working order for weekly events I had taken a good break from working on new things. There were definitely some needed fixes though and we have those and some cleanup for this update. I have a lot of other future items from people I will be looking into as well.
+                        </p>
+                        <h3>In this update: </h3>
+                        <p>Additions and Reworks:</p>
+                        <li>Spinner when uploading a deck</li>
+                        <li>Added button on deck editing page to goto the decklist page</li>
+                        <li>Decklist page rework. Added sections for clarity</li>
+                        <li>Added copy to clipboard button on decklist page</li>
+                        <li>Added Steal button to decklist page. See below.</li>
+                        <li>Added ability to create a new user from the profile tab if you are an admin.</li>
+                        <p>Fixes:</p>
+                        <li>Fixes to regex and deck creation logic that went overlooked</li>
+
+                        <h2>Deck Upload Spinner</h2>
+                        <p>Really simple right now but will give better clarity when a new deck is submitted that things are cookin behind the scenes. right now theres still no error feedback if things go wrong but that might come in a later update. Right now if you have issues uploading you can always goto the decklist and see what cards are missing. And when in doubt try uploading your deck to a different site to try and get different formatting.</p>
+                        
+                        <h2>Decklsit Page Rework: Stealing and Copying</h2>
+                        <p>I really wanted to cleanup the decklist page because it was a quick toss in before but had more potential. As long as you are logged in you can view anyones decklist by clicking on their commander picture in a match, or just have them link it to you. In the future I plan on adding full deck browsing as well.</p>
+                        <p>Stealing is something that I wish I added a while back but as we have had new players and also some players not ready for theme nights we have needed better deck sharing. The steal button on a decklist page simply makes a copy of that deck to your account. So whether you are helping someone new or just want to use someones own deck against them, stealing is now here for you.</p>
+                        <p>Copying to clipboard is also there which will allow you to easily grab a decklist for you to upload to another site or quickly edit and upload for yourself.</p>
+                        <p>A small PSA as well, if you were using the CMDR tag when uploading your decks it might have flagged way more than one card as your commander. I will be fixing this sometime in the future but your decklist will look messed up for a little bit</p>
+                        <h2>Admin: User Creation</h2>
+                        <p>Since we have been getting new users more frequently I also added in the ability for admin users to create a new user on the fly. Currently only Ship and I are admins as I dont know how far I want to go with permissions yet.</p>
+                        <p>This in culmination with deck stealing should make new user intake significantly faster and easier than before.</p>
+
+                        <h2>Bug Fixes</h2>
+                        <p>Fun fact the regex we had for the deck uploader was barely working and the logic for CMDR tags was messed up. Both these things have been fixed now I even rewrote the whole upload logic so hopefully no more issues with that.</p>
+
+                        <h2>Future Plans</h2>
+                        <p>Theres a lot of directions to go from here i have around 50 items on my trello board if I had to guess. Right now Im going to just add things as they seem important to people playing so if you want something reasonable just be vocal to keep it on my mind.</p>
+                        <p>Currently planned for the future: </p>
+                        <li>Deck versioning. This is a big one so I keep putting it off but it will most likely be the next big addition for the site</li>
+                        <li>Deck browsing. This alone is fairly small but I want to redesign the deck page a bit with it.</li>
+                        <li>Importing decks from URLs. Realistically this wont save a ton of time but its a huge QOL thing and might help with confusion for newer players.</li>
+                        <li>More stats. Stats were the main reason for tracking these things and I really want to cram more in, the current setup is just not super condusive for this though so im trying to figure out what I want to add.</li>
+                        <p>I dont have a set order for working on the above list so again the more vocal party will probably get picked first</p>
+
+                        <h3>Final note</h3>
+                        <p>I dont expect pretty much anyone to read this far or all of this but if for some reason you did hi and thanks. Trying out a longer format this time for the update to get a bit more explanation in on things so I hope it might help? I have no clue when the next update will be, but hopefully I make it a good one. </p>
+                        <p>peace ✌️</p>
+                    </article>
+                </div>
             </div>
+
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                 <article className="prose">
