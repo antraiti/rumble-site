@@ -38,7 +38,7 @@ async function getUsers(token: string) {
 export default function NewDeck() {
     const [users, setUsers] = useState([]);
     const router = useRouter();
-    const { user, userToken, isAdmin } = userData();
+    const { userToken, userId } = userData();
     const [deckList, setDeckList] = useState("");
     const [deckUser, setDeckUser] = useState();
     const [deckName, setDeckName] = useState("");
@@ -50,7 +50,7 @@ export default function NewDeck() {
         getUsers(userToken)
         .then(item => {
             setUsers(item);
-            setDeckUser(user?.publicid);
+            setDeckUser(userId);
             })
       }, [])
 

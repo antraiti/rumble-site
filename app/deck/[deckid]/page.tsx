@@ -85,6 +85,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
         copyToClipboard(decktext)
     }
 
+    //https://stackoverflow.com/questions/51805395/navigator-clipboard-is-undefined
     async function copyToClipboard(textToCopy: string) {
         // Navigator clipboard api needs a secure context (https)
         if (navigator.clipboard && window.isSecureContext) {
