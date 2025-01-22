@@ -50,24 +50,24 @@ export default function StatsCards() {
       switch(sortCol){
         case("plays"):
           if(sortDir)
-            return (b[1]["count"]-a[1]["count"]) ?? 1
+            return (b[1]["count"]-a[1]["count"])
           else
-            return (a[1]["count"]-b[1]["count"]) ?? 1
+            return (a[1]["count"]-b[1]["count"])
         case("wins"):
           if(sortDir)
-            return (b[1]["wins"]-a[1]["wins"]) ?? 1
+            return (b[1]["wins"]-a[1]["wins"])
           else
-            return (a[1]["wins"]-b[1]["wins"]) ?? 1
+            return (a[1]["wins"]-b[1]["wins"])
         case("avgplacement"):
           if(sortDir)
-            return (a[1]["placementtotal"]/a[1]["count"])-(b[1]["placementtotal"]/b[1]["count"]) ?? 1
+            return (a[1]["placementtotal"]/a[1]["count"])-(b[1]["placementtotal"]/b[1]["count"])
           else
-            return (b[1]["placementtotal"]/b[1]["count"])-(a[1]["placementtotal"]/a[1]["count"]) ?? 1
+            return (b[1]["placementtotal"]/b[1]["count"])-(a[1]["placementtotal"]/a[1]["count"])
         case("mv"):
           if(sortDir)
-            return (b[1]["card"]["mv"]-a[1]["card"]["mv"]) ?? 1
+            return (b[1]["card"]["mv"]-a[1]["card"]["mv"])
           else
-            return (a[1]["card"]["mv"]-b[1]["card"]["mv"]) ?? 1
+            return (a[1]["card"]["mv"]-b[1]["card"]["mv"])
         case("name"):
           if(sortDir)
             return (b[1]["card"]["name"]>a[1]["card"]["name"]) ? -1 : 1

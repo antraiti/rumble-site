@@ -19,21 +19,28 @@ export default function StatsLayout ({
           <div className="tooltip" data-tip="Global Stats">
             <li>
                 <Link className="w-full" href="/stats/global">
-                  <img className="h-5 w-5" src="../globe.svg"></img>
+                  <img className="h-5 w-5" src="/globe.svg"></img>
                 </Link>
             </li>
           </div>
           <div className="tooltip" data-tip="Card Stats">
             <li>
                 <Link className="w-full" href="/stats/cards">
-                  <img className="w-full" src="../card-view.svg"></img>
+                  <img className="w-full" src="/card-view.svg"></img>
                 </Link>
             </li>
           </div>
           <div className="tooltip" data-tip="Watchlist Stats">
             <li>
                 <Link className="w-full" href="/stats/watchlist">
-                  <img className="h-5 w-5" src="../eye.svg"></img>
+                  <img className="h-5 w-5" src="/eye.svg"></img>
+                </Link>
+            </li>
+          </div>
+          <div className="tooltip" data-tip="Users Stats">
+            <li>
+                <Link className="w-full" href="/stats/users">
+                  <img className="h-5 w-5" src="/person-team.svg"></img>
                 </Link>
             </li>
           </div>
