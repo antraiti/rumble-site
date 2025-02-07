@@ -61,7 +61,6 @@ export default function StatsUser({ params }: { params: { userid: number }}) {
             ])
         }
       })
-
       setCommanders(Array.from(commandersMap))
   });
   }, []);
@@ -69,6 +68,10 @@ export default function StatsUser({ params }: { params: { userid: number }}) {
   function DateOrUndefined(input: string) {
     const date = new Date(input)
     return date.toString() == "Invalid Date" ? undefined : date
+  }
+
+  function DateInRange(date: Date) {
+    return (!startDate || new Date(date) >= startDate) && (!endDate || date <= endDate)
   }
 
   return(
@@ -88,12 +91,14 @@ export default function StatsUser({ params }: { params: { userid: number }}) {
               </tr>
             </thead>
             <tbody>
-            {commanders?.filter((c: any) => (!startDate || new Date(c[1][0].date) > startDate) && (!endDate || new Date(c[1][0].date) < endDate)).sort((a:any,b:any) => b[1].length-a[1].length).map((cstats: any) =>
+            {commanders?.filter((c: any) => (!startDate || c[1].some((p:any) => new Date(p.date) >= startDate)) && (!endDate || c[1].some((p:any) => new Date(p.date) <= endDate)))
+              .sort((a:any,b:any) => b[1].length-a[1].length)
+              .map((cstats: any) =>
             {
               return <tr key={cstats[0]}>
                 <td>{cstats[1][0].cardname}</td>
-                <td>{cstats[1].length}</td>
-                <td>{cstats[1].filter((e: any) => e.win).length}</td>
+                <td>{cstats[1].filter((p: any) => DateInRange(new Date(p.date))).length}</td>
+                <td>{cstats[1].filter((p: any) => DateInRange(new Date(p.date)) && p.win).length}</td>
               </tr>
             })}
             </tbody>
