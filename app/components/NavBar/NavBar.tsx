@@ -43,7 +43,7 @@ export default function NavBar() {
                         </div>}
                     </ul>
                 </div>
-                <Link href="/"><img className="h-12" src="../QuickBanner.png"></img></Link>
+                <Link href="/"><img className="h-12" src="/QuickBanner.png"></img></Link>
                 <Link href="/quickstart" className="btn btn-ghost hidden md:flex">Quickstart</Link>
                 <Link href="/rules" className="btn btn-ghost hidden md:flex">Rules</Link>
                 <Link href="/banlist"  className="btn btn-ghost hidden md:flex">Banlist</Link>

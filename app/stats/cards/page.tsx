@@ -104,7 +104,7 @@ export default function StatsCards() {
             {
               return <tr key={crdstats[0]}>
                 <td className="p-0"><img className="h-8 w-full object-cover p-0" src={crdstats[1]["artcrop"]}/></td>
-                <td>{crdstats[1]["card"]["name"]}</td>
+                <td><a className="hover:font-bold" href={`https://scryfall.com/search?q=oracleid=${crdstats[1]["card"]["id"]}`}target="_blank">{crdstats[1]["card"]["name"]}</a></td>
                 <td>{crdstats[1]["card"]["cost"]}</td>
                 <td>{crdstats[1]["card"]["mv"]}</td>
                 <td>{crdstats[1]["card"]["typeline"]}</td>
