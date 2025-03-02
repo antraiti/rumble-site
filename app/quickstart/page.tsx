@@ -7,7 +7,7 @@ export default function Quickstart() {
                     <h1>Quick Start</h1>
                     <h3>This serves as a guide for players with EDH experience</h3>
                     <li>60 card singleton decks</li>
-                    <li>Refer to banlist as some EDH staples are banend (ie Sol Ring)</li>
+                    <li>Refer to banlist as some EDH staples are banned (ie Sol Ring)</li>
                     <li>20 starting life</li>
                     <li>There is no commander damage</li>
                     <li>Your commander may be any legendary creature or planeswalker that is not banned</li>

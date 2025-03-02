@@ -8,6 +8,31 @@ export default function InternalUpdate() {
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                     <article className="prose">
+                        <h1>2/12/2025</h1>
+                        <h2>First update of the year</h2>
+                        <p>
+                            Some small fixes and changes
+                        </p>
+                        <h3>In this update: </h3>
+                        <p>Additions and Reworks:</p>
+                        <li>Deck color filters</li>
+                        <li>Added average kills per game column on user stats</li>
+                        <li>Card redirects on card stat table</li>
+                        
+                        <p>Fixes:</p>
+                        <li>Fixed typo in quickstart</li>
+                        <li>Fixed rumble banner image issue on stat page</li>
+
+                        <h2>Future Plans</h2>
+                        <p>Same large list of options but I have been slowly planning on deck versioning as the potential next big change.</p>
+                        <p>I have also been thinking over MVP card voting, not sure if that would actually be a good change or just end up ruined by meme votes but its an easy enough addition so its on the table.</p>
+
+                    </article>
+                </div>
+            </div>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                    <article className="prose">
                         <h1>12/17/2024</h1>
                         <h2>Its been a minute...</h2>
                         <p>

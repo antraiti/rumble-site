@@ -42,15 +42,17 @@ export default function StatsUsers() {
                 <th>Name</th>
                 <th>Games Played</th>
                 <th>Kills</th>
+                <th title="Average Kills Per Game">KPG</th>
               </tr>
             </thead>
             <tbody>
             {usersStats?.sort((a:any,b:any) => b[1]["gamesPlayed"]-a[1]["gamesPlayed"]).map((ustats: any) =>
             {
               return <tr key={ustats[0]}>
-                <td><a href={`/stats/users/${ustats[0]}`}>{ustats[1]["username"]}</a></td>
+                <td><a className="hover:font-bold" href={`/stats/users/${ustats[0]}`}>{ustats[1]["username"]}</a></td>
                 <td>{ustats[1]["gamesPlayed"]}</td>
                 <td>{ustats[1]["kills"]}</td>
+                <td>{ustats[1]["gamesPlayed"] > 0 ? (ustats[1]["kills"]/ustats[1]["gamesPlayed"]).toFixed(3) : "N/A"}</td>
               </tr>
             })}
             </tbody>
