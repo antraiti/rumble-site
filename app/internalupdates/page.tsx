@@ -8,6 +8,28 @@ export default function InternalUpdate() {
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                     <article className="prose">
+                        <h1>3/2/2025</h1>
+                        <h2>Library Upgrades and Styling</h2>
+                        <p>
+                            Upgraded libraries to be up to date. There was a big update to the styling library used so there might be bugs or missed visual issues with that.
+                        </p>
+                        <h3>In this update: </h3>
+                        <p>Additions and Reworks:</p>
+                        <li>Card image popup on hover of decklist item</li>
+                        
+                        <p>Fixes:</p>
+                        <li>Checkbox filtering somehow wasnt included or something, fixed now</li>
+                        <li>Theme resources used throughout website changed. this will make future theme additions easier and make more sense</li>
+
+                        <h2>Future Plans</h2>
+                        <p>A lot on the backburner right now. Optimizing the stat endpoints more and adding more stats to the site is what im leaning toward next.</p>
+
+                    </article>
+                </div>
+            </div>
+            <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
+                    <article className="prose">
                         <h1>2/12/2025</h1>
                         <h2>First update of the year</h2>
                         <p>

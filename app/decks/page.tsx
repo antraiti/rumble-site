@@ -92,11 +92,11 @@ export default function Decks() {
             <div className="flex h-full w-full justify-around items-center align-middle">
                 <input type="text" placeholder="Search" className="input input-bordered w-full max-w-xs" onChange={e => setSearchValue(e.target.value)}/>
                 <div className="flex gap-10 overflow-hidden">
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-red-400)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-sky-400)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-amber-200)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-green-400)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-gray-500)] [--chkfg:black]" />
+                    <input type="checkbox" checked={colorFilter.red} onClick={_ => setColorFilter(prev => {return {...prev, red: !prev.red}})} className="checkbox border-red-400 checked:bg-red-400 [--chkfg:black]" />
+                    <input type="checkbox" checked={colorFilter.blue} onClick={_ => setColorFilter(prev => {return {...prev, blue: !prev.blue}})} className="checkbox border-sky-400 checked:bg-sky-400 [--chkfg:black]" />
+                    <input type="checkbox" checked={colorFilter.white} onClick={_ => setColorFilter(prev => {return {...prev, white: !prev.white}})} className="checkbox border-amber-200 checked:bg-amber-200 [--chkfg:black]" />
+                    <input type="checkbox" checked={colorFilter.green} onClick={_ => setColorFilter(prev => {return {...prev, green: !prev.green}})} className="checkbox border-green-400 checked:bg-green-400 [--chkfg:black]" />
+                    <input type="checkbox" checked={colorFilter.black} onClick={_ => setColorFilter(prev => {return {...prev, black: !prev.black}})} className="checkbox border-gray-500 checked:bg-gray-500 [--chkfg:black]" />
                 </div>
                 <button className="btn" onClick={() => router.push("/decks/newdeck")}>New Deck</button>
             </div>
