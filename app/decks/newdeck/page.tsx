@@ -85,7 +85,7 @@ export default function NewDeck() {
             <div className="flex flex-col justify-items-center max-w-3xl m-3 mx-auto">
                 {!isLoading ? 
                     (!errorMessage ? 
-                        <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5">
+                        <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5">
                             <h1>New Deck</h1>
                             {!isLoading && <select className="select select-bordered w-full m-5 max-w-m" value={deckUser} onChange={(e: any) => setDeckUser(e.target.value)}>
                                 {users && users.map((usr: any) => 
@@ -97,13 +97,13 @@ export default function NewDeck() {
                             <button className="btn btn-success w-full" onClick={() => finalizeDeck()} disabled={submitted}>Submit</button>
                         </div>
                         :
-                        <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5">
+                        <div className="card flex flex-col justify-center items-center shadow-xl p-5 m-5">
                             <h1>Error Uploading</h1>
                             <p>{errorMessage}</p>
                         </div>
                     )
                     :
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5">
+                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-200 p-5 m-5">
                         <h1>Uploading Deck</h1>
                         <span className="loading loading-infinity loading-lg"></span>
                     </div>}

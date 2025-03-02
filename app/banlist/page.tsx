@@ -48,7 +48,7 @@ export default function Banlist() {
 
     return (
         <div className="flex flex-col">
-            <div className="card mx-auto bg-primary shadow-xl m-5 p-5 w-3/4 max-w-4xl">
+            <div className="card mx-auto bg-base-100 shadow-xl m-5 p-5 w-3/4 max-w-4xl">
                 <h1 className="mx-auto font-bold text-2xl mb-2">Banned Cards</h1>
                 <p>
                     For Rumble we approach banning from a few different angles. Most notibly coming from other formats you will notice that many fast mana and high priced cards are banned.
@@ -61,7 +61,7 @@ export default function Banlist() {
                 <a className="hover:font-bold" href="https://scryfall.com/search?as=grid&order=name&q=oracle%3A%22playing+for+ante%22" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All (9) cards that reference “playing for ante”</a>
             </div>
             <div className="flex justify-center m-2 mx-auto w-full px-10">
-                <input value={bansearch} type="text" placeholder="Search" className="input input-bordered flex-grow max-w-md" onChange={(e: any) => setBansearch(e.target.value)}/>
+                <input value={bansearch} type="text" placeholder="Search" className="input input-bordered grow max-w-md" onChange={(e: any) => setBansearch(e.target.value)}/>
             </div>
             <div className="flex max-w-6xl mx-auto pb-20">
                 <div className="grid w-full lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-1">
@@ -141,12 +141,12 @@ export default function Banlist() {
                     "Volcanic Island#https://cards.scryfall.io/normal/front/2/f/2f607e7e-30c0-45e9-8f61-bf6e9fe63f2b.jpg?1562904669", 
                     "Worldfire#https://cards.scryfall.io/normal/front/2/e/2ef3d4b5-0453-4bf0-b018-23b0c3b9ae11.jpg?1631531850", 
                 ].filter((c: string) => c.split("#")[0].toLocaleLowerCase().includes(bansearch.toLocaleLowerCase() ?? "")).map((cardinfo) => (
-                    <div className="bg-secondary h-6 w-64 rounded-md m-1" key={cardinfo}>
+                    <div className="bg-base-100 h-6 w-64 rounded-md m-1" key={cardinfo}>
                             <a href={cardinfo.split("#")[1]} className="p-2 hover:font-bold">{cardinfo.split("#")[0]}</a>
                     </div>
                 )) : banlist.filter((card: any) => card.name.toLocaleLowerCase().includes(bansearch.toLocaleLowerCase() ?? "")).map((card: any) => 
                 {
-                    return <div className="bg-secondary h-6 w-64 rounded-md m-1" key={card.id}>
+                    return <div className="bg-base-100 h-6 w-64 rounded-md m-1" key={card.id}>
                                     <a href={`https://scryfall.com/search?q=oracleid=${card.id}`} className="p-2 hover:font-bold">{card.name}</a>
                             </div>
                 })}
@@ -154,7 +154,7 @@ export default function Banlist() {
             </div>
             { watchlist && <div>
 
-                <div className="card mx-auto bg-primary shadow-xl m-5 p-5 w-3/4 max-w-4xl">
+                <div className="card mx-auto bg-base-100 shadow-xl m-5 p-5 w-3/4 max-w-4xl">
                 <h1 className="mx-auto font-bold text-2xl mb-2">Watchlisted Cards</h1>
                 <p>
                     The Watchlist is used for any cards that we have noticed can have significant impact on games or might be banworthy. We highlight these cards to help bring attention to them and to promote discussion and observation on their effect of the format.
@@ -164,7 +164,7 @@ export default function Banlist() {
                 <div className="grid w-full lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-1">
                     {watchlist.map((card: any) => 
                     {
-                        return <div className="bg-secondary h-6 w-64 rounded-md m-1" key={card.id}>
+                        return <div className="bg-base-100 h-6 w-64 rounded-md m-1" key={card.id}>
                                         <a href={`https://scryfall.com/search?q=oracleid=${card.id}`} className="p-2 hover:font-bold">{card.name}</a>
                                 </div>
                     })}

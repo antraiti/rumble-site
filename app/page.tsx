@@ -8,13 +8,13 @@ export default function Home() {
             <p className="py-6">The Alternative Multiplayer Format</p>
           </div>
           <div className="flex flex-col gap-5">
-            <a href="/quickstart"><button className="btn w-full btn-secondary">Quick Start</button></a>
-            <a href="/starterdecks"><button className="btn w-full btn-secondary">Starter Decks</button></a>
+            <a href="/quickstart"><button className="btn btn-primary w-full">Quick Start</button></a>
+            <a href="/starterdecks"><button className="btn btn-primary w-full">Starter Decks</button></a>
           </div>
         </div>
       </div>
       <div className="grid md:grid-cols-3 grid-cols-1 gap-5 mx-auto place-items-center max-w-5xl">
-          <div className="join-card w-72 h-72 bg-base-100 shadow-xl">
+          <div className="card w-72 h-72 bg-base-100 shadow-xl">
             <figure className="px-10 pt-10">
               <img src="/images/blank-playing-cards.png" className="rounded-xl brightness-0 invert h-28" />
             </figure>

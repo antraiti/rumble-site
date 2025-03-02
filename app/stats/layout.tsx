@@ -8,7 +8,7 @@ export default function StatsLayout ({
   return (
     <section className="flex mx-auto max-w-6xl p-5">
       <div>
-        <ul className="menu bg-secondary rounded-box mr-5 w-16">
+        <ul className="menu bg-base-100 rounded-box mr-5 w-16">
           <div className="tooltip" data-tip="Your Stats">
             <li>
                 <Link className="w-full" href="/stats">

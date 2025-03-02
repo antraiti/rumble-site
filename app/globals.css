@@ -1,6 +1,73 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@theme {
+  --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
+  --background-image-gradient-conic: conic-gradient(
+    from 180deg at 50% 50%,
+    var(--tw-gradient-stops)
+  );
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@plugin "daisyui" {
+  themes: all;
+}
+
+@plugin "@tailwindcss/typography";
+
+
+@plugin "daisyui/theme" {
+  name: "mytheme";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(20.33% 0.016 252.42);
+  --color-base-200: oklch(16.26% 0.014 253.1);
+  --color-base-300: oklch(13.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: oklch(44% 0.043 257.281);
+  --color-primary-content: oklch(96% 0.018 272.314);
+  --color-secondary: oklch(50% 0.134 242.749);
+  --color-secondary-content: oklch(94% 0.028 342.258);
+  --color-accent: oklch(77% 0.152 181.912);
+  --color-accent-content: oklch(38% 0.063 188.416);
+  --color-neutral: oklch(14% 0.005 285.823);
+  --color-neutral-content: oklch(92% 0.004 286.32);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(29% 0.066 243.157);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(37% 0.077 168.94);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(41% 0.112 45.904);
+  --color-error: oklch(71% 0.194 13.428);
+  --color-error-content: oklch(27% 0.105 12.094);
+  --radius-selector: 0.5rem;
+  --radius-field: 1rem;
+  --radius-box: 1rem;
+  --size-selector: 0.28125rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
 
 :root {
   --foreground-rgb: 0, 0, 0;

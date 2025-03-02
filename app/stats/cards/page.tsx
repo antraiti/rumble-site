@@ -85,7 +85,7 @@ export default function StatsCards() {
         </label>
         </div>
         <div className="overflow-x-auto">
-          <table className="table bg-primary table-zebra">
+          <table className="table bg-base-100 table-zebra">
             {/* head */}
             <thead>
               <tr>

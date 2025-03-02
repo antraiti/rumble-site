@@ -73,7 +73,7 @@ export default function Profile() {
     
     return (
     <div>
-        <div className="flex flex-col max-w-3xl bg-secondary shadow-xl mx-auto rounded-3xl m-5">
+        <div className="flex flex-col max-w-3xl bg-base-100 shadow-xl mx-auto rounded-3xl m-5">
             {isAdmin &&
                 <select className="select select-bordered w-full max-w-xs" value={selectedUser} onChange={(e: any) => setSelectedUser(e.target.value)}>
                     {userlist.length > 0 && userlist.map((u: any) => <option key={u.username} value={u.username}>{u.username}</option>)}
@@ -92,7 +92,7 @@ export default function Profile() {
                 </div>
             </div>
         </div>
-        {isAdmin && <div className="flex flex-col max-w-3xl bg-secondary shadow-xl mx-auto rounded-3xl m-5">
+        {isAdmin && <div className="flex flex-col max-w-3xl bg-base-100 shadow-xl mx-auto rounded-3xl m-5">
             <div className="flex flex-col items-center w-full m-5 gap-5">
                 <>ADMIN: Create New User</>
                 {newUserMessage.length > 0 && <h1>{newUserMessage}</h1>}

@@ -23,7 +23,7 @@ export default function DeckCard(deckObject: any) {
     }
 
     return (
-        <div onClick={() => GotoDeckDetails()} className="card cursor-pointer card-side bg-base-100 shadow-xl m-3 h-40 max-w-7xl mx-auto hover:shadow-accent">
+        <div onClick={() => GotoDeckDetails()} className="card cursor-pointer card-side bg-base-100 shadow-xl m-3 h-40 max-w-7xl mx-auto hover:shadow-base-300">
             <figure className="w-1/4"><img src={getCommanderImageUrl()} alt={deckCommander?.name}/></figure>
             <div className="flex flex-col w-5 bg-gray-300">
                 {colorInfo?.red && <div className="flex flex-1 bg-red-300"><img className="flex-1" src="R.svg"/></div>}

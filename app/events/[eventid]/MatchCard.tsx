@@ -26,17 +26,17 @@ export default function MatchCard(matchObject: any) {
     }
 
     return (
-        <div className="bg-primary rounded-xl m-5 flex flex-col shadow-xl">
-            <div className="flex h-10 bg-secondary m-2 rounded-xl shadow-xl bg-gradient-to-r from-secondary via-neutral to-accent">
+        <div className="bg-base-100 rounded-xl m-5 flex flex-col shadow-xl">
+            <div className="flex h-10 bg-base-200 m-2 rounded-xl shadow-xl bg-linear-to-r from-base-200 via-neutral to-bg-base-200">
                 <div className="flex w-full items-center justify-between">
                     <div className="flex items-center ">
-                        <div className="dropdown shadow">
+                        <div className="dropdown shadow-sm">
                             <div tabIndex={0} role="button" className="btn btn-ghost w-5">=</div>
-                            <ul tabIndex={0} className="dropdown-content shadow z-[1] bg-secondary menu w-48">
+                            <ul tabIndex={0} className="dropdown-content shadow-sm z-1 bg-base-200 menu w-48">
                                 <li>
                                     <details>
                                         <summary>Power</summary>
-                                        <ul className="bg-secondary">
+                                        <ul className="bg-base-200">
                                         <li><a href="#" onClick={()=>matchObject.setMatchPower(matchInfo.match.id, "Casual")}>Casual</a></li>
                                         <li><a href="#" onClick={()=>matchObject.setMatchPower(matchInfo.match.id, "Normal")}>Normal</a></li>
                                         <li><a href="#" onClick={()=>matchObject.setMatchPower(matchInfo.match.id, "Competitive")}>Competitive</a></li>
@@ -63,7 +63,7 @@ export default function MatchCard(matchObject: any) {
                 </div>
             </div>
             <div className="mx-5 mb-5">
-                <table className="table bg-gradient-to-r from-secondary via-neutral to-accent">
+                <table className="table bg-linear-to-r bg-base-200 via-neutral bg-base-200">
                     <thead>
                     <tr>
                         <th>Commander</th>
@@ -116,7 +116,7 @@ export default function MatchCard(matchObject: any) {
                 {!matchInfo.match.start && 
                     <div className="dropdown">
                         <div tabIndex={0} role="button" className="btn btn-outline btn-info m-1 min-h-0 h-full mt-2">+</div>
-                        <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <ul tabIndex={0} className="dropdown-content z-1 menu p-2 shadow-sm bg-base-100 rounded-box w-52">
                         {matchObject.userlist.map((u: any) => 
                             (<button className="cursor-pointer hover:bg-primary h-8" key={u.id}
                             onClick={(e: any) => matchObject.addPerformance(e.target.value, matchInfo.match.id)} 

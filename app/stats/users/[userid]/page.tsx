@@ -75,13 +75,13 @@ export default function StatsUser({ params }: { params: { userid: number }}) {
   }
 
   return(
-    <div className="card shadow-xl bg-primary p-5 m-5 w-full">
+    <div className="card shadow-xl bg-base-100 p-5 m-5 w-full">
       <h1 className="text-xl font-bold mx-auto">Commanders Played</h1>
       <div className="flex justify-end flex-row">
         <input onChange={e => setStartDate(DateOrUndefined(e.target.value))} type="text" placeholder="Start Date" className="input input-bordered m-5 max-w-m"/>
         <input onChange={e => setEndDate(DateOrUndefined(e.target.value))} type="text" placeholder="End Date" className="input input-bordered m-5 max-w-m"/>
       </div>
-      <table className="table bg-secondary shadow-xl table-zebra">
+      <table className="table bg-base-300 shadow-xl table-zebra">
             {/* head */}
             <thead>
               <tr>

@@ -35,7 +35,7 @@ export default function StatsUsers() {
         <h1 className="text-4xl font-bold italic">Users</h1>
       </div>
       <div className="stats flex flex-col mt-auto">
-      <table className="table bg-primary table-zebra">
+      <table className="table bg-base-100 table-zebra">
             {/* head */}
             <thead>
               <tr>

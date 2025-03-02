@@ -70,11 +70,11 @@ export default function Decks() {
             <div className="flex h-full w-full justify-around items-center align-middle">
                 <input type="text" placeholder="Search" className="input input-bordered w-full max-w-xs" onChange={e => setSearchValue(e.target.value)}/>
                 <div className="flex gap-10 overflow-hidden">
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:theme(colors.red.400)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:theme(colors.sky.400)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:theme(colors.amber.200)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:theme(colors.green.400)] [--chkfg:black]" />
-                    <input type="checkbox" checked={false} className="checkbox [--chkbg:theme(colors.gray.500)] [--chkfg:black]" />
+                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-red-400)] [--chkfg:black]" />
+                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-sky-400)] [--chkfg:black]" />
+                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-amber-200)] [--chkfg:black]" />
+                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-green-400)] [--chkfg:black]" />
+                    <input type="checkbox" checked={false} className="checkbox [--chkbg:var(--color-gray-500)] [--chkfg:black]" />
                 </div>
                 <button className="btn" onClick={() => router.push("/decks/newdeck")}>New Deck</button>
             </div>

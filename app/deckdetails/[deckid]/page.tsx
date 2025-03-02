@@ -124,16 +124,16 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     ))}
             <div className="flex justify-items-center max-w-7xl m-3 mx-auto">
                 <div className="flex justify-between min-w-96 w-1/2">
-                    <div className="card flex flex-col justify-start items-center shadow-xl bg-primary p-5 m-5 w-full">
+                    <div className="card flex flex-col justify-start items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1 className="pb-5">Deck Image</h1>
                         <img className="pb-5 min-h-96 object-scale-down" src={deckInfo?.image}/>
                         {printingList && printingList.length > 0 && <div className="grid bg-base-200 grid-cols-2 overflow-y-auto p-5 max-h-96 min-w-72 rounded-md">
-                            {printingList?.map((p: any) => {return <button key={p.artcrop} className="btn h-full" onClick={e => sendDeckUpdate("image", p.artcrop)}><img className="w-full p-1" src={p.artcrop}/></button>})}
+                            {printingList?.filter((p: any) => p.cardid == deckCommander || p.cardid == deckPartner).map((p: any) => {return <button key={p.artcrop} className="btn h-full" onClick={e => sendDeckUpdate("image", p.artcrop)}><img className="w-full p-1" src={p.artcrop}/></button>})}
                         </div>}
                     </div>
                 </div>
                 <div className="flex flex-col justify-start w-full">
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5 w-full">
+                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Deck</h1>
                         <input type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
                         <select className="select select-bordered w-full m-5 max-w-m" value={deckCommander ?? undefined} onChange={e => sendDeckUpdate("commander", e.target.value)}>
@@ -156,7 +156,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                         </select>
                         <button onClick={() => {router.push(`/deck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">View Deck</button>
                     </div>
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5 w-full">
+                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Sideboard</h1>
                         <select className="select select-bordered w-full m-5 max-w-m" onChange={e => sendDeckUpdate("sideboard", e.target.value)}>
                             <option disabled selected>Add Card</option>
@@ -166,14 +166,14 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                         </select>
                         <div className="grid grid-cols-1 md:grid-cols-2 w-full">
                             {cardList.filter((card: any) => card[0].issideboard).map((card: any) => 
-                                    <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-accent h-10 m-2 w-72">
+                                    <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-base-300 h-10 m-2 w-72">
                                         <h1 className="mx-5">{card[1].name}</h1>
                                         <button className="btn btn-error btn-outline btn-sm" onClick={e => sendDeckUpdate("-sideboard", card[0].cardid)}>x</button>
                                     </div>
                                     )}
                         </div>
                     </div>
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-primary p-5 m-5 w-full">
+                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Custom Cards</h1>
                         <select className="select select-bordered w-full m-5 max-w-m" onChange={e => sendDeckUpdate("card", e.target.value)}>
                             <option disabled selected>Add Card</option>
@@ -183,7 +183,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                         </select>
                         <div className="grid grid-cols-1 md:grid-cols-2 w-full">
                             {cardList.filter((card: any) => card[1].custom).map((card: any) => 
-                                    <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-accent h-10 m-2 w-72">
+                                    <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-base-300 h-10 m-2 w-72">
                                         <h1 className="mx-5">{card[1].name}</h1>
                                         <button className="btn btn-error btn-outline btn-sm" onClick={e => sendDeckUpdate("-card", card[0].cardid)}>x</button>
                                     </div>
