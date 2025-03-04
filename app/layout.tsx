@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import NavBar from './components/NavBar/NavBar'
 import { WebHookWrapper } from './components/WebhookWrapper'
+import { ThemeWrapper } from './components/ThemeWrapper'
 
 
 export const metadata: Metadata = {
@@ -16,13 +17,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" data-theme="mytheme" className='bg-base-200'>
-      <body className='bg-base-200'>
-        <NavBar/>
-        <WebHookWrapper connectionurl={process.env.HOST_URL}>
-          {children}
-        </WebHookWrapper>
-      </body>
-    </html>
+    <ThemeWrapper>
+      <NavBar/>
+      <WebHookWrapper connectionurl={process.env.HOST_URL}>
+        {children}
+      </WebHookWrapper>
+    </ThemeWrapper>
   )
 }

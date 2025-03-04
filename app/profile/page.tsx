@@ -1,6 +1,7 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import userData from "../util/UserData"
+import SetThemeContext from "../components/ThemeContext";
 
 async function sendPassowrdChangeRequest(token: string, usernamne: string, password: string) {
     return fetch(`/api/user/${usernamne}/pass`, {
@@ -64,11 +65,14 @@ export default function Profile() {
     const [newUserpassword, setNewUserpassword] = useState("");
     const [creatingUser, setCreatingUser] = useState(false);
     const [newUserMessage, setNewUserMessage] = useState("");
+    const [selectedTheme, setSelectedTheme] = useState(userName);
+    const ThemeSetter = useContext(SetThemeContext);
 
     useEffect(() => {
         getUsers(userToken).then(items => {
             setUserlist(items);
         });
+        setSelectedTheme(localStorage.getItem("theme") ?? "default")
       }, [])
     
     return (
@@ -91,6 +95,46 @@ export default function Profile() {
                     <button className="btn btn-warning" onClick={() => sendPassowrdChangeRequest(userToken, selectedUser, pword)}>Change Password</button>
                 </div>
             </div>
+        </div>
+        <div className="flex flex-col max-w-3xl bg-base-100 shadow-xl mx-auto rounded-3xl m-5 p-10">
+                <select className="select select-bordered w-full max-w-xs" value={selectedTheme} onChange={(e: any) =>  {setSelectedTheme(e.target.value);ThemeSetter(e.target.value)}}>
+                    <option>default</option>
+                    <option>light</option>
+                    <option>dark</option>
+                    <option>cupcake</option>
+                    <option>bumblebee</option>
+                    <option>emerald</option>
+                    <option>corporate</option>
+                    <option>synthwave</option>
+                    <option>retro</option>
+                    <option>cyberpunk</option>
+                    <option>valentine</option>
+                    <option>halloween</option>
+                    <option>garden</option>
+                    <option>forest</option>
+                    <option>aqua</option>
+                    <option>lofi</option>
+                    <option>pastel</option>
+                    <option>fantasy</option>
+                    <option>wireframe</option>
+                    <option>black</option>
+                    <option>luxury</option>
+                    <option>dracula</option>
+                    <option>cmyk</option>
+                    <option>autumn</option>
+                    <option>business</option>
+                    <option>acid</option>
+                    <option>lemonade</option>
+                    <option>night</option>
+                    <option>coffee</option>
+                    <option>winter</option>
+                    <option>dim</option>
+                    <option>nord</option>
+                    <option>sunset</option>
+                    <option>caramellatte</option>
+                    <option>abyss</option>
+                    <option>silk</option>
+                </select>
         </div>
         {isAdmin && <div className="flex flex-col max-w-3xl bg-base-100 shadow-xl mx-auto rounded-3xl m-5">
             <div className="flex flex-col items-center w-full m-5 gap-5">
