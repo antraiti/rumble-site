@@ -47,6 +47,7 @@ export default function NavBar() {
                 <Link href="/quickstart" className="btn btn-ghost hidden md:flex">Quickstart</Link>
                 <Link href="/rules" className="btn btn-ghost hidden md:flex">Rules</Link>
                 <Link href="/banlist"  className="btn btn-ghost hidden md:flex">Banlist</Link>
+                <Link href="/decks/checker"  className="btn btn-ghost hidden md:flex">Deck Check</Link>
                 <Link href="/starterdecks" className="btn btn-ghost hidden md:flex">Starter Decks</Link>
                 {/* <Link href="/rules" className="btn btn-ghost">Deck Check</Link> */}
             </div>
