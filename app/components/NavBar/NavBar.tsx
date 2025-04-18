@@ -31,7 +31,7 @@ export default function NavBar() {
                         <Link href="/banlist"  className="btn btn-ghost justify-start">Banlist</Link>
                         <div className="divider"/>
                         {!username &&
-                        <Link href="login" className="btn btn-ghost">Sign In</Link>
+                        <Link href="/login" className="btn btn-ghost">Sign In</Link>
                         }
                         {username &&
                         <div>
@@ -53,7 +53,7 @@ export default function NavBar() {
             </div>
             <div className="navbar-end hidden md:flex">
                 {!username &&
-                <Link href="login" className="btn">Sign In</Link>
+                <Link href="/login" className="btn">Sign In</Link>
                 }
                 {username &&
                 <div>

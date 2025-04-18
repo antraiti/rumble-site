@@ -38,6 +38,28 @@ async function getCardsFromList(token: string, decklist: string) {
     })
 }
 
+const convertToCSV = (objArray: any) => {
+    const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray;
+    let str = '';
+
+    for (let i = 0; i < array.length; i++) {
+        let line = `"${array[i][1].card.name}","${array[i][1].card.typeline}",${array[i][1].count},${array[i][0]}`
+        str += line + '\r\n';
+    }
+    return str;
+};
+
+const downloadCSV = (data: any) => {
+    const csvData = new Blob([convertToCSV(data)], { type: 'text/csv' });
+    const csvURL = URL.createObjectURL(csvData);
+    const link = document.createElement('a');
+    link.href = csvURL;
+    link.download = `popular_cards.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 export default function UnpopularChecker() {
     const {userToken, userName, userId} = UserData();
     const [cardSearch, setCardSearch] = useState<string>("");
@@ -53,7 +75,7 @@ export default function UnpopularChecker() {
             items["cards"]
                 .sort((a:any,b:any) => b[1]["count"]-a[1]["count"])
                 .every((element: any) => {
-                    if (element[1].card.typeline.indexOf("Basic") >= 0) return true;
+                    if (element[1].card.typeline.indexOf("Basic") >= 0 || element[1].card.banned) return true;
                     if (filteredCards.length <= 300 || filteredCards[filteredCards.length-1][1].count == element[1].count) {
                         filteredCards.push(element);
                         return true;
@@ -78,6 +100,15 @@ export default function UnpopularChecker() {
         );
     }
 
+    if (!userToken) return (<div>
+            <div role="alert" className="alert alert-error mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-bold">Missing Token. You need to login to view this page.</span>
+            </div>
+        </div>)
+
     return (
         <div>
             <div className="card mx-auto bg-base-100 shadow-xl m-5 p-5 w-3/4 max-w-4xl">
@@ -98,7 +129,7 @@ export default function UnpopularChecker() {
                     </thead>
                     <tbody>
                         {bannedCards?.sort((a:any,b:any) => sortDir ? b[1]["count"]-a[1]["count"] : a[1]["count"]-b[1]["count"])
-                            .filter(c => cardSearch.length == 0 || c[1]["card"]["name"].indexOf(cardSearch) >= 0)
+                            .filter(c => cardSearch.length == 0 || c[1]["card"]["name"].toLowerCase().indexOf(cardSearch.toLowerCase()) >= 0)
                             .slice(0, 10)
                             .map((ustats: any) =>
                             {
@@ -110,6 +141,7 @@ export default function UnpopularChecker() {
                     </tbody>
                 </table>
                 <p>Showing 10 of {bannedCards.length}</p>
+                <button onClick={_ => downloadCSV(bannedCards)} className="btn btn-accent max-w-md mx-auto">Download CSV</button>
             </div>
             <div className="card mx-auto bg-base-100 shadow-xl m-5 p-5 w-3/4 max-w-4xl">
                 <h1 className="mx-auto font-bold text-2xl mb-2">Decklist Check</h1>

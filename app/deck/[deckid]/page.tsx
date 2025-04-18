@@ -190,6 +190,10 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
             </div>);
     }
 
+    const trueCount = (cardList: Array<any>) => {
+        return cardList.reduce((accumulator, currentValue) => {return accumulator + currentValue[0].count}, 0)
+    }
+
     return(
     <div className="mx-auto m-5 p-5 max-w-7xl">
         <div className="flex justify-between">
@@ -217,37 +221,37 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && creatures.length > 0) && <h2 className="pt-2">{`Creatures (${creatures.length}):`}</h2>}
+                {(deckData && creatures.length > 0) && <h2 className="pt-2">{`Creatures (${trueCount(creatures)}):`}</h2>}
                 {(deckData && creatures.length > 0) && creatures.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && planeswalkers.length > 0) && <h2 className="pt-2">{`Planeswalkers (${planeswalkers.length}):`}</h2>}
+                {(deckData && planeswalkers.length > 0) && <h2 className="pt-2">{`Planeswalkers (${trueCount(planeswalkers)}):`}</h2>}
                 {(deckData && planeswalkers.length > 0) && planeswalkers.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && sorceries.length > 0) && <h2 className="pt-2">{`Sorceries (${sorceries.length}):`}</h2>}
+                {(deckData && sorceries.length > 0) && <h2 className="pt-2">{`Sorceries (${trueCount(sorceries)}):`}</h2>}
                 {(deckData && sorceries.length > 0) && sorceries.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && instants.length > 0) && <h2 className="pt-2">{`Instants (${instants.length}):`}</h2>}
+                {(deckData && instants.length > 0) && <h2 className="pt-2">{`Instants (${trueCount(instants)}):`}</h2>}
                 {(deckData && instants.length > 0) && instants.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && artifacts.length > 0) && <h2 className="pt-2">{`Artifacts (${artifacts.length}):`}</h2>}
+                {(deckData && artifacts.length > 0) && <h2 className="pt-2">{`Artifacts (${trueCount(artifacts)}):`}</h2>}
                 {(deckData && artifacts.length > 0) && artifacts.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && enchantments.length > 0) && <h2 className="pt-2">{`Enchantments (${enchantments.length}):`}</h2>}
+                {(deckData && enchantments.length > 0) && <h2 className="pt-2">{`Enchantments (${trueCount(enchantments)}):`}</h2>}
                 {(deckData && enchantments.length > 0) && enchantments.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && lands.length > 0) && <h2 className="pt-2">{`Lands (${lands.length}):`}</h2>}
+                {(deckData && lands.length > 0) && <h2 className="pt-2">{`Lands (${trueCount(lands)}:`}</h2>}
                 {(deckData && lands.length > 0) && lands.map((card: any) => {
                     return CardDisplay(card);
                 })}
