@@ -4,7 +4,7 @@ import UserData from "@/app/util/UserData";
 import { useEffect, useState } from "react";
 
 async function getCardsStats(token: string, userid: number) {
-    return fetch(`../../api/stats/cards`, {
+    return fetch(`../../api/stats/cards/custom`, {
     method: 'GET',
     headers: {
         'Accept': 'application/json',
