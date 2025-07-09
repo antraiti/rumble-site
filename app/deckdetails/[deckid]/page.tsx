@@ -138,12 +138,13 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                         <input type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
                         <select className="select select-bordered w-full m-5 max-w-m" value={deckCommander ?? undefined} onChange={e => sendDeckUpdate("commander", e.target.value)}>
                             <option disabled selected>Commander</option>
-                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker"))).map((card: any) => 
+                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Vehicle") || c[1].typeline?.includes("Spacecraft"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>
                         <select className="select select-bordered w-full m-5 max-w-m" value={deckPartner ?? undefined} onChange={e => sendDeckUpdate("partner", e.target.value)}>
                             <option disabled selected>Partner</option>
+                            <option></option>
                             {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}

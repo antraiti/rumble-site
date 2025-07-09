@@ -6,7 +6,7 @@ export default function Rules() {
                 <article className="prose">
                     <h1>Deck Requirements and Restrictions</h1>
                     <li>60 card deck</li>
-                    <li>A commander - part of the 60 card deck but starts the game in the command zone - commanders can be either: one legendary creature, one planeswalker, or two legendary creatures with partner</li>
+                    <li>A commander - part of the 60 card deck but starts the game in the command zone - commanders can be: one legendary creature, planeswalker, vehicle, or Spacecraft. Two Legendary Creatures with partner. Or the other similar effects made for commanders, i.e. Background, Friends Forever, Doctors Companion</li>
                     <li>All cards in the deck must be in the color identity of your commander(s)</li>
                     <li>One copy of any card, except basic lands</li>
                     <li>Decks may not contain any copies of cards on the banlist (see below)</li>
