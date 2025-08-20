@@ -87,7 +87,7 @@ export default function MatchCard(matchObject: any) {
                         <td>
                             <select name="deckid" className="select select-ghost w-full" value={performance?.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
                                 <option value={undefined}></option>
-                                {decks.filter((d: any) => d[0].userid == performance.userid && d[0].islegal).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name}`}</option>))}
+                                {decks.filter((d: any) => d[0].userid == performance.userid && (matchObject.themed || d[0].islegal)).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name}`}</option>))}
                             </select>
                         </td>
                         <td>

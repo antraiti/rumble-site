@@ -211,7 +211,8 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
                       addPerformance={requestNewPerformance}
                       updateTimestamp={requestMatchTimestampUpdate}
                       requestMatchJoin={requestMatchJoin}
-                      setMatchPower={setMatchPower}/>
+                      setMatchPower={setMatchPower}
+                      themed={eventDetails?.event.themed}/>
                   ))}
               </div>
           </div>
