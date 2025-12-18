@@ -1,6 +1,7 @@
-export async function GET(request: Request, { params }: { params: { userid: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ userid: string }> }) {
+    const {userid} = await params;
     const searchParams = new URLSearchParams(new URL(request.url).searchParams);
-    const res = await fetch(process.env.API_URL+`/stats/user/${params.userid}/simple${searchParams.get('themed') ? "?themed="+searchParams.get('themed') : ""}`, {
+    const res = await fetch(process.env.API_URL+`/stats/user/${userid}/simple${searchParams.get('themed') ? "?themed="+searchParams.get('themed') : ""}`, {
         method: 'GET',
         headers: request.headers,
         next: { revalidate: 60 }

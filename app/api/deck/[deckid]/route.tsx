@@ -1,5 +1,6 @@
-export async function GET(request: Request, { params }: { params: { deckid: number } }) {
-    const res = await fetch(process.env.API_URL+`/deck/v2/${params.deckid}`, {
+export async function GET(request: Request, { params }: { params: Promise<{ deckid: string }>}) {
+    const { deckid } = await params;
+    const res = await fetch(process.env.API_URL+`/deck/v2/${deckid}`, {
         method: 'GET',
         headers: request.headers})
         .then(data => {
@@ -19,8 +20,9 @@ export async function GET(request: Request, { params }: { params: { deckid: numb
     }
 }
 
-export async function PUT(request: Request, { params }: { params: { deckid: number } }) {
-    const res = await fetch(process.env.API_URL+`/deck/v2/${params.deckid}`, {
+export async function PUT(request: Request, { params }: { params: Promise<{ deckid: string }> }) {
+    const { deckid } = await params;
+    const res = await fetch(process.env.API_URL+`/deck/v2/${deckid}`, {
         method: 'PUT',
         headers: request.headers,
         body: JSON.stringify(await request.json())})

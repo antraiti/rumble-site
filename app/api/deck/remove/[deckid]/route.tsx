@@ -1,5 +1,6 @@
-export async function PUT(request: Request, { params }: { params: { deckid: number } }) {
-    const res = await fetch(process.env.API_URL+`/removedeck/${params.deckid}`, {
+export async function PUT(request: Request, { params }: { params: Promise<{ deckid: string }> }) {
+    const { deckid } = await params;
+    const res = await fetch(process.env.API_URL+`/removedeck/${deckid}`, {
         method: 'PUT',
         headers: request.headers})
         .then(data => {

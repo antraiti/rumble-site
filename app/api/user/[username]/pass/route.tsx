@@ -1,5 +1,6 @@
-export async function PUT(request: Request, { params }: { params: { username: string } }) {
-    const res = await fetch(process.env.API_URL+`/user/${params.username}/pass`, {
+export async function PUT(request: Request, { params }: { params: Promise<{ username: string }> }) {
+    const { username } = await params;
+    const res = await fetch(process.env.API_URL+`/user/${username}/pass`, {
         method: 'PUT',
         headers: request.headers,
         body: JSON.stringify(await request.json())})

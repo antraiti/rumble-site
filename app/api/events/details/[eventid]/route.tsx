@@ -1,5 +1,6 @@
-export async function GET(request: Request, { params }: { params: { eventid: number } }) {
-    const res = await fetch(process.env.API_URL+`/event/${params.eventid}`, {
+export async function GET(request: Request, { params }: { params: Promise<{ eventid: string }> }) {
+    const {eventid} = await params;
+    const res = await fetch(process.env.API_URL+`/event/${eventid}`, {
         method: 'GET',
         headers: request.headers})
         .then(data => {

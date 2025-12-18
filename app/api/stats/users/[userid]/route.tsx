@@ -1,5 +1,6 @@
-export async function GET(request: Request, { params }: { params: { userid: string } }) {
-    const res = await fetch(process.env.API_URL+`/stats/users/${params.userid}`, {
+export async function GET(request: Request, { params }: { params: Promise<{ userid: string }> }) {
+    const { userid } = await params;
+    const res = await fetch(process.env.API_URL+`/stats/users/${userid}`, {
         method: 'GET',
         headers: request.headers})
         .then(data => {
