@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
 
@@ -55,8 +55,12 @@ async function getDeckInfo(token: string, id: number) {
     })
 }
 
+export interface DeckDetailsProps {
+    deckid: number;
+}
 
-export default function DeckDetails({ params }: { params: { deckid: number }}) {
+export default function DeckDetails({ params }: { params: Promise<DeckDetailsProps>}) {
+    const {deckid} = use(params);
     const { userToken } = userData();
     const router = useRouter();
     const [deckInfo, setDeckInfo] = useState<any | null>();
@@ -77,7 +81,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
     },[])
 
     function fetchDeckInfo() {
-        getDeckInfo(userToken, params.deckid).then((item) => {
+        getDeckInfo(userToken, deckid).then((item) => {
             setDeckInfo(item.deck);
             setDeckName(item.deck.name);
             setDeckCommander(item.deck.commander);
@@ -94,13 +98,13 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
     }
 
     function sendDeckUpdate(prop: string, val: string) {
-        updateDeck(userToken, params.deckid, prop, val).then(() => {
+        updateDeck(userToken, deckid, prop, val).then(() => {
             fetchDeckInfo();
         })
     }
 
     function deleteDeck() {
-        sendDeleteDeckRequest(userToken, params.deckid).then(() => {
+        sendDeleteDeckRequest(userToken, deckid).then(() => {
             router.push("/decks");
         });
     }
@@ -112,7 +116,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
         }
         setCtimer(
           setTimeout(() => {
-            updateDeck(userToken, params.deckid, prop, val);
+            updateDeck(userToken, deckid, prop, val);
           }, 500)
         );
     }
@@ -136,21 +140,21 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Deck</h1>
                         <input type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
-                        <select className="select select-bordered w-full m-5 max-w-m" value={deckCommander ?? undefined} onChange={e => sendDeckUpdate("commander", e.target.value)}>
-                            <option disabled selected>Commander</option>
+                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Commander"} value={deckCommander ?? undefined} onChange={e => sendDeckUpdate("commander", e.target.value)}>
+                            <option disabled>Commander</option>
                             {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Vehicle") || c[1].typeline?.includes("Spacecraft"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>
-                        <select className="select select-bordered w-full m-5 max-w-m" value={deckPartner ?? undefined} onChange={e => sendDeckUpdate("partner", e.target.value)}>
-                            <option disabled selected>Partner</option>
+                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Partner"} value={deckPartner ?? undefined} onChange={e => sendDeckUpdate("partner", e.target.value)}>
+                            <option disabled>Partner</option>
                             <option></option>
                             {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>
-                        <select className="select select-bordered w-full m-5 max-w-m" value={deckCompanion ?? undefined} onChange={e => sendDeckUpdate("companion", e.target.value)}>
-                            <option disabled selected>Companion</option>
+                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Companion"} value={deckCompanion ?? undefined} onChange={e => sendDeckUpdate("companion", e.target.value)}>
+                            <option disabled>Companion</option>
                             {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
@@ -159,8 +163,8 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     </div>
                     <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Sideboard</h1>
-                        <select className="select select-bordered w-full m-5 max-w-m" onChange={e => sendDeckUpdate("sideboard", e.target.value)}>
-                            <option disabled selected>Add Card</option>
+                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Add Card"} onChange={e => sendDeckUpdate("sideboard", e.target.value)}>
+                            <option disabled>Add Card</option>
                             {cardList.map((card: any) => 
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
@@ -176,8 +180,8 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                     </div>
                     <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Custom Cards</h1>
-                        <select className="select select-bordered w-full m-5 max-w-m" onChange={e => sendDeckUpdate("card", e.target.value)}>
-                            <option disabled selected>Add Card</option>
+                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Add Card"} onChange={e => sendDeckUpdate("card", e.target.value)}>
+                            <option disabled>Add Card</option>
                             {customCards.map((card: any) => 
                                     <option key={card.id} value={card.id}>{card.name}</option>
                                     )}

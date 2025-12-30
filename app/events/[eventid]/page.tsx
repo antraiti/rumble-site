@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useWebSocket } from 'next-ws/client';
 import userData from "../../util/UserData"
 import MatchCard from "./MatchCard";
+import React from "react";
 
 async function GetEventDetails(token: string, eventid: number) {
     return fetch(`/api/events/details/${eventid}`, {
@@ -111,7 +112,12 @@ async function updateMatchProperty(token: string, match: number, prop: string) {
     })
   }
 
-export default function DeckDetails({ params }: { params: { eventid: number }}) {
+export interface DeckDetailsProps {
+    eventid: number;
+}
+
+export default function DeckDetails({ params }: {params: Promise<DeckDetailsProps>}) {
+    const {eventid} = React.use(params);
     const [eventDetails, setEventDetails] = useState<any>();
     const { user, userName, userToken, userId } = userData();
     const [ userList, setUserList ] = useState([]);
@@ -139,7 +145,8 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
     }
 
     function updateEventDetails() {
-        GetEventDetails(userToken, params.eventid).then(data => {
+        console.log(eventid)
+        GetEventDetails(userToken, eventid).then(data => {
             setEventDetails(data);
         });
     }
@@ -152,7 +159,7 @@ export default function DeckDetails({ params }: { params: { eventid: number }}) 
       }
     
     const requestNewMatch = () => {
-        newMatch(userToken, params.eventid).then(() => {
+        newMatch(userToken, eventid).then(() => {
             ws?.send("buh");
             updateEventDetails();
         })

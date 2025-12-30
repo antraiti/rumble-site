@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import UserData from "../../../util/UserData";
 
 async function getUserStats(token: string, userid: number) {
@@ -20,7 +20,12 @@ async function getUserStats(token: string, userid: number) {
   })
 }
 
-export default function StatsUser({ params }: { params: { userid: number }}) {
+export interface StatsUserProps {
+  userid: number;
+}
+
+export default function StatsUser({ params }: {params: Promise<StatsUserProps>}) {
+  const {userid} = use(params);
   const {userToken, userName} = UserData()
   const [userStats, setUserStats] = useState<any>();
   const [commanders, setCommanders] = useState<any>([])
@@ -28,11 +33,11 @@ export default function StatsUser({ params }: { params: { userid: number }}) {
   const [endDate, setEndDate] = useState<any>()
 
   useEffect(() => {
-    getUserStats(userToken, params.userid).then(items => {
+    getUserStats(userToken, userid).then(items => {
       setUserStats(items);
 
       const commandersMap = new Map()
-      items["performances"].filter((p: any) => p["userid"] == params.userid).map((p: any) => {
+      items["performances"].filter((p: any) => p["userid"] == userid).map((p: any) => {
         if (!p.deckid) return;
         const deck = items["decks"].find((d: any) => d.id == p.deckid)
         const match = items["matches"].find((m: any) => m.id == p.matchid)

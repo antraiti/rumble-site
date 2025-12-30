@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
 
@@ -50,7 +50,12 @@ async function getDeckInfo(token: string, id: number) {
         })
     }   
 
-export default function DeckDetails({ params }: { params: { deckid: number }}) {
+export interface DeckPageProps {
+    deckid: number;
+}
+
+export default function DeckDetails({ params }: { params: Promise<DeckPageProps>}) {
+    const {deckid} = use(params);
     const { userToken } = userData();
     const router = useRouter();
     const [deckData, setDeckData] = useState<any | null>();
@@ -114,7 +119,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
     }
 
     useEffect(() => {
-        getDeckInfo(userToken, params.deckid).then((item) => {
+        getDeckInfo(userToken, deckid).then((item) => {
             console.log(item)
             setCommanders([]);
             setCompanions([]);
@@ -203,7 +208,7 @@ export default function DeckDetails({ params }: { params: { deckid: number }}) {
                 <button className="btn btn-primary" onClick={() => sendToClipboard()}>Clipboard</button>
             </div>
                 {userToken && <div className="tooltip" data-tip="Creates a Copy of this Deck on Your Account">
-                    <button className="btn btn-primary" onClick={() => stealDeck(userToken, params.deckid).then(_ => router.push("/decks"))}>Steal</button>
+                    <button className="btn btn-primary" onClick={() => stealDeck(userToken, deckid).then(_ => router.push("/decks"))}>Steal</button>
                 </div>}
             </div>
         </div>
