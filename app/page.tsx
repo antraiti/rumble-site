@@ -14,30 +14,10 @@ export default function Home() {
         </div>
       </div>
       <div className="grid md:grid-cols-3 grid-cols-1 gap-5 mx-auto place-items-center max-w-5xl">
-          <div className="card w-72 h-72 bg-base-100 shadow-xl">
-            <figure className="px-10 pt-10">
-              <img src="/images/blank-playing-cards.png" className="rounded-xl brightness-0 invert h-28" />
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title text-center self-center">60 Card Singleton Decks</h2>
-            </div>
-          </div>
-          <div className="card w-72 h-72 bg-base-100 shadow-xl">
-            <figure className="px-10 pt-10">
-              <img src="/images/heart-outline.png" className="rounded-xl brightness-0 invert h-28" />
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title text-center self-center">20 Starting Life Total</h2>
-            </div>
-          </div>
-          <div className="card w-72 h-72 bg-base-100 shadow-xl">
-            <figure className="px-10 pt-10">
-              <img src="/images/dragon-icon.png" className="rounded-xl brightness-0 invert h-28" />
-            </figure>
-            <div className="card-body">
-              <h2 className="card-title text-center self-center">1 Legendary Creature/Planeswalker as your Commander</h2>
-            </div>
-          </div>
+        <IcoCard num={60} descript={`Card Singleton Decks`} image={`/diamonds-card-svgrepo-com.svg`}/>
+        <IcoCard num={20} descript={`Starting Life Total`} image={`/broken-heart-svgrepo-com.svg`}/>
+        <IcoCard num={1} descript={`Legendary Creature or Planeswalker`} image={`/crown-svgrepo-com.svg`}/>
+            
         </div>
         <div className="w-full mt-10">
           <div className="card bg-base-100 shadow-xl max-w-xl mx-auto">
@@ -55,4 +35,17 @@ export default function Home() {
         </div>
     </div>
   )
+}
+
+const IcoCard = (props: any) => {
+  return (
+    <div className="card bg-base-100 shadow-xl p-2 w-72 h-52">
+      <figure className="">
+        <img src={props.image} className="rounded-xl brightness-0 invert h-28 w-28" />
+        <h1 className="card-title text-center self-center text-7xl pl-5">{`${props.num}`}</h1>
+      </figure>
+      <div className="card-body">
+        <div><h2 className="text-center text-xl">{`${props.descript}`}</h2></div>
+      </div>
+    </div>)
 }
