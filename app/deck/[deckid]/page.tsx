@@ -120,7 +120,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
 
     useEffect(() => {
         getDeckInfo(userToken, deckid).then((item) => {
-            console.log(item)
+            console.dir(item)
             setCommanders([]);
             setCompanions([]);
             setCreatures([]);

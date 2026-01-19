@@ -159,7 +159,10 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
                                     <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
                                     )}
                         </select>
-                        <button onClick={() => {router.push(`/deck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">View Deck</button>
+                        <div className="flex gap-12">
+                            <button onClick={() => {router.push(`/deck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">View Deck</button>
+                            <button onClick={() => {router.push(`/exportdeck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">Export for TTS</button>
+                        </div>
                     </div>
                     <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
                         <h1>Sideboard</h1>
