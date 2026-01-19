@@ -22,10 +22,10 @@ export class ttsDeckCustom {
     GUID: string = "empty";
     Name: string = "DeckCustom"
     Transform: ttsTransform = {
-        posX: -0.279157281,
-        posY: 1.2649585,
-        posZ: -5.04879475,
-        rotX: -6.57048031E-06,
+        posX: 0,
+        posY: 1,
+        posZ: 0,
+        rotX: 0,
         rotY: 180.0,
         rotZ: 180.0,
         scaleX: 1.0,
@@ -69,10 +69,10 @@ export class ttsCard {
     GUID: string = "";
     Name: string = "Card"
     Transform: ttsTransform = {
-        posX: -0.279157281,
-        posY: 1.2649585,
-        posZ: -5.04879475,
-        rotX: -6.57048031E-06,
+        posX: 0,
+        posY: 1,
+        posZ: 0,
+        rotX: 0,
         rotY: 180.0,
         rotZ: 180.0,
         scaleX: 1.0,
@@ -116,10 +116,10 @@ export class ttsCard {
 }
 
 export class ttsTransform {
-    posX: number = -0.279157281;
-    posY: number = 1.2649585;
-    posZ: number = -5.04879475;
-    rotX: number = -6.57048031E-06;
+    posX: number = 0;
+    posY: number = 1;
+    posZ: number = 0;
+    rotX: number = 0;
     rotY: number = 180.0;
     rotZ: number = 180.0;
     scaleX: number = 1.0;

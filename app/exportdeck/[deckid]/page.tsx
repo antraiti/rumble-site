@@ -54,16 +54,17 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
         tDeck.ObjectStates.push(tDCustom);
 
         let counter: number = 2;
+        let rightCounter: number = 1;
+        let leftCounter: number = -1;
+
+        const sideboardCards: ttsCard[] = []
+        const commanderCards: ttsCard[] = []
 
         Array.from(cardPrintings.values()).forEach((cp: DeckCardPrinting) => {
             if ((cp.card[1].id as string).endsWith("/back")) return; //skip card backs
             logString += `Processing: ${cp.card[1].id}`
 
             /**
-             * TODO: move commander(s)/companion to their own stack
-             * - create templated locations for each case count (1, 2, 3)
-             * - when generating put commanders in one list companion in its own store and dont add them to main deck
-             * - after processing cards then individually handle commanders then companion using defined locations
              * 
              * TODO: fetch token data if possible
              */
@@ -103,18 +104,48 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                     tCard.States["2"] = tBackCard;
                 }
 
-                //add id to DeckIDs
-                tDCustom.DeckIDs.push(numId);
+                if (cp.card[0].iscommander === true) {
+                    commanderCards.unshift(tCard);
+                } else if (cp.card[0].iscompanion === true) {
+                    commanderCards.push(tCard);
+                } else if (cp.card[0].issideboard === true) {
+                    sideboardCards.push(tCard);
+                } else {
+                    //add id to DeckIDs
+                    tDCustom.DeckIDs.push(numId);
 
-                //add ttsCustomDeck to decks CustomDeck
-                tDCustom.CustomDeck[stringId] = tCDeck;
+                    //add ttsCustomDeck to decks CustomDeck
+                    tDCustom.CustomDeck[stringId] = tCDeck;
 
-                //add card to deck
-                tDCustom.ContainedObjects.push(tCard);
+                    //add card to deck
+                    tDCustom.ContainedObjects.push(tCard);
+                }
 
                 counter++;
             }
         })
+
+        //Add in commander and sideboard cards
+        commanderCards.forEach(c => {
+            c.Transform.posX = rightCounter * 2.5;
+            c.Transform.rotZ = 0;
+            tDeck.ObjectStates.push(c);
+            rightCounter++;
+        });
+
+        if (sideboardCards.length > 0) {
+            const tDCSideboard: ttsDeckCustom = new ttsDeckCustom();
+            tDCSideboard.Transform.rotZ = 0;
+            tDCSideboard.Transform.posX = leftCounter * 2.5;
+            leftCounter--;
+            tDeck.ObjectStates.push(tDCSideboard);
+            sideboardCards.forEach(c => {
+                c.Transform.rotZ = 0;
+                tDCSideboard.DeckIDs.push(c.CardID);
+                tDCSideboard.CustomDeck[(c.CardID/100).toString()] = c.CustomDeck[(c.CardID/100).toString()];
+                tDCSideboard.ContainedObjects.push(c);
+            })
+        }
 
         downloadJsonFile(JSON.stringify(tDeck, null, 4), deckData?.deck.name);
         (document?.getElementById('export_info') as any).showModal();
