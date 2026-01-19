@@ -55,7 +55,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
 
         let counter: number = 2;
 
-        cardPrintings.values().forEach((cp: DeckCardPrinting) => {
+        Array.from(cardPrintings.values()).forEach((cp: DeckCardPrinting) => {
             if ((cp.card[1].id as string).endsWith("/back")) return; //skip card backs
             logString += `Processing: ${cp.card[1].id}`
 
