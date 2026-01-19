@@ -7,6 +7,26 @@ export default function InternalUpdate() {
             </div> */}
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
+                    <article className="prose pl-5 pb-5">
+                        <h1>1/19/2025</h1>
+                        <h2>Exporting To Tabletop Simulator</h2>
+                        <p>
+                            New deck exporting page lets you choose art for each card and your cardbacks then export for TTS.
+                        </p>
+
+                        <h3>How to Export to TTS: </h3>
+                        <li>{`Navigate to the deck details page (where you edit your decks commander and image)`}</li>
+                        <li>{`There is a new button there for "Export to TTS" which will take you to the export page`}</li>
+                        <li>{`At the top you can change the card back by providing a url in the input (the preview window will show if the url works)`}</li>
+                        <li>{`You can click on a card to open a window to select a new style for it.`}</li>
+                        <li>{`Once completed, click export at the top to download the deck json.`}</li>
+                        
+                        <p>{`Exporting will also open a window which will allow you to download your cardback image. This image will need to be placed alongside your deck in the TTS saved objects directory if you want a working icon in the TTS object browser`}</p>
+                    </article>
+                </div>
+            </div>
+            {/* <div className="card bg-base-100 shadow-xl mt-6">
+                <div className="card-body">
                     <article className="prose">
                         <h1>3/2/2025</h1>
                         <h2>Library Upgrades and Styling</h2>
@@ -101,7 +121,6 @@ export default function InternalUpdate() {
                     </article>
                 </div>
             </div>
-
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                 <article className="prose">
@@ -247,7 +266,7 @@ export default function InternalUpdate() {
                     <p>- Stats page. This will have subpages for different categories but will start to let everyone get a good idea on how the numbers look</p>
                 </article>
                 </div>
-            </div>
+            </div> */}
           </div>
     );
 }
