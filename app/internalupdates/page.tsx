@@ -8,7 +8,7 @@ export default function InternalUpdate() {
             <div className="card bg-base-100 shadow-xl mt-6">
                 <div className="card-body">
                     <article className="prose pl-5 pb-5">
-                        <h1>1/19/2025</h1>
+                        <h1>1/19/2026</h1>
                         <h2>Exporting To Tabletop Simulator</h2>
                         <p>
                             New deck exporting page lets you choose art for each card and your cardbacks then export for TTS.

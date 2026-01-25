@@ -36,6 +36,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
     const [deckData, setDeckData] = useState<any | null>();
     const [cards, setCards] = useState<any[]>([]);
     const [printings, setPrintings] = useState<any[]>([]);
+    const [tokens, setTokens] = useState<any[]>([]);
     const [selectedCard, setSelectedCard] = useState<any>();
     const [cardPrintings, setCardPrintings] = useState<Map<string, DeckCardPrinting>>(new Map<string, DeckCardPrinting>());
     const [cardBack, setCardBack] = useState<string>("https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg");
@@ -58,16 +59,12 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
         let leftCounter: number = -1;
 
         const sideboardCards: ttsCard[] = []
+        const tokenCards: ttsCard[] = []
         const commanderCards: ttsCard[] = []
 
         Array.from(cardPrintings.values()).forEach((cp: DeckCardPrinting) => {
             if ((cp.card[1].id as string).endsWith("/back")) return; //skip card backs
             logString += `Processing: ${cp.card[1].id}`
-
-            /**
-             * 
-             * TODO: fetch token data if possible
-             */
 
             for (let i = 0; i < cp.card[0].count; i++) {
                 const stringId: string = counter.toString();
@@ -110,6 +107,8 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                     commanderCards.push(tCard);
                 } else if (cp.card[0].issideboard === true) {
                     sideboardCards.push(tCard);
+                } else if (cp.card[0].istoken == true) {
+                    tokenCards.push(tCard);
                 } else {
                     //add id to DeckIDs
                     tDCustom.DeckIDs.push(numId);
@@ -147,6 +146,20 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
             })
         }
 
+        if (tokenCards.length > 0) {
+            const tDCToken: ttsDeckCustom = new ttsDeckCustom();
+            tDCToken.Transform.rotZ = 0;
+            tDCToken.Transform.posX = leftCounter * 2.5;
+            leftCounter--;
+            tDeck.ObjectStates.push(tDCToken);
+            tokenCards.forEach(c => {
+                c.Transform.rotZ = 0;
+                tDCToken.DeckIDs.push(c.CardID);
+                tDCToken.CustomDeck[(c.CardID/100).toString()] = c.CustomDeck[(c.CardID/100).toString()];
+                tDCToken.ContainedObjects.push(c);
+            })
+        }
+
         downloadJsonFile(JSON.stringify(tDeck, null, 4), deckData?.deck.name);
         (document?.getElementById('export_info') as any).showModal();
     }
@@ -157,6 +170,13 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
 
             setDeckData(item);
             setPrintings(item.printings)
+            setTokens(item.tokens)
+            item.tokens.map((token: any) => {
+                cardPrintings.set(token, {
+                    card: [{id: token, count: 1, istoken: true}, {id: token, name: "token", oracletext: "sorry i didnt setup this info"}],
+                    printing: item.printings.find((p: any) => p.cardid == token)?.cardimage
+                })
+            })
 
             setCards([]);
             item.cardlist.map((card: any) => {
@@ -194,10 +214,18 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
 
     function UpdatePrinting(card: any, newPrint: string) {
         const cardPrints: Map<string, DeckCardPrinting> = new Map(cardPrintings);
-        cardPrints.set(card[1].id, {
-            card: card,
-            printing: newPrint
-        })
+        if (cardPrintings.has(card[1].id)) { //this should always be true
+            const oldPrinting = cardPrintings.get(card[1].id)!
+            cardPrints.set(card[1].id, {
+                card: oldPrinting.card,
+                printing: newPrint
+            })
+        } else {
+            cardPrints.set(card[1].id, {
+                card: card,
+                printing: newPrint
+            })
+        }
         setCardPrintings(cardPrints);
     }
 
@@ -226,10 +254,29 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
             </div>
         </div>
         <div className="pt-5">
+            <h1 className="text-xl">Commander / Companion</h1>
             <div className="grid grid-cols-4 gap-4">
-                {cards.map(c => CardDisplay(c))}
+                {cards.filter(c => c[0].iscommander || c[0].iscompanion).map(c => CardDisplay(c))}
             </div>
         </div>
+        <div className="pt-5">
+            <h1 className="text-xl">Deck</h1>
+            <div className="grid grid-cols-4 gap-4">
+                {cards.filter(c => !c[0].iscommander && !c[0].iscompanion && !c[0].issideboard).map(c => CardDisplay(c))}
+            </div>
+        </div>
+        {cards.filter(c => c[0].issideboard).length > 0 && <div className="pt-5">
+            <h1 className="text-xl">Sideboard</h1>
+            <div className="grid grid-cols-4 gap-4">
+                {cards.filter(c => c[0].issideboard).map(c => CardDisplay(c))}
+            </div>
+        </div>}
+        {tokens.length > 0 && <div className="pt-5">
+            <h1 className="text-xl">Tokens</h1>
+            <div className="grid grid-cols-4 gap-4">
+                {tokens.map(c => CardDisplay([{}, {id:c}]))}
+            </div>
+        </div>}
 
         <dialog id="card_style_selector" className="modal">
             {selectedCard && <div className="modal-box w-11/12 max-w-5xl max-h-3/4 pt-18">
