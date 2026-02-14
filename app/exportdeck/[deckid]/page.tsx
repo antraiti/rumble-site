@@ -20,13 +20,55 @@ async function getDeckInfo(token: string, id: number) {
     })
 }
 
+async function getFavoritePrintings(token: string) {
+    return fetch('/api/cards/printfavorite', {
+    method: 'GET',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-access-token': token
+    }})
+    .then(data => {
+        if(data.status >= 400) {
+            throw new Error("Server responds with error!");
+        }
+        return data.json();
+    })
+}
+
+async function setFavoritePrinting(token: string, cardid: string, printingid: string) {
+    return fetch('/api/cards/printfavorite', {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'x-access-token': token
+    },
+    body: JSON.stringify({"card": cardid, "print": printingid})
+    })
+    .then(data => {
+        if(data.status >= 400) {
+            throw new Error("Server responds with error!");
+        }
+        return data.json();
+    })
+}
+
 export interface DeckViewPageProps {
     deckid: number;
 }
 
 interface DeckCardPrinting {
     card: any;
+    printingid: string;
     printing: string;
+}
+
+interface FavoritePrinting {
+    id: number;
+    userid: number;
+    cardid: string;
+    printingid: string;
 }
 
 export default function DeckDetails({ params }: { params: Promise<DeckViewPageProps>}) {
@@ -36,6 +78,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
     const [deckData, setDeckData] = useState<any | null>();
     const [cards, setCards] = useState<any[]>([]);
     const [printings, setPrintings] = useState<any[]>([]);
+    const [favoritePrintings, setFavoritePrintings] = useState<FavoritePrinting[]>([]);
     const [tokens, setTokens] = useState<any[]>([]);
     const [selectedCard, setSelectedCard] = useState<any>();
     const [cardPrintings, setCardPrintings] = useState<Map<string, DeckCardPrinting>>(new Map<string, DeckCardPrinting>());
@@ -47,6 +90,12 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
             this.select();
         });
     })
+
+    function updateFavorites() {
+        getFavoritePrintings(userToken).then((e: Array<FavoritePrinting>) => {
+            setFavoritePrintings(e);
+        })
+    }
 
     const downloadDeck = () => {
         let logString = "";
@@ -165,65 +214,104 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
     }
 
     useEffect(() => {
-        getDeckInfo(userToken, deckid).then((item) => {
-            console.log(item)
+        getFavoritePrintings(userToken).then((e: Array<FavoritePrinting>) => {
+            setFavoritePrintings(e)
 
-            setDeckData(item);
-            setPrintings(item.printings)
-            setTokens(item.tokens)
-            item.tokens.map((token: any) => {
-                cardPrintings.set(token, {
-                    card: [{id: token, count: 1, istoken: true}, {id: token, name: "token", oracletext: "sorry i didnt setup this info"}],
-                    printing: item.printings.find((p: any) => p.cardid == token)?.cardimage
-                })
-            })
+            getDeckInfo(userToken, deckid).then((item) => {
+                console.log(item)
 
-            setCards([]);
-            item.cardlist.map((card: any) => {
-                cardPrintings.set(card[0].cardid, {
-                    card: card,
-                    printing: item.printings.find((p: any) => p.cardid == card[1].id)?.cardimage
-                })
-                setCards(prev => [...prev, card])
-                if (card[1].transform) {
-                    const backcard = item.cardbacks.find((cb: any) => cb.id == card[0].cardid+"/back");
-                    setCards(prev => [...prev, [{}, backcard]])
-                    cardPrintings.set(backcard.id, {
-                        card: [{}, backcard],
-                        printing: item.printings.find((p: any) => p.cardid == backcard.id)?.cardimage
+                setDeckData(item);
+                setPrintings(item.printings)
+                setTokens(item.tokens)
+                item.tokens.map((token: any) => {
+                    const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == token)
+                    const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == token)
+                    cardPrintings.set(token, {
+                        card: [{id: token, count: 1, istoken: true}, {id: token, name: "token", oracletext: "sorry i didnt setup this info"}],
+                        printing: printing.cardimage,
+                        printingid: printing.id
                     })
-                }
-            })
-        });
+                })
+
+                setCards([]);
+                item.cardlist.map((card: any) => {
+                    const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == card[0].cardid)
+                    if(favoritePrint) console.log(favoritePrint)
+                    const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == card[1].id)
+                    cardPrintings.set(card[0].cardid, {
+                        card: card,
+                        printing: printing.cardimage,
+                        printingid: printing.id
+                    })
+                    setCards(prev => [...prev, card])
+                    if (card[1].transform) {
+                        const backcard = item.cardbacks.find((cb: any) => cb.id == card[0].cardid+"/back");
+                        const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == backcard.id)
+                        const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == backcard.id)
+                        setCards(prev => [...prev, [{}, backcard]])
+                        cardPrintings.set(backcard.id, {
+                            card: [{}, backcard],
+                            printing: printing.cardimage,
+                            printingid: printing.id
+                        })
+                    }
+                })
+            });
+        })
       }, [])
 
     
     function CardDisplay(card: any) {
+        const favorited: boolean = favoritePrintings.find(e => e.printingid == cardPrintings.get(card[1].id)?.printingid) != null
         return (
             <div 
-                className="hover-3d cursor-pointer" 
+                className="hover-3d group cursor-pointer w-75 relative" 
                 key={card[1].id}
-                onClick={()=> {setSelectedCard(card); (document?.getElementById('card_style_selector') as any).showModal();}}
             >
-                <figure className="max-w-100 rounded-2xl">
-                    <img src={cardPrintings.get(card[1].id)?.printing} alt="3D card" />
+                <figure 
+                    className="max-w-100 rounded-2xl" 
+                >
+                    <div 
+                        className="absolute w-12 h-12 bg-gray-800/0 hover:bg-gradient-to-br from-gray-800/90 to-gray-800/0 p-2 hover:p-1"
+                        title={favorited ? "Remove from favorites" : "Add to favorites"}
+                        onClick={()=> {favorited ? setFavoritePrinting(userToken, card[1].id, "").then(_ => updateFavorites()) : setFavoritePrinting(userToken, card[1].id, cardPrintings.get(card[1].id)?.printingid ?? "").then(_ => updateFavorites())}}
+                    >
+                        {
+                        favorited
+                        ?
+                        <svg className="hidden group-hover:block" fill="#ffee00" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1915.918 737.475c-10.955-33.543-42.014-56.131-77.364-56.131h-612.029l-189.063-582.1v-.112C1026.394 65.588 995.335 43 959.984 43c-35.237 0-66.41 22.588-77.365 56.245L693.443 681.344H81.415c-35.35 0-66.41 22.588-77.365 56.131-10.955 33.544.79 70.137 29.478 91.03l495.247 359.831-189.177 582.212c-10.955 33.657 1.13 70.25 29.817 90.918 14.23 10.278 30.946 15.487 47.66 15.487 16.716 0 33.432-5.21 47.775-15.6l495.134-359.718 495.021 359.718c28.574 20.781 67.087 20.781 95.662.113 28.687-20.668 40.658-57.261 29.703-91.03l-189.176-582.1 495.36-359.83c28.574-20.894 40.433-57.487 29.364-91.03" fillRule="evenodd"/>
+                        </svg>
+                        :
+                        <svg className="hidden group-hover:block" fill="#ffffff" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1306.181 1110.407c-28.461 20.781-40.32 57.261-29.477 91.03l166.136 511.398-435.05-316.122c-28.686-20.781-67.086-20.781-95.66 0l-435.05 316.122 166.25-511.623c10.842-33.544-1.017-70.024-29.591-90.805L178.577 794.285h537.825c35.351 0 66.523-22.701 77.365-56.245l166.25-511.51 166.136 511.397a81.155 81.155 0 0 0 77.365 56.358h537.939l-435.276 316.122Zm609.77-372.819c-10.956-33.656-42.014-56.244-77.365-56.244h-612.141l-189.064-582.1C1026.426 65.589 995.367 43 960.017 43c-35.351 0-66.523 22.588-77.365 56.245L693.475 681.344H81.335c-35.351 0-66.41 22.588-77.366 56.244-10.842 33.657 1.017 70.137 29.591 90.918l495.247 359.718-189.29 582.211c-10.842 33.657 1.017 70.137 29.704 90.918 14.23 10.39 31.059 15.586 47.661 15.586 16.829 0 33.657-5.195 47.887-15.699l495.248-359.718 495.02 359.718c28.575 20.894 67.088 20.894 95.775.113 28.574-20.781 40.433-57.261 29.59-91.03l-189.289-582.1 495.247-359.717c28.687-20.781 40.546-57.261 29.59-90.918Z" fillRule="evenodd"/>
+                        </svg>
+                    }
+                    </div>
+                    <img 
+                        src={cardPrintings.get(card[1].id)?.printing} 
+                        alt="3D card"
+                        onClick={()=> {setSelectedCard(card); (document?.getElementById('card_style_selector') as any).showModal();}}
+                    />
                 </figure>
             </div>
         )
     }
 
-    function UpdatePrinting(card: any, newPrint: string) {
+    function UpdatePrinting(card: any, newPrint: string, newPrintId: string) {
         const cardPrints: Map<string, DeckCardPrinting> = new Map(cardPrintings);
         if (cardPrintings.has(card[1].id)) { //this should always be true
             const oldPrinting = cardPrintings.get(card[1].id)!
             cardPrints.set(card[1].id, {
                 card: oldPrinting.card,
-                printing: newPrint
+                printing: newPrint,
+                printingid: newPrintId
             })
         } else {
             cardPrints.set(card[1].id, {
                 card: card,
-                printing: newPrint
+                printing: newPrint,
+                printingid: newPrintId
             })
         }
         setCardPrintings(cardPrints);
@@ -290,7 +378,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                             <div 
                                 className="hover-3d cursor-pointer"
                                 key={printing.cardimage}
-                                onClick={_ => {UpdatePrinting(selectedCard, printing.cardimage); (document?.getElementById('card_style_selector') as any).close()}}
+                                onClick={_ => {UpdatePrinting(selectedCard, printing.cardimage, printing.id); (document?.getElementById('card_style_selector') as any).close()}}
                             >
                                 <figure className="max-w-100 rounded-2xl">
                                     <img src={printing.cardimage} alt="3D card" />
