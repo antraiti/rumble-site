@@ -1,7 +1,7 @@
 export default function Rules() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-6xl">
-            <div className="card bg-base-100 shadow-xl mt-6">
+            <div className="card bg-base-100 shadow-xl mt-6 p-4">
                 <div className="card-body">
                 <article className="prose">
                     <h1>Deck Requirements and Restrictions</h1>
@@ -13,7 +13,7 @@ export default function Rules() {
                     <li>Decks may also have sideboards of up to 7 cards</li> </article>
                 </div>
             </div>
-            <div className="card bg-base-100 shadow-xl mt-6">
+            <div className="card bg-base-100 shadow-xl mt-6 p-4">
                 <div className="card-body">
                 <article className="prose">
                     <h1>Basic Game Rules</h1>
@@ -25,7 +25,7 @@ export default function Rules() {
                 </article>
                 </div>
             </div>
-            <div className="card bg-base-100 shadow-xl mt-6">
+            <div className="card bg-base-100 shadow-xl mt-6 p-4 ">
                 <div className="card-body">
                 <article className="prose">
                     <h1>Important Things to Note</h1>

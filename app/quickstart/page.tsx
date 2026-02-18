@@ -2,7 +2,7 @@ export default function Quickstart() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-6xl">
             <div className="card bg-base-100 shadow-xl mt-6">
-                <div className="card-body">
+                <div className="card-body p-12">
                 <article className="prose">
                     <h1>Quick Start</h1>
                     <h3>This serves as a guide for players with EDH experience</h3>

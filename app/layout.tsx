@@ -5,6 +5,12 @@ import NavBar from './components/NavBar/NavBar'
 import { WebHookWrapper } from './components/WebhookWrapper'
 import { ThemeWrapper } from './components/ThemeWrapper'
 import Cookies from "js-cookie";
+import { Nunito } from 'next/font/google'
+
+const nunito = Nunito({
+  weight: '400',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
   title: 'Rumble MTG',
@@ -18,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     //for some reason data theme doesnt work even when directly changed. might be a bug with recent daisyui version upgrade
-    <html lang="en" data-theme={Cookies.get("theme")}>
+    <html lang="en" data-theme={Cookies.get("theme")} className={nunito.className}>
       <ThemeWrapper>
         <NavBar/>
         <WebHookWrapper connectionurl={process.env.HOST_URL}>
