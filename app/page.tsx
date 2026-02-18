@@ -1,15 +1,15 @@
 export default function Home() {
   return (
-    <div className="h-screen bg-linear-to-b from-base-200 to-base-300">
+    <div className="h-screen min-h-300 bg-linear-to-b from-base-200 to-base-300">
       <div className="hero md:h-72 h-56"
       >
         <div className="hero-content text-center">
-          <img src="/newlogo.svg" className="h-32 w-32 mb-5"/>
+          <img src="/newlogo.svg" className="h-32 w-32 mb-5 md:block hidden"/>
           <div className="max-w-md">
             <h1 className="text-7xl font-bold">Rumble</h1>
             <p className="py-6">The Alternative Multiplayer Format</p>
           </div>
-          <div className="flex flex-col gap-5">
+          <div className="md:flex flex-col gap-5 hidden">
             <a href="/quickstart"><button className="btn btn-soft w-full">Quick Start</button></a>
             <a href="/starterdecks"><button className="btn btn-soft w-full">Starter Decks</button></a>
           </div>
@@ -20,7 +20,7 @@ export default function Home() {
         <IcoCard num={20} descript={`Starting Life Total`} image={`/broken-heart-svgrepo-com.svg`} bgcolor={`bg-linear-to-br from-red-300/50 to-red-400/50`}/>
         <IcoCard num={1} descript={`Legendary Creature or Planeswalker`} image={`/crown-svgrepo-com.svg`} bgcolor={`bg-linear-to-br from-amber-200/50 to-amber-300/50`}/>
       </div>
-        <div className="w-full mt-16">
+        <div className="w-full mt-16 p-5">
           <div className="card bg-base-100 shadow-xl max-w-xl mx-auto">
             <div className="card-body">
             <article className="prose">

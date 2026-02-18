@@ -23,7 +23,7 @@ export default function NavBar() {
         <div className="navbar bg-base-100 text-base-content">
             <div className="navbar-start">
                 <div className="dropdown">
-                    <div tabIndex={0} role="button" className="btn btn-ghost md:hidden">
+                    <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
                     </div>
                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow-sm bg-base-100 rounded-box w-52">
@@ -43,15 +43,15 @@ export default function NavBar() {
                         </div>}
                     </ul>
                 </div>
-                <Link href="/" className="mr-4"><div className="flex items-center"><img className="h-10 pr-2" src="/newlogo.svg"/><h1 className="text-3xl font-bold">Rumble</h1></div></Link>
-                <Link href="/quickstart" className="btn btn-ghost hidden md:flex">Quickstart</Link>
-                <Link href="/rules" className="btn btn-ghost hidden md:flex">Rules</Link>
-                <Link href="/banlist"  className="btn btn-ghost hidden md:flex">Banlist</Link>
-                <Link href="/decks/checker"  className="btn btn-ghost hidden md:flex">Deck Check</Link>
-                <Link href="/starterdecks" className="btn btn-ghost hidden md:flex">Starter Decks</Link>
+                <Link href="/" className="mr-4"><div className="flex items-center w-36"><img className="h-10 pr-2" src="/newlogo.svg"/><h1 className="text-3xl font-bold">Rumble</h1></div></Link>
+                <Link href="/quickstart" className="btn btn-ghost hidden lg:flex">Quickstart</Link>
+                <Link href="/rules" className="btn btn-ghost hidden lg:flex">Rules</Link>
+                <Link href="/banlist"  className="btn btn-ghost hidden lg:flex">Banlist</Link>
+                <Link href="/decks/checker"  className="btn btn-ghost hidden lg:flex">Deck Check</Link>
+                <Link href="/starterdecks" className="btn btn-ghost hidden lg:flex">Starter Decks</Link>
                 {/* <Link href="/rules" className="btn btn-ghost">Deck Check</Link> */}
             </div>
-            <div className="navbar-end hidden md:flex">
+            <div className="navbar-end hidden lg:flex">
                 {!username &&
                 <Link href="/login" className="btn btn-soft">Sign In</Link>
                 }
