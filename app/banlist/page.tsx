@@ -56,7 +56,8 @@ export default function Banlist() {
                 </p>
                 <div className="divider"></div>
                 {/* <a className="hover:font-bold" href="https://deckstats.net/decks/148092/2204198-bb-banlist" target="_blank" rel="noopener noreferrer" title="Link to banlist on deckstats">For Primary upkept banlist click here</a> */}
-                <a className="hover:font-bold" href="https://scryfall.com/search?as=full&q=border%3Asilver" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All silver bordered cards from any of the “Un-” sets</a>
+                <a className="hover:font-bold" href="https://scryfall.com/search?as=full&q=border%3Asilver" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All silver bordered cards</a>
+                <a className="hover:font-bold" href="https://scryfall.com/search?q=stamp%3Aacorn&unique=cards&as=grid&order=name" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All acorn cards</a>
                 <a className="hover:font-bold" href="https://scryfall.com/search?as=grid&order=name&q=type%3Aconspiracy" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All (25) cards with the Card Type “Conspiracy”</a>
                 <a className="hover:font-bold" href="https://scryfall.com/search?as=grid&order=name&q=oracle%3A%22playing+for+ante%22" target="_blank" rel="noopener noreferrer" title="Link to Scryfall Results">All (9) cards that reference “playing for ante”</a>
             </div>
