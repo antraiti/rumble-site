@@ -1,5 +1,6 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
-import type { ColorPlayCounts, ColorWinRates } from "../../types";
+import type { ColorPlayCounts, ColorWinRates, SeatStat } from "../../types";
 
 export const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
 export const ratio = (part: number, total: number) => (total > 0 ? part / total : 0);
@@ -139,9 +140,106 @@ export function sortBy<T, K extends string>(rows: T[], sort: SortState<K>, value
 export const isScryfallId = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
 export function CardName({ id, name }: { id: string; name: string }) {
-  return isScryfallId(id)
-    ? <a className="hover:text-primary hover:underline" href={`https://scryfall.com/search?q=oracleid=${id}`} target="_blank" rel="noreferrer">{name}</a>
-    : <span>{name}</span>;
+  return <Link className="hover:text-primary hover:underline" href={`/stats/cards/${encodeURIComponent(id)}`}>{name}</Link>;
+}
+
+export function Panel({ title, description, action, className = "", children }: {
+  title: ReactNode; description?: ReactNode; action?: ReactNode; className?: string; children: ReactNode;
+}) {
+  return (
+    <section className={`card bg-base-100 shadow-sm ${className}`}>
+      <div className="card-body gap-4 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="card-title text-xl">{title}</h2>
+            {description && <p className="text-base-content/70">{description}</p>}
+          </div>
+          {action}
+        </div>
+        {children}
+      </div>
+    </section>
+  );
+}
+
+/** Stacked columns: the faded bar is the total, the solid part is the highlighted subset. */
+export function ActivityChart({ data, totalLabel, highlightLabel }: {
+  data: { label: string; total: number; highlight: number }[]; totalLabel: string; highlightLabel: string;
+}) {
+  const peak = Math.max(1, ...data.map(item => item.total));
+  const ticks = data.length > 1 ? [data[0], data[Math.floor((data.length - 1) / 2)], data[data.length - 1]] : data;
+  return (
+    <div>
+      <div className="flex h-44 items-end gap-1" role="img" aria-label={`${totalLabel} over time`}>
+        {data.map(item => (
+          <div key={item.label} className="tooltip flex h-full min-w-0 flex-1 items-end" data-tip={`${item.label}: ${item.total} ${totalLabel.toLowerCase()}, ${item.highlight} ${highlightLabel.toLowerCase()}`}>
+            <div
+              className="flex w-full flex-col justify-end overflow-hidden rounded-t bg-info/25 transition-colors hover:bg-info/40"
+              style={{ height: item.total ? `${(item.total / peak) * 100}%` : "2px" }}
+            >
+              <div className="w-full bg-info" style={{ height: item.total ? `${(item.highlight / item.total) * 100}%` : 0 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex justify-between text-sm text-base-content/60">
+        {ticks.map((tick, index) => <span key={`${tick.label}-${index}`}>{tick.label}</span>)}
+      </div>
+      <div className="mt-2 flex gap-4 text-sm text-base-content/70">
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-info/25" />{totalLabel}</span>
+        <span className="flex items-center gap-1.5"><span className="size-3 rounded-sm bg-info" />{highlightLabel}</span>
+      </div>
+    </div>
+  );
+}
+
+const ordinal = (n: number) => `${n}${n % 10 === 1 && n % 100 !== 11 ? "st" : n % 10 === 2 && n % 100 !== 12 ? "nd" : n % 10 === 3 && n % 100 !== 13 ? "rd" : "th"}`;
+
+/** Win rate per turn-order seat, with a marker for the overall rate. */
+export function SeatChart({ seats }: { seats: SeatStat[] }) {
+  const rows = seats.filter(seat => seat.games > 0);
+  if (rows.length === 0) return <p className="text-base-content/60">No turn order recorded yet.</p>;
+  const overall = ratio(rows.reduce((sum, seat) => sum + seat.wins, 0), rows.reduce((sum, seat) => sum + seat.games, 0));
+  const scale = Math.max(overall * 1.5, ...rows.map(seat => ratio(seat.wins, seat.games)), 0.01);
+  const best = Math.max(...rows.map(seat => ratio(seat.wins, seat.games)));
+  return (
+    <div className="space-y-3">
+      {rows.map(seat => {
+        const rate = ratio(seat.wins, seat.games);
+        return (
+          <div key={seat.seat} className="grid grid-cols-[3rem_1fr_auto] items-center gap-3">
+            <span className="font-bold">{ordinal(seat.seat)}</span>
+            <div className="relative h-8 overflow-hidden rounded-field bg-base-200">
+              <div
+                className={`flex h-full items-center justify-end rounded-field px-2 text-sm font-bold ${rate === best && rate > 0 ? "bg-linear-to-r from-info to-accent text-info-content" : "bg-info/35"}`}
+                style={{ width: `${Math.max((rate / scale) * 100, 12)}%` }}
+              >
+                {percent(rate)}
+              </div>
+              <span aria-hidden="true" className="absolute inset-y-0 border-l-2 border-dashed border-base-content/50" style={{ left: `${(overall / scale) * 100}%` }} />
+            </div>
+            <span className="text-right text-sm text-base-content/70">{seat.games} games</span>
+          </div>
+        );
+      })}
+      <p className="flex items-center gap-2 text-sm text-base-content/60">
+        <span aria-hidden="true" className="h-4 border-l-2 border-dashed border-base-content/50" />Overall {percent(overall)}
+      </p>
+    </div>
+  );
+}
+
+export function IdentityPips({ identity }: { identity: { white: boolean; blue: boolean; black: boolean; red: boolean; green: boolean } }) {
+  const pips = ([["white", "W"], ["blue", "U"], ["black", "B"], ["red", "R"], ["green", "G"]] as const).filter(([key]) => identity[key]);
+  return (
+    <span className="flex shrink-0 items-center gap-0.5">
+      {(pips.length ? pips.map(([, symbol]) => symbol) : ["C"]).map(symbol => <img key={symbol} src={`/${symbol}.svg`} alt="" className="size-5" />)}
+    </span>
+  );
+}
+
+export function PlayerLink({ id, name, className = "font-semibold" }: { id: number; name: string; className?: string }) {
+  return <Link href={`/stats/users/${id}`} className={`hover:text-primary hover:underline ${className}`}>{name}</Link>;
 }
 
 export function LoadingState({ rows = 4 }: { rows?: number }) {

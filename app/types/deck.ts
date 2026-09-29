@@ -5,6 +5,7 @@ export interface DeckInfo {
   identityid: number;
   islegal: boolean;
   image?: string;
+  lastupdated?: string | null;
 }
 
 export interface DeckCommander {

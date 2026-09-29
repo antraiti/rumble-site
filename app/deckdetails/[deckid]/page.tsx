@@ -1,11 +1,34 @@
 'use client'
-import { use, useEffect, useState } from "react";
+import Link from "next/link";
+import { use, useEffect, useState, type ReactNode } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
 import { apiGet, apiPut } from "../../util/apiClient";
 
+type DeckEntry = { cardid: string; issideboard?: boolean };
+type DeckCard = { name: string; typeline?: string; custom?: boolean };
+type CardListItem = [DeckEntry, DeckCard];
+type Printing = { cardid: string; artcrop: string };
+type CustomCard = { id: string; name: string };
+type DeckDetailsResponse = {
+    deck: { id: number; name: string; image?: string; commander?: string | null; partner?: string | null; companion?: string | null };
+    cardlist: CardListItem[] | null;
+    legality: { legal: boolean; messages: string[] | null };
+    performances: unknown[] | null;
+    printings: Printing[] | null;
+    customcards: CustomCard[] | null;
+};
+
+const commanderTypes = ["Creature", "Planeswalker", "Vehicle", "Artifact", "Spacecraft"];
+const partnerTypes = ["Creature", "Planeswalker", "Background"];
+
+function isLegendary(card: DeckCard, types: string[]) {
+    const typeline = card.typeline ?? "";
+    return typeline.includes("Legendary") && types.some(type => typeline.includes(type));
+}
+
 async function getDeckInfo(token: string, id: number) {
-    return apiGet(`deck/${id}`, { token });
+    return apiGet<DeckDetailsResponse>(`deck/${id}`, { token });
   }
 
   async function updateDeck(token: string, id: number, prop: string, val: string) {
@@ -24,18 +47,21 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
     const {deckid} = use(params);
     const { userToken } = userData();
     const router = useRouter();
-    const [deckInfo, setDeckInfo] = useState<any | null>();
-    const [deckName, setDeckName] = useState(""); //splitting out these properties is bad and can be done
-    const [deckCommander, setDeckCommander] = useState();
-    const [deckPartner, setDeckPartner] = useState();
-    const [deckCompanion, setDeckCompanion] = useState();
-    const [cardList, setCardList] = useState<any | null>([]);
-    const [customCards, setCustomCards] = useState<any | null>([]);
-    const [deckLegality, setDeckLegality] = useState();
-    const [deckLegalityMessages, setDeckLegalityMessages] = useState([]);
-    const [deckPerformances, setDeckPerformances] = useState([""]);
-    const [ctimer, setCtimer] = useState<any | null>(null);
-    const [printingList, setPrintingList] = useState<any | null>([]);
+    const [deckInfo, setDeckInfo] = useState<DeckDetailsResponse["deck"] | null>(null);
+    const [deckName, setDeckName] = useState("");
+    const [deckCommander, setDeckCommander] = useState<string | null>();
+    const [deckPartner, setDeckPartner] = useState<string | null>();
+    const [deckCompanion, setDeckCompanion] = useState<string | null>();
+    const [cardList, setCardList] = useState<CardListItem[]>([]);
+    const [customCards, setCustomCards] = useState<CustomCard[]>([]);
+    const [deckLegality, setDeckLegality] = useState(true);
+    const [deckLegalityMessages, setDeckLegalityMessages] = useState<string[]>([]);
+    const [gamesPlayed, setGamesPlayed] = useState(0);
+    const [ctimer, setCtimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+    const [printingList, setPrintingList] = useState<Printing[]>([]);
+    const [loadError, setLoadError] = useState(false);
+    const [updateError, setUpdateError] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(false);
 
     function fetchDeckInfo() {
         getDeckInfo(userToken, deckid).then((item) => {
@@ -44,14 +70,13 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
             setDeckCommander(item.deck.commander);
             setDeckPartner(item.deck.partner);
             setDeckCompanion(item.deck.companion);
-            setCardList(item.cardlist);
+            setCardList(item.cardlist ?? []);
             setDeckLegality(item.legality.legal);
-            setDeckLegalityMessages(item.legality.messages);
-            setDeckPerformances(item.performances);
-            setPrintingList(item.printings);
-            setCustomCards(item.customcards);
-            console.log(item);
-        });
+            setDeckLegalityMessages(item.legality.messages ?? []);
+            setGamesPlayed(item.performances?.length ?? 0);
+            setPrintingList(item.printings ?? []);
+            setCustomCards(item.customcards ?? []);
+        }).catch(() => setLoadError(true));
     }
 
     useEffect(() => {
@@ -59,15 +84,16 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
     },[])
 
     function sendDeckUpdate(prop: string, val: string) {
-        updateDeck(userToken, deckid, prop, val).then(() => {
-            fetchDeckInfo();
-        })
+        setUpdateError(false);
+        updateDeck(userToken, deckid, prop, val)
+            .then(() => fetchDeckInfo())
+            .catch(() => setUpdateError(true));
     }
 
     function deleteDeck() {
-        sendDeleteDeckRequest(userToken, deckid).then(() => {
-            router.push("/decks");
-        });
+        sendDeleteDeckRequest(userToken, deckid)
+            .then(() => router.push("/decks"))
+            .catch(() => setUpdateError(true));
     }
 
     function changeDelay(prop: string, val: string) {
@@ -77,94 +103,203 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
         }
         setCtimer(
           setTimeout(() => {
-            updateDeck(userToken, deckid, prop, val);
+            updateDeck(userToken, deckid, prop, val).catch(() => setUpdateError(true));
           }, 500)
         );
     }
 
+    if (loadError) {
+        return (
+            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+                <div role="alert" className="alert alert-error">Couldn&apos;t load this deck. Try refreshing the page.</div>
+            </main>
+        );
+    }
+
+    if (!deckInfo) {
+        return (
+            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8" aria-busy="true">
+                <div className="skeleton h-20 w-full" />
+                <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+                    <div className="skeleton h-96 w-full" />
+                    <div className="skeleton h-96 w-full" />
+                </div>
+            </main>
+        );
+    }
+
+    const played = gamesPlayed > 0;
+    const commanderOptions = cardList.filter(([, card]) => isLegendary(card, commanderTypes));
+    const partnerOptions = cardList.filter(([, card]) => isLegendary(card, partnerTypes));
+    const sideboard = cardList.filter(([entry]) => entry.issideboard);
+    const sideboardToAdd = cardList.filter(([entry]) => !entry.issideboard);
+    const customInDeck = cardList.filter(([, card]) => card.custom);
+    const customToAdd = customCards.filter(cc => !cc.id.endsWith("/back") && !cardList.some(([entry]) => entry.cardid === cc.id));
+    const artOptions = printingList.filter(p => p.cardid === deckCommander || p.cardid === deckPartner);
+    const cardName = (id: string) => cardList.find(([entry]) => entry.cardid === id)?.[1].name ?? "Card";
+
     return (
-        <div className="bg-base-200 h-full">
-            {!deckLegality && deckLegalityMessages && deckLegalityMessages.map((mes) => (
-                        <div role="alert" className="alert alert-error mx-auto m-3 max-w-5xl" key={mes}>Alert: {mes}</div>
-                    ))}
-            <div className="flex justify-items-center max-w-7xl m-3 mx-auto">
-                <div className="flex justify-between min-w-96 w-1/2">
-                    <div className="card flex flex-col justify-start items-center shadow-xl bg-base-100 p-5 m-5 w-full">
-                        <h1 className="pb-5">Deck Image</h1>
-                        <img className="pb-5 min-h-96 object-scale-down" src={deckInfo?.image}/>
-                        {printingList && printingList.length > 0 && <div className="grid bg-base-200 grid-cols-2 overflow-y-auto p-5 max-h-96 min-w-72 rounded-md">
-                            {printingList?.filter((p: any) => p.cardid == deckCommander || p.cardid == deckPartner).map((p: any) => {return <button key={p.artcrop} className="btn h-full" onClick={e => sendDeckUpdate("image", p.artcrop)}><img className="w-full p-1" src={p.artcrop}/></button>})}
-                        </div>}
+        <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+            <header className="flex flex-wrap items-end justify-between gap-4 border-b border-base-content/15 pb-5">
+                <div className="min-w-0">
+                    <p className="text-sm font-bold uppercase text-primary"><Link href="/decks" className="link link-hover">Rumble / Decks</Link></p>
+                    <h1 className="mt-1 break-words text-3xl font-bold">{deckName || "Untitled deck"}</h1>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                        <span className={`badge badge-soft ${deckLegality ? "badge-success" : "badge-error"}`}>{deckLegality ? "Legal" : "Not legal"}</span>
+                        <span className="badge badge-ghost">{played ? `${gamesPlayed} ${gamesPlayed === 1 ? "game" : "games"} played` : "Not played yet"}</span>
                     </div>
                 </div>
-                <div className="flex flex-col justify-start w-full">
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
-                        <h1>Deck</h1>
-                        <input type="text" placeholder="Deck Name" className="input input-bordered w-full m-5 max-w-m" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
-                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Commander"} value={deckCommander ?? undefined} onChange={e => sendDeckUpdate("commander", e.target.value)}>
-                            <option disabled>Commander</option>
-                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Vehicle") || c[1].typeline?.includes("Artifact") || c[1].typeline?.includes("Spacecraft"))).map((card: any) => 
-                                    <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
-                                    )}
-                        </select>
-                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Partner"} value={deckPartner ?? undefined} onChange={e => sendDeckUpdate("partner", e.target.value)}>
-                            <option disabled>Partner</option>
-                            <option></option>
-                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
-                                    <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
-                                    )}
-                        </select>
-                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Companion"} value={deckCompanion ?? undefined} onChange={e => sendDeckUpdate("companion", e.target.value)}>
-                            <option disabled>Companion</option>
-                            {cardList.filter((c: any)=> c[1].typeline?.includes("Legendary") && (c[1].typeline?.includes("Creature") || c[1].typeline?.includes("Planeswalker") || c[1].typeline?.includes("Background"))).map((card: any) => 
-                                    <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
-                                    )}
-                        </select>
-                        <div className="flex gap-12">
-                            <button onClick={() => {router.push(`/deck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">View Deck</button>
-                            <button onClick={() => {router.push(`/exportdeck/${deckInfo.id}`);}} className="btn shadow-xl mx-auto max-w-md">Export for TTS</button>
-                        </div>
+                <div className="flex flex-wrap gap-2">
+                    <Link href={`/deck/${deckInfo.id}`} className="btn btn-primary">View deck</Link>
+                    <Link href={`/exportdeck/${deckInfo.id}`} className="btn">Export for TTS</Link>
+                </div>
+            </header>
+
+            {!deckLegality && deckLegalityMessages.length > 0 && (
+                <div role="alert" className="alert alert-error alert-soft mt-5 items-start">
+                    <div>
+                        <p className="font-semibold">This deck isn&apos;t legal</p>
+                        <ul className="mt-1 list-disc pl-5 text-sm">
+                            {deckLegalityMessages.map(mes => <li key={mes}>{mes}</li>)}
+                        </ul>
                     </div>
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
-                        <h1>Sideboard</h1>
-                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Add Card"} onChange={e => sendDeckUpdate("sideboard", e.target.value)}>
-                            <option disabled>Add Card</option>
-                            {cardList.map((card: any) => 
-                                    <option key={card[0].cardid} value={card[0].cardid}>{card[1].name}</option>
-                                    )}
+                </div>
+            )}
+            {updateError && (
+                <div role="alert" className="alert alert-warning alert-soft mt-5">
+                    <span>Couldn&apos;t save that change. Try again.</span>
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => setUpdateError(false)}>Dismiss</button>
+                </div>
+            )}
+
+            <div className="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+                <Panel title="Deck art" description="Pick a printing of your commander or partner.">
+                    <figure className="aspect-[4/3] overflow-hidden rounded-box bg-base-200">
+                        {deckInfo.image
+                            ? <img src={deckInfo.image} alt={`${deckName} art`} className="h-full w-full object-contain" />
+                            : <div className="grid h-full place-items-center text-base-content/60">No art selected</div>}
+                    </figure>
+                    {artOptions.length > 0 && (
+                        <div className="grid max-h-96 grid-cols-2 gap-2 overflow-y-auto p-1 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
+                            {artOptions.map(p => {
+                                const selected = p.artcrop === deckInfo.image;
+                                return (
+                                    <button
+                                        key={p.artcrop}
+                                        type="button"
+                                        aria-pressed={selected}
+                                        aria-label={`Use ${cardName(p.cardid)} art`}
+                                        className={`overflow-hidden rounded-field ring-offset-2 ring-offset-base-100 transition hover:ring-2 hover:ring-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${selected ? "ring-2 ring-primary" : ""}`}
+                                        onClick={() => sendDeckUpdate("image", p.artcrop)}
+                                    >
+                                        <img src={p.artcrop} alt="" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
+                </Panel>
+
+                <div className="grid gap-6">
+                    <Panel title="Setup">
+                        <fieldset className="fieldset">
+                            <legend className="fieldset-legend">Deck name</legend>
+                            <input type="text" placeholder="Deck name" className="input input-lg w-full text-xl font-semibold" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
+                        </fieldset>
+                        <div className="rounded-box bg-base-200 p-4">
+                            <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/60">Command zone</h3>
+                            <div className="mt-1 grid gap-x-4 sm:grid-cols-2">
+                                <fieldset className="fieldset sm:col-span-2">
+                                    <legend className="fieldset-legend">Commander</legend>
+                                    <select className="select w-full" value={deckCommander ?? ""} onChange={e => sendDeckUpdate("commander", e.target.value)}>
+                                        <option value="" disabled>Choose a commander</option>
+                                        {commanderOptions.map(([entry, card]) => <option key={entry.cardid} value={entry.cardid}>{card.name}</option>)}
+                                    </select>
+                                </fieldset>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Partner</legend>
+                                    <select className="select w-full" value={deckPartner ?? ""} onChange={e => sendDeckUpdate("partner", e.target.value)}>
+                                        <option value="">None</option>
+                                        {partnerOptions.map(([entry, card]) => <option key={entry.cardid} value={entry.cardid}>{card.name}</option>)}
+                                    </select>
+                                </fieldset>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Companion</legend>
+                                    <select className="select w-full" value={deckCompanion ?? ""} onChange={e => sendDeckUpdate("companion", e.target.value)}>
+                                        <option value="">None</option>
+                                        {partnerOptions.map(([entry, card]) => <option key={entry.cardid} value={entry.cardid}>{card.name}</option>)}
+                                    </select>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </Panel>
+
+                    <Panel title="Sideboard" description={played ? "Locked because this deck has been played." : undefined}>
+                        <select className="select w-full" value="" disabled={played} aria-label="Add a card to the sideboard" onChange={e => sendDeckUpdate("sideboard", e.target.value)}>
+                            <option value="" disabled>Add a card…</option>
+                            {sideboardToAdd.map(([entry, card]) => <option key={entry.cardid} value={entry.cardid}>{card.name}</option>)}
                         </select>
-                        <div className="grid grid-cols-1 md:grid-cols-2 w-full">
-                            {cardList.filter((card: any) => card[0].issideboard).map((card: any) => 
-                                    <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-base-300 h-10 m-2 w-72">
-                                        <h1 className="mx-5">{card[1].name}</h1>
-                                        <button className="btn btn-error btn-outline btn-sm" onClick={e => sendDeckUpdate("-sideboard", card[0].cardid)}>x</button>
+                        <RemovableCards cards={sideboard} emptyText="No sideboard cards." disabled={played} removeLabel="from the sideboard" onRemove={id => sendDeckUpdate("-sideboard", id)} />
+                    </Panel>
+
+                    <Panel title="Custom cards" description={played ? "Locked because this deck has been played." : undefined}>
+                        <select className="select w-full" value="" disabled={played} aria-label="Add a custom card" onChange={e => sendDeckUpdate("card", e.target.value)}>
+                            <option value="" disabled>Add a card…</option>
+                            {customToAdd.map(card => <option key={card.id} value={card.id}>{card.name}</option>)}
+                        </select>
+                        <RemovableCards cards={customInDeck} emptyText="No custom cards." disabled={played} removeLabel="from the deck" onRemove={id => sendDeckUpdate("-card", id)} />
+                    </Panel>
+
+                    {!played && (
+                        <section className="card border border-error/30 bg-base-100">
+                            <div className="card-body flex-row flex-wrap items-center justify-between gap-3 p-5">
+                                <div>
+                                    <h2 className="font-semibold">Delete deck</h2>
+                                    <p className="text-sm text-base-content/70">Only decks that haven&apos;t been played can be deleted.</p>
+                                </div>
+                                {confirmDelete ? (
+                                    <div className="flex gap-2">
+                                        <button type="button" className="btn btn-ghost" onClick={() => setConfirmDelete(false)}>Cancel</button>
+                                        <button type="button" className="btn btn-error" onClick={deleteDeck}>Confirm delete</button>
                                     </div>
-                                    )}
-                        </div>
-                    </div>
-                    <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5 w-full">
-                        <h1>Custom Cards</h1>
-                        <select className="select select-bordered w-full m-5 max-w-m" defaultValue={"Add Card"} onChange={e => sendDeckUpdate("card", e.target.value)}>
-                            <option disabled>Add Card</option>
-                            {customCards
-                                .filter((cc: any) => {return !(cc.id as string).endsWith("/back")})
-                                .filter((cc: any) => {return cardList.length > 0 ? !cardList.find((c: any) => c[0].cardid == cc.id) : true})
-                                .map((card: any) => 
-                                    <option key={card.id} value={card.id}>{card.name}</option>
-                                    )}
-                        </select>
-                        <div className="grid grid-cols-1 md:grid-cols-2 w-full">
-                            {cardList.filter((card: any) => card[1].custom).map((card: any) => 
-                                    <div key={card[0].cardid} className="card flex justify-between flex-row items-center bg-base-300 h-10 m-2 w-72">
-                                        <h1 className="mx-5">{card[1].name}</h1>
-                                        <button className="btn btn-error btn-outline btn-sm" onClick={e => sendDeckUpdate("-card", card[0].cardid)}>x</button>
-                                    </div>
-                                    )}
-                        </div>
-                    </div>
-                    {deckPerformances.length == 0 && <button onClick={() => deleteDeck()} className="btn btn-error shadow-xl mx-auto max-w-md">Delete Deck</button>}
+                                ) : (
+                                    <button type="button" className="btn btn-error btn-outline" onClick={() => setConfirmDelete(true)}>Delete deck</button>
+                                )}
+                            </div>
+                        </section>
+                    )}
                 </div>
             </div>
-        </div>
+        </main>
+    );
+}
+
+function Panel({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
+    return (
+        <section className="card bg-base-100 shadow-sm">
+            <div className="card-body gap-4 p-5 sm:p-6">
+                <div>
+                    <h2 className="card-title text-lg">{title}</h2>
+                    {description && <p className="text-sm text-base-content/70">{description}</p>}
+                </div>
+                {children}
+            </div>
+        </section>
+    );
+}
+
+function RemovableCards({ cards, emptyText, disabled, removeLabel, onRemove }: { cards: CardListItem[]; emptyText: string; disabled: boolean; removeLabel: string; onRemove: (id: string) => void }) {
+    if (cards.length === 0) return <p className="text-sm text-base-content/60">{emptyText}</p>;
+    return (
+        <ul className="grid gap-2 sm:grid-cols-2">
+            {cards.map(([entry, card]) => (
+                <li key={entry.cardid} className="flex items-center justify-between gap-2 rounded-field bg-base-200 py-1 pl-3 pr-1">
+                    <span className="truncate">{card.name}</span>
+                    <button type="button" className="btn btn-ghost btn-square btn-sm text-error" disabled={disabled} aria-label={`Remove ${card.name} ${removeLabel}`} onClick={() => onRemove(entry.cardid)}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4" aria-hidden="true"><path strokeLinecap="round" d="M6 6l12 12M18 6L6 18" /></svg>
+                    </button>
+                </li>
+            ))}
+        </ul>
     );
 }

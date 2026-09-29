@@ -4,6 +4,7 @@ import UserData from "../../util/UserData";
 import type { PlayerCommanderStats, UserStats } from "../../types";
 import { useStatsOptions } from "./StatsShell";
 import { useStatsFetch } from "./useStatsFetch";
+import Matchups from "./Matchups";
 import { ArtThumb, CardName, ColorTable, EmptyRow, ErrorState, LoadingState, StatTiles, percent, ratio } from "./StatsUi";
 
 export default function PlayerStats({ userId, fallbackName, isSelf }: { userId: string | number | null; fallbackName?: string; isSelf: boolean }) {
@@ -37,9 +38,9 @@ export default function PlayerStats({ userId, fallbackName, isSelf }: { userId: 
         { label: "Win rate", value: percent(ratio(stats.matcheswon, stats.matchesplayed)) },
         { label: "Avg. placement", value: stats.matchesplayed ? stats.averageplacement.toFixed(2) : "—" },
       ]} />}
-      <div className="space-y-6">
-        {stats && <ColorTable plays={stats.colorplaycount} winrates={stats.colorwinrates} />}
-        <section aria-labelledby="commanders-heading" className="card bg-base-100 shadow-sm">
+      {stats && <ColorTable plays={stats.colorplaycount} winrates={stats.colorwinrates} />}
+      {userId && <Matchups userId={userId} name={name} isSelf={isSelf} overallWinRate={stats ? ratio(stats.matcheswon, stats.matchesplayed) : undefined} />}
+      <section aria-labelledby="commanders-heading" className="card bg-base-100 shadow-sm">
           <div className="card-body gap-4 p-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 id="commanders-heading" className="card-title text-xl">Commanders</h2>
@@ -85,7 +86,6 @@ export default function PlayerStats({ userId, fallbackName, isSelf }: { userId: 
             )}
           </div>
         </section>
-      </div>
     </div>
   );
 }

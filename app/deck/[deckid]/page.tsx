@@ -43,6 +43,20 @@ export interface DeckPageProps {
     deckid: number;
 }
 
+// Mounts the card image on first hover/focus so a deck view doesn't download every card image up front.
+function CardPreviewRow({ image, name, children }: { image?: string; name: string; children: React.ReactNode }) {
+    const [showPreview, setShowPreview] = useState(false);
+    const reveal = () => setShowPreview(true);
+    return (
+        <div className="tooltip tooltip-top mb-1 w-full break-inside-avoid" onMouseEnter={reveal} onFocus={reveal}>
+            {image && showPreview && <div className="tooltip-content z-50 bg-transparent p-0 shadow-none">
+                <img className="h-72 w-52 rounded-xl object-contain" src={image} alt={`${name} card art`} />
+            </div>}
+            {children}
+        </div>
+    );
+}
+
 function CategoryHeading({ label, count }: { label: string; count: number }) {
     return <h2 className="mb-1 mt-3 flex items-center gap-2 border-b border-base-content/15 pb-1 text-xs font-bold uppercase text-base-content/70">
         <span>{label}</span>
@@ -189,10 +203,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
                 : "border-l-transparent";
 
         return (
-            <div className="tooltip tooltip-top mb-1 w-full break-inside-avoid" key={cardInfo.id}>
-                {cardImage && <div className="tooltip-content z-50 bg-transparent p-0 shadow-none">
-                    <img className="h-72 w-52 rounded-xl object-contain" src={cardImage} alt={`${cardInfo.name} card art`} />
-                </div>}
+            <CardPreviewRow key={cardInfo.id} image={cardImage} name={cardInfo.name}>
                 <article className={`flex min-h-9 w-full items-center gap-1.5 overflow-hidden rounded-md border border-base-300 border-l-2 bg-base-100 px-1 py-1 transition-colors hover:border-primary/50 hover:bg-base-200 ${roleClass}`}>
                     <span aria-label={`${decklistEntry.count} copies`} title={`${decklistEntry.count} in deck`} className="flex w-8 shrink-0 self-stretch items-center justify-center border-r border-base-content/10 font-mono text-base font-bold text-base-content/75">
                         {decklistEntry.count}
@@ -225,7 +236,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
                         ))}
                     </div>
                 </article>
-            </div>);
+            </CardPreviewRow>);
     }
 
     const trueCount = (cardList: Array<any>) => {
