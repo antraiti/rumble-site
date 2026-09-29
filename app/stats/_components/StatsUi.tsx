@@ -28,8 +28,8 @@ export function StatTiles({ items }: { items: { label: string; value: ReactNode;
 
 const colors: { key: keyof ColorPlayCounts; name: string; icon: string; accent: string; ring: string }[] = [
   { key: "w", name: "White", icon: "/W.svg", accent: "bg-amber-100", ring: "text-amber-300" },
-  { key: "u", name: "Blue", icon: "/U.svg", accent: "bg-sky-300", ring: "text-sky-400" },
-  { key: "b", name: "Black", icon: "/B.svg", accent: "bg-gray-400", ring: "text-gray-400" },
+  { key: "u", name: "Blue", icon: "/U.svg", accent: "bg-sky-200", ring: "text-sky-400" },
+  { key: "b", name: "Black", icon: "/B.svg", accent: "bg-gray-300", ring: "text-gray-400" },
   { key: "r", name: "Red", icon: "/R.svg", accent: "bg-red-300", ring: "text-red-400" },
   { key: "g", name: "Green", icon: "/G.svg", accent: "bg-green-300", ring: "text-green-400" },
   { key: "c", name: "Colorless", icon: "/C.svg", accent: "bg-base-content/30", ring: "text-base-content/60" },

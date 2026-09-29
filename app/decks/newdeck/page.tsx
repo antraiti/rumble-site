@@ -7,7 +7,7 @@ import type { User } from "../../types";
 
 
 async function getUsers(token: string) {
-    return apiGet<User[]>('users');
+    return apiGet<User[]>('users', { token });
   }
 
   async function SubmitDeck(token: string, di: any) {
@@ -19,7 +19,7 @@ export default function NewDeck() {
     const router = useRouter();
     const { userToken, userId } = userData();
     const [deckList, setDeckList] = useState("");
-    const [deckUser, setDeckUser] = useState();
+    const [deckUser, setDeckUser] = useState<number>();
     const [deckName, setDeckName] = useState("");
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
@@ -27,17 +27,15 @@ export default function NewDeck() {
 
     useEffect(() => {
         getUsers(userToken)
-        .then(item => {
-            setUsers(item);
-            setDeckUser(userId);
-            })
+        .then(item => setUsers(item))
+        .catch(() => setUsers([]));
       }, [])
 
     const finalizeDeck = () => {
         console.log("Finalizing deck")
         setIsLoading(true);
             const di = {
-                user: deckUser,
+                user: Number(deckUser ?? userId),
                 list: deckList,
                 name: deckName
             }
@@ -66,7 +64,7 @@ export default function NewDeck() {
                     (!errorMessage ? 
                         <div className="card flex flex-col justify-center items-center shadow-xl bg-base-100 p-5 m-5">
                             <h1>New Deck</h1>
-                            {!isLoading && <select className="select select-bordered w-full m-5 max-w-m" value={deckUser} onChange={(e: any) => setDeckUser(e.target.value)}>
+                            {!isLoading && <select className="select select-bordered w-full m-5 max-w-m" value={deckUser ?? userId ?? ""} onChange={(e: any) => setDeckUser(Number(e.target.value))}>
                                 {users && users.map((usr: any) => 
                                         <option key={usr.id} value={usr.id}>{usr.username}</option>
                                         )}
