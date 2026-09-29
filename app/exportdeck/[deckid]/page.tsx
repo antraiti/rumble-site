@@ -3,55 +3,18 @@ import { use, useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { ttsCard, ttsCustomDeck, ttsDeck, ttsDeckCustom } from "@/models/tts/tts_deckmodel";
 import { downloadImage, downloadJsonFile } from "@/app/util/utils";
+import { apiGet, apiPost } from "@/app/util/apiClient";
 
 async function getDeckInfo(token: string, id: number) {
-    return fetch('/api/deck/'+id, {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet(`deck/${id}`, { token });
 }
 
 async function getFavoritePrintings(token: string) {
-    return fetch('/api/cards/printfavorite', {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet('cards/printfavorite', { token });
 }
 
 async function setFavoritePrinting(token: string, cardid: string, printingid: string) {
-    return fetch('/api/cards/printfavorite', {
-    method: 'POST',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    },
-    body: JSON.stringify({"card": cardid, "print": printingid})
-    })
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiPost('cards/printfavorite', { token, body: {"card": cardid, "print": printingid} });
 }
 
 export interface DeckViewPageProps {
@@ -85,16 +48,19 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
     const [cardBack, setCardBack] = useState<string>("https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg");
 
     useEffect(() => {
-        const cardbackInput = document.getElementById('cardback-url')! as HTMLInputElement;
-        cardbackInput.addEventListener('focus', function() {
+        const cardbackInput = document.getElementById('cardback-url') as HTMLInputElement | null;
+        cardbackInput?.addEventListener('focus', function() {
             this.select();
         });
-    })
+    }, [])
 
     function updateFavorites() {
+        if (!userToken) return;
         getFavoritePrintings(userToken).then((e: Array<FavoritePrinting>) => {
             setFavoritePrintings(e);
-        })
+        }).catch(() => {
+            setFavoritePrintings([]);
+        });
     }
 
     const downloadDeck = () => {
@@ -214,7 +180,11 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
     }
 
     useEffect(() => {
-        getFavoritePrintings(userToken).then((e: Array<FavoritePrinting>) => {
+        const favoritesRequest = userToken
+            ? getFavoritePrintings(userToken).catch(() => [] as FavoritePrinting[])
+            : Promise.resolve([] as FavoritePrinting[]);
+
+        favoritesRequest.then((e: Array<FavoritePrinting>) => {
             setFavoritePrintings(e)
 
             getDeckInfo(userToken, deckid).then((item) => {
@@ -226,6 +196,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                 item.tokens.map((token: any) => {
                     const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == token)
                     const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == token)
+                    if (!printing) console.log("no printing found for token " + token)
                     cardPrintings.set(token, {
                         card: [{id: token, count: 1, istoken: true}, {id: token, name: "token", oracletext: "sorry i didnt setup this info"}],
                         printing: printing.cardimage,
@@ -246,8 +217,11 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                     setCards(prev => [...prev, card])
                     if (card[1].transform) {
                         const backcard = item.cardbacks.find((cb: any) => cb.id == card[0].cardid+"/back");
-                        const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == backcard.id)
+                        console.log(card[0].cardid+"/back")
+                        //const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == backcard.id)
+                        if (!backcard) console.log("no back card found for " + card[0].cardid)
                         const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == backcard.id)
+                        if (!printing) console.log("no printing found for token " + backcard.id)
                         setCards(prev => [...prev, [{}, backcard]])
                         cardPrintings.set(backcard.id, {
                             card: [{}, backcard],
@@ -257,8 +231,8 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                     }
                 })
             });
-        })
-      }, [])
+                })
+            }, [deckid, userToken])
 
     
     function CardDisplay(card: any) {
@@ -274,7 +248,13 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                     <div 
                         className="absolute w-12 h-12 bg-gray-800/0 hover:bg-gradient-to-br from-gray-800/90 to-gray-800/0 p-2 hover:p-1"
                         title={favorited ? "Remove from favorites" : "Add to favorites"}
-                        onClick={()=> {favorited ? setFavoritePrinting(userToken, card[1].id, "").then(_ => updateFavorites()) : setFavoritePrinting(userToken, card[1].id, cardPrintings.get(card[1].id)?.printingid ?? "").then(_ => updateFavorites())}}
+                        onClick={()=> {
+                            if (!userToken) return;
+                            const request = favorited
+                                ? setFavoritePrinting(userToken, card[1].id, "")
+                                : setFavoritePrinting(userToken, card[1].id, cardPrintings.get(card[1].id)?.printingid ?? "");
+                            request.then(() => updateFavorites()).catch(() => undefined);
+                        }}
                     >
                         {
                         favorited

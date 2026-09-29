@@ -2,40 +2,14 @@
 
 import UserData from "@/app/util/UserData";
 import { useEffect, useState } from "react";
+import { apiGet, apiPost } from "@/app/util/apiClient";
 
 async function getCardsStats(token: string, userid: number) {
-    return fetch(`../../api/stats/cards/custom`, {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token,
-      'Cache-Control': 'no-store'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet('stats/cards/custom', { token });
   }
 
 async function getCardsFromList(token: string, decklist: string) {
-    return fetch(`../../api/cards/fromdecklist`, {
-    method: 'POST',
-    body: JSON.stringify(decklist),
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token,
-        'Cache-Control': 'no-store'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiPost('cards/fromdecklist', { token, body: decklist });
 }
 
 const convertToCSV = (objArray: any) => {

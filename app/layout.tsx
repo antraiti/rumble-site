@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import NavBar from './components/NavBar/NavBar'
 import { WebHookWrapper } from './components/WebhookWrapper'
 import { ThemeWrapper } from './components/ThemeWrapper'
-import Cookies from "js-cookie";
 import { Nunito } from 'next/font/google'
 
 const nunito = Nunito({
@@ -23,8 +21,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    //for some reason data theme doesnt work even when directly changed. might be a bug with recent daisyui version upgrade
-    <html lang="en" data-theme={Cookies.get("theme")} className={nunito.className}>
+    <html lang="en" className={nunito.className}>
       <ThemeWrapper>
         <NavBar/>
         <WebHookWrapper connectionurl={process.env.HOST_URL}>

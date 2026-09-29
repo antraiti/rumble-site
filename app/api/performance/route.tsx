@@ -1,25 +1,21 @@
-export async function PUT(request: Request) {
+import { proxyFetch } from "../../util/apiProxy";
+import { parseBody } from "../../util/validate";
+import { z } from "zod";
 
-    const res = await fetch(process.env.API_URL+"/performance", {
-        method: 'PUT',
-        headers: request.headers,
-        body: JSON.stringify(await request.json())
-    });
-    if(res.ok)
-        return Response.json(await res.json());
-    else
-        return Response.json({});
-} 
+const performanceUpdateSchema = z.object({ id: z.union([z.number(), z.string()]) }).catchall(z.any());
+const performanceCreateSchema = z.object({
+    userid: z.union([z.number(), z.string()]),
+    matchid: z.union([z.number(), z.string()]),
+});
+
+export async function PUT(request: Request) {
+    const parsed = await parseBody(request, performanceUpdateSchema);
+    if ("error" in parsed) return parsed.error;
+    return proxyFetch(request, "/performance", { body: parsed.data });
+}
 
 export async function POST(request: Request) {
-
-    const res = await fetch(process.env.API_URL+"/performance", {
-        method: 'POST',
-        headers: request.headers,
-        body: JSON.stringify(await request.json())
-    });
-    if(res.ok)
-        return Response.json(await res.json());
-    else
-        return Response.json({});
-} 
+    const parsed = await parseBody(request, performanceCreateSchema);
+    if ("error" in parsed) return parsed.error;
+    return proxyFetch(request, "/performance", { body: parsed.data });
+}

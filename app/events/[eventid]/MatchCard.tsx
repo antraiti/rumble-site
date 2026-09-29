@@ -1,21 +1,26 @@
 'use client'
 
 import UserData from "@/app/util/UserData";
+import { normalizeDeckEntry, type NormalizedDeckEntry } from "@/app/util/deckCompatibility";
 import { useEffect, useState } from "react";
 
 export default function MatchCard(matchObject: any) {
     const { userId, isAdmin } = UserData(); 
     const matchInfo = matchObject.matchInfo;
-    const decks = matchObject.decks;
+    const decks: NormalizedDeckEntry[] = (matchObject.decks ?? [])
+        .map(normalizeDeckEntry)
+        .filter((deck: NormalizedDeckEntry | null): deck is NormalizedDeckEntry => deck !== null);
     const [matchtime, setMatchtime] = useState<number>(0);
     const [canedit, setCanedit] = useState<boolean>(true);
 
     useEffect(() => {
-        setTimeout(() => {
-            setMatchtime(Date.now() - (new Date(matchInfo.match.start)).getTime());
-            //setCanedit(Date.now() - (new Date(matchInfo.match.start)).getHours() < 25);
-        }, 1000)
-    }, [matchtime])
+        if (!matchInfo.match.start || matchInfo.match.end) return;
+
+        const updateMatchtime = () => setMatchtime(Date.now() - new Date(matchInfo.match.start).getTime());
+        updateMatchtime();
+        const interval = window.setInterval(updateMatchtime, 1000);
+        return () => window.clearInterval(interval);
+    }, [matchInfo.match.start, matchInfo.match.end]);
 
     function getCommanderImageUrl(deckCommander: any) {
         if (!deckCommander?.image) {
@@ -75,19 +80,33 @@ export default function MatchCard(matchObject: any) {
                     </tr>
                     </thead>
                     <tbody>
-                    {matchInfo?.performances?.map((performance: any) => (<tr key={performance.id} className={performance?.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
+                    {matchInfo?.performances?.map((performance: any) => {
+                        const deckEntry = performance.deckid != null
+                            ? decks.find((d) => d.deck.id == performance.deckid)
+                            : undefined;
+                        const deck = deckEntry?.deck ?? null;
+                        const deckInfo = deckEntry?.card ?? deck;
+                        const playerDecks = decks
+                            .filter((entry) => entry.deck.userid == performance.userid && (matchObject.themed || entry.deck.islegal || entry.deck.id == performance.deckid))
+                            .sort((first, second) => first.deck.name.localeCompare(second.deck.name));
+
+                        return (<tr key={performance.id} className={performance?.placement == 1 ? "border-solid border-2 border-amber-300" : ""}>
                         <td className="p-0">
-                            <div className="tooltip w-full" data-tip={(performance.deckid != null ? (decks.find((d: any) => d[0].id == performance.deckid)[1])?.name : "")}>
-                                <a href={performance.deckid != null ? `/deck/${performance.deckid}` : ""} target="_blank">
-                                    <img className=" h-16 w-full object-cover rounded-lg" src={getCommanderImageUrl(performance.deckid != null ? decks.find((d: any) => d[0].id == performance.deckid)[0] : null)}></img>
-                                </a>    
+                            <div className="tooltip w-full" data-tip={deckInfo?.name ?? ""}>
+                                {performance.deckid != null ? <a href={`/deck/${performance.deckid}`} target="_blank" rel="noreferrer">
+                                    <img className="h-16 w-full rounded-lg object-cover" src={getCommanderImageUrl(deck)} alt={`${deckInfo?.name ?? "Deck"} image`} />
+                                </a> : <img className="h-16 w-full rounded-lg object-cover" src={getCommanderImageUrl(deck)} alt="No deck selected" />}
                             </div>
                         </td>
                         <td>{performance.username}</td>
                         <td>
-                            <select name="deckid" className="select select-ghost w-full" value={performance?.deckid ?? undefined} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
-                                <option value={undefined}></option>
-                                {decks.filter((d: any) => d[0].userid == performance.userid && (matchObject.themed || d[0].islegal)).reverse().map((deck: any) => (<option value={deck[0].id} key={deck[0].id}>{`${deck[0].name}`}</option>))}
+                            <select aria-label={`Deck for ${performance.username}`} name="deckid" className="select select-ghost w-full" value={performance?.deckid?.toString() ?? ""} onChange={(e: any) => matchObject.updateMatch(e, performance.id)}>
+                                <option value="">No deck selected</option>
+                                {playerDecks.map((entry) => (
+                                    <option value={entry.deck.id} key={entry.deck.id}>
+                                        {entry.deck.name}{!entry.deck.islegal && !matchObject.themed ? " (currently illegal)" : ""}
+                                    </option>
+                                ))}
                             </select>
                         </td>
                         <td>
@@ -110,7 +129,8 @@ export default function MatchCard(matchObject: any) {
                             </select>
                         </td>
                         {!matchInfo.match.start && <td className="w-5 p-0"><button name="delete" className="btn btn-outline btn-error w-5 h-16 m-0" onClick={(e: any) => matchObject.updateMatch(e, performance.id)}>X</button></td>}
-                    </tr>))}
+                    </tr>);
+                    })}
                     </tbody>
                 </table>
                 {!matchInfo.match.start && 

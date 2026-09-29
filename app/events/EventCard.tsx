@@ -1,21 +1,44 @@
-import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import type { EventInfo } from "../types";
 
-export default function EventCard(eventObject: any) {
-    const router = useRouter();
-    const eventInfo = eventObject.eventInfo;
+type EventCardProps = {
+    eventInfo: EventInfo;
+    current?: boolean;
+};
 
-    function GotoEventDetails() {
-        router.push(`/events/${eventInfo.id}`);
-    }
+export default function EventCard({ eventInfo, current = false }: EventCardProps) {
+    const date = new Date(eventInfo.time);
+    const displayTime = Number.isNaN(date.getTime())
+        ? eventInfo.time
+        : date.toLocaleString(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+        });
 
     return (
-        <div onClick={() => GotoEventDetails()} className={`card cursor-pointer bg-base-100 shadow-lg max-w-4xl w-full h-10 m-2 hover:shadow-base-300`}>
-            <div className='flex justify-between h-full'>
-                <div className="flex mx-5"><article className="flex max-w-none items-center font-bold"><h1 className={`text-xl`}>{eventInfo?.name}</h1></article>
-                {eventInfo?.themed && <div className="badge badge-info badge-outline mx-2"><img src="carnival-mask.svg" className="h-5"/></div>}
+        <Link
+            href={`/events/${eventInfo.id}`}
+            className={`group flex w-full max-w-5xl items-center justify-between gap-4 rounded-lg border bg-base-100 px-4 py-3 transition-colors hover:border-primary/50 hover:bg-base-200 ${current ? "border-success/50" : "border-base-300"}`}
+        >
+            <div className="flex min-w-0 items-center gap-3">
+                <span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${current ? "bg-success" : "bg-base-content/20"}`} />
+                <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <h3 className="font-semibold leading-snug group-hover:text-primary">{eventInfo.name}</h3>
+                        {current && <span className="badge badge-success badge-outline badge-sm">Today</span>}
+                        {eventInfo.weekly && <span className="text-xs text-base-content/55">Weekly</span>}
+                        {eventInfo.themed && <span className="inline-flex items-center gap-1 text-xs text-info">
+                            <Image src="/carnival-mask.svg" alt="" width={16} height={16} />
+                            Themed
+                        </span>}
+                    </div>
                 </div>
-                <article className="flex mx-5 max-w-none items-center"><p className="text-m">{eventInfo?.time}</p></article>
             </div>
-        </div>
+            <time dateTime={eventInfo.time} className="shrink-0 text-right text-sm text-base-content/65">{displayTime}</time>
+        </Link>
     );
 }

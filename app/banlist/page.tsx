@@ -1,33 +1,12 @@
 'use client'
 import { useState, useEffect } from "react";
+import { apiGet } from "../util/apiClient";
 
 async function getBanlist() {
-    return fetch('/api/cards/banlist', {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet('cards/banlist');
 }
 async function getWatchlist() {
-    return fetch('/api/cards/watchlist', {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet('cards/watchlist');
 }
 
 export default function Banlist() {

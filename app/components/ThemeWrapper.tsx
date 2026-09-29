@@ -4,10 +4,11 @@ import SetThemeContext from "./ThemeContext";
 import Cookies from "js-cookie";
 
 export function ThemeWrapper({children}: any) {
-    const storedTheme = Cookies.get('theme')
-    const [theme, setTheme] = useState<string>("defualt")
+    const [theme, setTheme] = useState<string>("default")
     
     useEffect(() => {
+      // cookie-derived value is unavailable during SSR; set after mount to avoid hydration mismatch
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTheme(Cookies.get('theme') ?? "default");
     }, [])
 
@@ -17,7 +18,7 @@ export function ThemeWrapper({children}: any) {
     }
 
     return (
-            <body data-theme={theme} className='bg-base-200 min-h-screen h-'>
+            <body data-theme={theme} className='min-h-screen bg-base-200'>
                 <SetThemeContext.Provider value={ThemeSet}>
                     {children}
                 </SetThemeContext.Provider>

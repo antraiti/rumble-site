@@ -1,22 +1,10 @@
 'use client'
 
 import { useState } from "react";
+import { apiPost } from "../../util/apiClient";
 
 async function getCheckResult(decklist: string) {
-    return fetch(`../../api/deck/checker`, {
-    method: 'POST',
-    body: JSON.stringify(decklist),
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiPost('deck/checker', { body: decklist });
 }
 
 export default function Checker() {

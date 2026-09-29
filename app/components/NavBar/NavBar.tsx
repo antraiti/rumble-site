@@ -10,6 +10,8 @@ export default function NavBar() {
     const router = useRouter();
     
     useEffect(() => {
+        // cookie-derived value is unavailable during SSR; set after mount to avoid hydration mismatch
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUsername(userName);
     }, [user]);
 

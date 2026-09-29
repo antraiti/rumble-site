@@ -1,52 +1,63 @@
+import Image from 'next/image'
+import Link from 'next/link'
+import RumbleCardFan from './components/RumbleCardFan'
+
+const formatRules = [
+  { value: '60', label: 'card singleton decks', image: '/diamonds-card-svgrepo-com.svg' },
+  { value: '20', label: 'starting life', image: '/broken-heart-svgrepo-com.svg' },
+  { value: '1', label: 'legendary creature or planeswalker', image: '/crown-svgrepo-com.svg' },
+]
+
 export default function Home() {
   return (
-    <div className="h-screen min-h-300 bg-linear-to-b from-base-200 to-base-300">
-      <div className="hero md:h-72 h-56"
-      >
-        <div className="hero-content text-center">
-          <img src="/newlogo.svg" className="h-32 w-32 mb-5 md:block hidden"/>
-          <div className="max-w-md">
-            <h1 className="text-7xl font-bold">Rumble</h1>
-            <p className="py-6">The Alternative Multiplayer Format</p>
-          </div>
-          <div className="md:flex flex-col gap-5 hidden">
-            <a href="/quickstart"><button className="btn btn-soft w-full">Quick Start</button></a>
-            <a href="/starterdecks"><button className="btn btn-soft w-full">Starter Decks</button></a>
+    <main className="min-h-[calc(100dvh-4rem)] bg-linear-to-b from-base-200 via-base-100 to-base-200">
+      <section className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-14 sm:px-8 md:min-h-[26rem] md:grid-cols-[1fr_auto] md:gap-16 md:py-20">
+        <div className="max-w-2xl">
+          <h1 className="text-6xl font-black leading-none sm:text-7xl">Rumble</h1>
+          <p className="mt-5 max-w-xl text-lg text-base-content/75 sm:text-xl">
+            Rumble is a multiplayer Magic format with 60-card singleton decks, 20 starting life, and a legendary creature or planeswalker leading your deck.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/quickstart" className="btn btn-primary">Quick start</Link>
+            <Link href="/starterdecks" className="btn btn-outline">Browse starter decks</Link>
           </div>
         </div>
-      </div>
-      <div className="grid md:grid-cols-3 grid-cols-1 gap-5 mx-auto place-items-center max-w-5xl">
-        <IcoCard num={60} descript={`Card Singleton Decks`} image={`/diamonds-card-svgrepo-com.svg`} bgcolor={`bg-linear-to-br from-blue-300/50 to-blue-400/50`}/>
-        <IcoCard num={20} descript={`Starting Life Total`} image={`/broken-heart-svgrepo-com.svg`} bgcolor={`bg-linear-to-br from-red-300/50 to-red-400/50`}/>
-        <IcoCard num={1} descript={`Legendary Creature or Planeswalker`} image={`/crown-svgrepo-com.svg`} bgcolor={`bg-linear-to-br from-amber-200/50 to-amber-300/50`}/>
-      </div>
-        <div className="w-full mt-16 p-5">
-          <div className="card bg-base-100 shadow-xl max-w-xl mx-auto">
-            <div className="card-body">
-            <article className="prose">
-                <h1>Why Rumble?</h1>
-                <p>After many years of EDH and trying other independent formats we formed Rumble to create a more diverse and versatile format. 
-                  The smaller deck sizes force more focused deckbuilding decisions while enabling archetypes like mill and overall making play costs cheaper. 
-                  The stricter bans on fast mana remove explosive starts and help keep decks on more equal footing, while also preserving the value of ramp cards. 
-                  The smaller life total keeps games streamlined while enabling aggro and combat decks.
-                  </p>
-            </article>
+        <div className="mx-auto md:mx-0">
+          <RumbleCardFan priority />
+        </div>
+      </section>
+
+      <section aria-label="Rumble format at a glance" className="mx-auto grid max-w-7xl grid-cols-1 border-y border-base-content/15 px-5 sm:grid-cols-3 sm:px-8">
+        {formatRules.map((rule) => (
+          <div key={rule.label} className="flex items-center gap-4 border-base-content/15 py-5 sm:justify-center sm:border-r sm:px-6 sm:py-7 last:border-0">
+            <span
+              aria-hidden="true"
+              className="size-10 shrink-0 bg-base-content"
+              style={{
+                maskImage: `url('${rule.image}')`,
+                WebkitMaskImage: `url('${rule.image}')`,
+                maskPosition: 'center',
+                WebkitMaskPosition: 'center',
+                maskRepeat: 'no-repeat',
+                WebkitMaskRepeat: 'no-repeat',
+                maskSize: 'contain',
+                WebkitMaskSize: 'contain',
+              }}
+            />
+            <div>
+              <p className="text-3xl font-black leading-none">{rule.value}</p>
+              <p className="mt-1 text-sm capitalize text-base-content/70">{rule.label}</p>
             </div>
           </div>
-        </div>
-    </div>
-  )
-}
+        ))}
+      </section>
 
-const IcoCard = (props: any) => {
-  return (
-    <div className="card bg-base-100 shadow-xl p-0 w-72 h-24">
-      <div className="flex h-full items-center">
-        <div className={`card flex flex-col items-center justify-between h-full ${props.bgcolor} p-2`}>
-          <img src={props.image} className="rounded-xl brightness-0 invert h-12 w-12" />
-          <h1 className="card-title text-center self-center text-3xl">{`${props.num}`}</h1>
-        </div>
-          <h2 className="text-center text-xl w-full">{`${props.descript}`}</h2>
-      </div>
-    </div>)
+      <section className="mx-auto grid max-w-7xl gap-5 px-5 py-12 sm:px-8 md:grid-cols-[12rem_1fr] md:gap-12 md:py-16">
+        <h2 className="text-2xl font-bold sm:text-3xl">Why Rumble?</h2>
+        <p className="max-w-3xl text-base leading-7 text-base-content/80">
+          Smaller decks reward focused building, open room for strategies like mill, and keep costs down. A tighter ban list reins in explosive fast-mana starts without diminishing the value of ramp, while a lower life total keeps games moving and gives combat decks space to shine.
+        </p>
+      </section>
+    </main>
+  )
 }

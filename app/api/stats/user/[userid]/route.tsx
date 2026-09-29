@@ -1,23 +1,8 @@
+import { proxyFetch } from "../../../../util/apiProxy";
+
 export async function GET(request: Request, { params }: { params: Promise<{ userid: string }> }) {
     const {userid} = await params;
     const searchParams = new URLSearchParams(new URL(request.url).searchParams);
-    const res = await fetch(process.env.API_URL+`/stats/user/${userid}/simple${searchParams.get('themed') ? "?themed="+searchParams.get('themed') : ""}`, {
-        method: 'GET',
-        headers: request.headers,
-        next: { revalidate: 60 }
-    })
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("Server responds with error!");
-            } else if (data.status === 204) {
-                return [];
-            }
-            return data.json();
-        })
-    if(res.ok) {
-        return Response.json(await res.json());
-    }
-    else {
-        return Response.json(res);
-    }
+    const themed = searchParams.get('themed');
+    return proxyFetch(request, `/stats/user/${userid}/simple${themed ? "?themed="+themed : ""}`, { revalidate: 60 });
 }

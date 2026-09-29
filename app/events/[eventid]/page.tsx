@@ -5,111 +5,36 @@ import { useWebSocket } from 'next-ws/client';
 import userData from "../../util/UserData"
 import MatchCard from "./MatchCard";
 import React from "react";
+import { apiGet, apiPost, apiPut } from "../../util/apiClient";
 
 async function GetEventDetails(token: string, eventid: number) {
-    return fetch(`/api/events/details/${eventid}`, {
-        method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-token': token,
-            'Cache-Control': 'no-store'
-        }})
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("Server responds with error!");
-            } else if (data.status === 204) {
-                return [];
-            }
-            return data.json();
-        })
+    return apiGet(`events/details/${eventid}`, { token });
     }
 
 async function updatePerformance(token: string, id: number, key: any, val: any | null) {
-    return fetch(`/api/performance/`, {
-        method: 'PUT',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-token': token
-        },
-        body: JSON.stringify({'id': id, [key]: val})
-        })
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("issue updating performance");
-            }
-            return data.json();
-        })
+    const numericFields = ['deckid', 'placement', 'order', 'killedbyuid'];
+    const nullableFields = ['deckid', 'placement', 'order'];
+    const clearField = val === '' && nullableFields.includes(key);
+    const isKilledByPlaceholder = key === 'killedbyuid' && val === 'Killed By';
+    const value = numericFields.includes(key) && val !== '' && !isKilledByPlaceholder ? Number(val) : val;
+    const body = clearField ? { id, clear: key } : { id, [key]: value };
+    return apiPut('performance', { token, body });
     }
 
 async function addPerformance(token: string, user: string, match: number) {
-    return fetch(`/api/performance/`, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-token': token
-        },
-        body: JSON.stringify({"userid": user, "matchid": match})
-        })
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("issue updating performance");
-            }
-            return data.json();
-        })
+    return apiPost('performance', { token, body: {"userid": user, "matchid": match} });
     }
 
 async function newMatch(token: string, id: number) {
-    return fetch(`/api/match/`, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-token': token
-        },
-        body: JSON.stringify(id)
-        })
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("issue updating performance");
-            }
-            return data.json();
-        })
+    return apiPost('match', { token, body: id });
     }
 
 async function getUsers(token: string) {
-    return fetch('/api/users', {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet('users', { token });
 }
 
 async function updateMatchProperty(token: string, match: number, prop: string) {
-    return fetch('/api/match', {
-    method: 'PUT',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    },
-    body: JSON.stringify({'prop': prop, 'matchid': match})
-    })
-    .then((data: any) => {
-        if(data.status >= 400) {
-            throw new Error(data.message);
-        }
-        return data.json();
-    })
+    return apiPut('match', { token, body: {'prop': prop, 'matchid': match} });
   }
 
 export interface DeckDetailsProps {
@@ -131,6 +56,17 @@ export default function DeckDetails({ params }: {params: Promise<DeckDetailsProp
                         });
     }
 
+    function updateEventDetails() {
+        console.log(eventid)
+        GetEventDetails(userToken, eventid).then(data => {
+            setEventDetails(data);
+        });
+    }
+
+    const receivedUpdate = (e: any) => {
+        updateEventDetails();
+    }
+
     useEffect(() => {
         ws?.addEventListener('message', receivedUpdate);
         updateEventDetails();
@@ -139,17 +75,6 @@ export default function DeckDetails({ params }: {params: Promise<DeckDetailsProp
         });
         return () => ws?.removeEventListener('message', receivedUpdate);
     }, [ws]);
-
-    const receivedUpdate = (e: any) => {
-        updateEventDetails();
-    }
-
-    function updateEventDetails() {
-        console.log(eventid)
-        GetEventDetails(userToken, eventid).then(data => {
-            setEventDetails(data);
-        });
-    }
 
     const updateMatch = (e: any, perfid: number) => {
         updatePerformance(userToken, perfid, e.target.name, e.target.value).then(() => {

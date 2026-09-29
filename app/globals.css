@@ -1,4 +1,6 @@
 @import 'tailwindcss';
+/* The sandbox is git-ignored, which Tailwind skips during class detection. */
+@source "./sandbox";
 
 @theme {
   --background-image-gradient-radial: radial-gradient(var(--tw-gradient-stops));
@@ -31,7 +33,6 @@
 }
 
 @plugin "@tailwindcss/typography";
-
 
 @plugin "daisyui/theme" {
   name: "default";

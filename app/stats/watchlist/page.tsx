@@ -1,47 +1,61 @@
 'use client'
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import UserData from "../../util/UserData";
+import type { WatchlistStat } from "../../types";
+import { useStatsFetch } from "../_components/useStatsFetch";
+import { ArtThumb, CardName, EmptyRow, ErrorState, LoadingState, ManaCost, SortHeader, type SortState, nextSort, percent, ratio, sortBy } from "../_components/StatsUi";
 
-async function getWatchlistStats(token: string, userid: number) {
-    return fetch(`../api/stats/watchlist`, {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token,
-      'Cache-Control': 'no-store'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+type SortKey = "name" | "plays" | "wins" | "winrate" | "avg";
+
+function sortValue(stat: WatchlistStat, key: SortKey) {
+  switch (key) {
+    case "name": return stat.name;
+    case "plays": return stat.playcount;
+    case "wins": return stat.wincount;
+    case "winrate": return ratio(stat.wincount, stat.playcount);
+    case "avg": return stat.playcount ? stat.average : 99;
   }
+}
 
-export default function StatsGlobal() {
-    const {userToken, userName, userId} = UserData()
-    const [watchlistStats, setWatchlistStats] = useState<any>([]);
+export default function StatsWatchlist() {
+  const { userToken } = UserData();
+  const { data, error, loading } = useStatsFetch<{ data: WatchlistStat[] }>("stats/watchlist", userToken);
+  const [sort, setSort] = useState<SortState<SortKey>>({ key: "plays", desc: true });
+  const rows = useMemo(() => sortBy(data?.data ?? [], sort, sortValue), [data, sort]);
 
-    useEffect(() => {
-        getWatchlistStats(userToken, userId).then(items => {
-            setWatchlistStats(items.data);
-            console.log(items);
-    });
-    }, []);
-    return(
-      <div className="max-w-6xl w-full">
-        {
-            watchlistStats?.map((wls: any) =>
-            {
-                return <div className="flex" key={wls.id}>
-                        <div className="w-72">{wls.name}</div>
-                        <div className="w-48">Appearances: {wls.playcount}</div>
-                        <div className="w-24">Wins: {wls.wincount}</div>
-                        <div className="w-48">Average Placement: {wls.average.toFixed(2)}</div>
-                    </div>
-            })
-        }
-      </div>
-    );
-  }
+  if (error) return <ErrorState />;
+  if (loading) return <LoadingState />;
+
+  const onSort = (key: SortKey) => setSort(prev => nextSort(prev, key, key !== "name" && key !== "avg"));
+  const header = (label: string, key: SortKey, className = "text-right") => <SortHeader label={label} sortKey={key} sort={sort} onSort={onSort} className={className} />;
+
+  return (
+    <section aria-label="Watchlist stats" className="overflow-x-auto rounded-box bg-base-100 shadow-sm">
+      <table className="table table-zebra text-base">
+        <thead>
+          <tr>
+            {header("Card", "name", "")}
+            <th className="hidden sm:table-cell">Cost</th>
+            {header("Plays", "plays")}
+            {header("Wins", "wins")}
+            {header("Win rate", "winrate")}
+            {header("Avg. place", "avg")}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? <EmptyRow colSpan={6}>No cards are on the watchlist.</EmptyRow>
+            : rows.map(stat => (
+              <tr key={stat.id}>
+                <td><span className="flex items-center gap-3"><ArtThumb src={stat.artcrop} /><CardName id={stat.id} name={stat.name} /></span></td>
+                <td className="hidden sm:table-cell"><ManaCost cost={stat.cost} /></td>
+                <td className="text-right font-mono">{stat.playcount}</td>
+                <td className="text-right font-mono">{stat.wincount}</td>
+                <td className="text-right font-mono">{percent(ratio(stat.wincount, stat.playcount))}</td>
+                <td className="text-right font-mono">{stat.playcount ? stat.average.toFixed(2) : "—"}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}

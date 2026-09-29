@@ -1,41 +1,21 @@
+import { proxyFetch } from "../../util/apiProxy";
+import { parseBody } from "../../util/validate";
+import { z } from "zod";
+
+const matchCreateSchema = z.union([z.number(), z.string()]);
+const matchUpdateSchema = z.object({
+    prop: z.string().min(1),
+    matchid: z.union([z.number(), z.string()]),
+});
+
 export async function POST(request: Request) {
-    const res = await fetch(process.env.API_URL+`/match`, {
-        method: 'POST',
-        headers: request.headers,
-        body: JSON.stringify(await request.json())})
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("Server responds with error!");
-            } else if (data.status === 204) {
-                return [];
-            }
-            return data.json();
-        })
-    if(res.ok) {
-        return Response.json(await res.json());
-    }
-    else {
-        return Response.json(res);
-    }
+    const parsed = await parseBody(request, matchCreateSchema);
+    if ("error" in parsed) return parsed.error;
+    return proxyFetch(request, "/match", { body: parsed.data });
 }
 
 export async function PUT(request: Request) {
-    const res = await fetch(process.env.API_URL+`/match`, {
-        method: 'PUT',
-        headers: request.headers,
-        body: JSON.stringify(await request.json())})
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("Server responds with error!");
-            } else if (data.status === 204) {
-                return [];
-            }
-            return data.json();
-        })
-    if(res.ok) {
-        return Response.json(await res.json());
-    }
-    else {
-        return Response.json(res);
-    }
+    const parsed = await parseBody(request, matchUpdateSchema);
+    if ("error" in parsed) return parsed.error;
+    return proxyFetch(request, "/match", { body: parsed.data });
 }

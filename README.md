@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+This project is part of the parent Rumble workspace. Read the top-level [workspace README](../README.md) and [architecture specification](../ARCHITECTURE.md) before making changes that may affect `RumbleAPI` or shared API contracts.
+
 ## Getting Started
 
 First, run the development server:

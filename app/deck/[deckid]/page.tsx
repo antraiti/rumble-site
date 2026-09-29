@@ -2,56 +2,52 @@
 import { use, useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
+import { apiGet, apiPost } from "../../util/apiClient";
 
 async function getDeckInfo(token: string, id: number) {
-    return fetch('/api/deck/'+id, {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
-  }
+    return apiGet(`deck/${id}`, { token });
+}
 
   async function getUsers(token: string) {
-    return fetch('/api/users', {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet('users', { token });
   }
     async function stealDeck(token: string, id: number) {
-        return fetch(`/api/deck/${id}/steal`, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'x-access-token': token
-        }})
-        .then(data => {
-            if(data.status >= 400) {
-                console.log(data)
-                throw new Error("Server responds with error!");
-            }
-            return data.json();
-        })
+        return apiPost(`deck/${id}/steal`, { token });
     }   
+
+    function getManaSymbolUrl(symbol: string) {
+        const fileName = symbol === "∞" ? "INFINITY" : symbol === "½" ? "HALF" : symbol.replaceAll("/", "");
+        return `https://svgs.scryfall.io/card-symbols/${fileName}.svg`;
+    }
+
+    function StatusIcon({ src, label, color }: { src: string; label: string; color: string }) {
+        return <span
+            role="img"
+            aria-label={label}
+            title={label}
+            className={`size-4 shrink-0 ${color}`}
+            style={{
+                maskImage: `url('${src}')`,
+                WebkitMaskImage: `url('${src}')`,
+                maskPosition: "center",
+                WebkitMaskPosition: "center",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+            }}
+        />;
+    }
 
 export interface DeckPageProps {
     deckid: number;
+}
+
+function CategoryHeading({ label, count }: { label: string; count: number }) {
+    return <h2 className="mb-1 mt-3 flex items-center gap-2 border-b border-base-content/15 pb-1 text-xs font-bold uppercase text-base-content/70">
+        <span>{label}</span>
+        <span className="font-mono text-[11px] text-base-content/45">{count}</span>
+    </h2>;
 }
 
 export default function DeckDetails({ params }: { params: Promise<DeckPageProps>}) {
@@ -183,15 +179,52 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
 
     
     function CardDisplay(card: any) {
+        const [decklistEntry, cardInfo] = card;
+        const manaSymbols = cardInfo.cost?.match(/\{([^}]+)\}/g)?.map((symbol: string) => symbol.slice(1, -1)) ?? [];
+        const cardImage = printings.find((printing: any) => printing.cardid == cardInfo.id)?.cardimage;
+        const roleClass = decklistEntry.iscommander
+            ? "border-l-warning bg-warning/5"
+            : decklistEntry.iscompanion
+                ? "border-l-info bg-info/5"
+                : "border-l-transparent";
+
         return (
-            <div className={`flex bg-base-100 h-6 w-64 tooltip rounded-md m-1 ${card[0].iscommander ? "border-yellow-500 border " : ""}`} key={card[1].name}>
-                <div className="tooltip-content bg-transparent">
-                    <div><img className="object-scale-down w-72 h-72" src={printings.find((p: any) => p.cardid == card[1].id)?.cardimage}></img> </div>
-                </div>
-                <div className="px-2">{card[0].count}</div>
-                <a className="hover:font-bold" href={`https://scryfall.com/search?q=oracleid=${card[1].id}`}target="_blank">{card[1].name.split("//")[0]}</a>
-                {card[1].watchlist && <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#fff700" stroke="#fff700"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>This Card is on the Watchlist</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Alert"> <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="24" height="24"> </rect> <line x1="12" y1="13" x2="12" y2="9" id="Path" stroke="#fff700" stroke-width="2" stroke-linecap="round"> </line> <line x1="12" y1="16.5" x2="12" y2="16.63" id="Path" stroke="#fff700" stroke-width="2" stroke-linecap="round"> </line> <path d="M10.2679,5.0000025 C11.0377,3.66667 12.9622,3.66667 13.732,5.0000025 L20.6602,17.0000025 C21.43,18.3333 20.4678,20.0000025 18.9282,20.0000025 L5.07177,20.0000025 C3.53217,20.0000025 2.56992,18.3333 3.33972,17.0000025 L10.2679,5.0000025 Z" id="Path" stroke="#fff700" stroke-width="2" stroke-linecap="round"> </path> </g> </g> </g></svg>}
-                {card[1].banned && <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#ff0000" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>This Card Is BANNED</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Alert"> <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="24" height="24"> </rect> <line x1="12" y1="13" x2="12" y2="9" id="Path" stroke="#ff0000" stroke-width="2" stroke-linecap="round"> </line> <line x1="12" y1="16.5" x2="12" y2="16.63" id="Path" stroke="#ff0000" stroke-width="2" stroke-linecap="round"> </line> <path d="M10.2679,5.0000025 C11.0377,3.66667 12.9622,3.66667 13.732,5.0000025 L20.6602,17.0000025 C21.43,18.3333 20.4678,20.0000025 18.9282,20.0000025 L5.07177,20.0000025 C3.53217,20.0000025 2.56992,18.3333 3.33972,17.0000025 L10.2679,5.0000025 Z" id="Path" stroke="#ff0000" stroke-width="2" stroke-linecap="round"> </path> </g> </g> </g><div className="tooltip" data-tip="hello"></div></svg>}
+            <div className="tooltip tooltip-top mb-1 w-full break-inside-avoid" key={cardInfo.id}>
+                {cardImage && <div className="tooltip-content z-50 bg-transparent p-0 shadow-none">
+                    <img className="h-72 w-52 rounded-xl object-contain" src={cardImage} alt={`${cardInfo.name} card art`} />
+                </div>}
+                <article className={`flex min-h-9 w-full items-center gap-1.5 overflow-hidden rounded-md border border-base-300 border-l-2 bg-base-100 px-1 py-1 transition-colors hover:border-primary/50 hover:bg-base-200 ${roleClass}`}>
+                    <span aria-label={`${decklistEntry.count} copies`} title={`${decklistEntry.count} in deck`} className="flex w-8 shrink-0 self-stretch items-center justify-center border-r border-base-content/10 font-mono text-base font-bold text-base-content/75">
+                        {decklistEntry.count}
+                    </span>
+                    <a
+                        className="min-w-0 flex-1 truncate text-sm font-medium leading-snug hover:text-primary hover:underline"
+                        href={`https://scryfall.com/search?q=oracleid=${cardInfo.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        title={cardInfo.name}
+                    >
+                        {cardInfo.name.split("//")[0].trim()}
+                    </a>
+                    <div className="flex shrink-0 items-center gap-1">
+                        {decklistEntry.iscommander && <StatusIcon src="/crown-svgrepo-com.svg" label="Commander" color="bg-warning" />}
+                        {decklistEntry.iscompanion && <StatusIcon src="/person-team.svg" label="Companion" color="bg-info" />}
+                        {cardInfo.watchlist && <StatusIcon src="/star-svgrepo-com.svg" label="On watchlist" color="bg-warning" />}
+                        {cardInfo.banned && <StatusIcon src="/alert-svgrepo.svg" label="Banned card" color="bg-error" />}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-0.5" aria-label={cardInfo.cost ? `Mana cost ${cardInfo.cost}` : "No mana cost"}>
+                        {manaSymbols.map((symbol: string, index: number) => (
+                            <img
+                                key={`${symbol}-${index}`}
+                                src={getManaSymbolUrl(symbol)}
+                                alt={`{${symbol}}`}
+                                title={`{${symbol}}`}
+                                className="size-[18px]"
+                                loading="lazy"
+                            />
+                        ))}
+                    </div>
+                </article>
             </div>);
     }
 
@@ -214,60 +247,62 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
         </div>
         <h2>{deckData && userlist && userlist.includes((user: any) => user.id == deckData.deck.userid)?.username}</h2>
         <div className="pt-5">
-            <h1 className="text-xl font-bold">{"Mainboard:"}</h1>
-            <div className="xl:columns-4 lg:columns-4 md:columns-3 sm:columns-1">
-                <h2>{`Commander${commanders.length > 1 ? "s" : ""}:`}</h2>
+            <h1 className="mb-2 text-xl font-bold">Mainboard</h1>
+            <div className="columns-1 gap-3 md:columns-2 xl:columns-3">
+                <CategoryHeading label={`Commander${commanders.length > 1 ? "s" : ""}`} count={trueCount(commanders)} />
                 {deckData && commanders.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && companions.length > 0) && <h2 className="pt-2">{"Companion:"}</h2>}
+                {(deckData && companions.length > 0) && <CategoryHeading label="Companion" count={trueCount(companions)} />}
                 {(deckData && companions.length > 0) && companions.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && creatures.length > 0) && <h2 className="pt-2">{`Creatures (${trueCount(creatures)}):`}</h2>}
+                {(deckData && creatures.length > 0) && <CategoryHeading label="Creatures" count={trueCount(creatures)} />}
                 {(deckData && creatures.length > 0) && creatures.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && planeswalkers.length > 0) && <h2 className="pt-2">{`Planeswalkers (${trueCount(planeswalkers)}):`}</h2>}
+                {(deckData && planeswalkers.length > 0) && <CategoryHeading label="Planeswalkers" count={trueCount(planeswalkers)} />}
                 {(deckData && planeswalkers.length > 0) && planeswalkers.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && sorceries.length > 0) && <h2 className="pt-2">{`Sorceries (${trueCount(sorceries)}):`}</h2>}
+                {(deckData && sorceries.length > 0) && <CategoryHeading label="Sorceries" count={trueCount(sorceries)} />}
                 {(deckData && sorceries.length > 0) && sorceries.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && instants.length > 0) && <h2 className="pt-2">{`Instants (${trueCount(instants)}):`}</h2>}
+                {(deckData && instants.length > 0) && <CategoryHeading label="Instants" count={trueCount(instants)} />}
                 {(deckData && instants.length > 0) && instants.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && artifacts.length > 0) && <h2 className="pt-2">{`Artifacts (${trueCount(artifacts)}):`}</h2>}
+                {(deckData && artifacts.length > 0) && <CategoryHeading label="Artifacts" count={trueCount(artifacts)} />}
                 {(deckData && artifacts.length > 0) && artifacts.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && enchantments.length > 0) && <h2 className="pt-2">{`Enchantments (${trueCount(enchantments)}):`}</h2>}
+                {(deckData && enchantments.length > 0) && <CategoryHeading label="Enchantments" count={trueCount(enchantments)} />}
                 {(deckData && enchantments.length > 0) && enchantments.map((card: any) => {
                     return CardDisplay(card);
                 })}
 
-                {(deckData && lands.length > 0) && <h2 className="pt-2">{`Lands (${trueCount(lands)}:`}</h2>}
+                {(deckData && lands.length > 0) && <CategoryHeading label="Lands" count={trueCount(lands)} />}
                 {(deckData && lands.length > 0) && lands.map((card: any) => {
                     return CardDisplay(card);
                 })}
                 </div>
-            <div className="divider"></div>
-            <h2 className="text-xl font-bold pt-6">{"Sideboard:"}</h2>
-            <div className="md:columns-3 sm:columns-1">
-                {deckData && deckData?.cardlist.filter((card: any) => card[0].issideboard).map((card: any) => {
+            {sideboard.length > 0 && <>
+                <div className="divider"></div>
+                <div className="columns-1 gap-3 md:columns-2 xl:columns-3">
+                    <CategoryHeading label="Sideboard" count={trueCount(sideboard)} />
+                    {sideboard.map((card: any) => {
                     return CardDisplay(card);
-                })}
-            </div>
+                    })}
+                </div>
+            </>}
         </div>
     </div>);
 }

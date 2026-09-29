@@ -2,57 +2,18 @@
 import { use, useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
+import { apiGet, apiPut } from "../../util/apiClient";
 
 async function getDeckInfo(token: string, id: number) {
-    return fetch('/api/deck/'+id, {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet(`deck/${id}`, { token });
   }
 
   async function updateDeck(token: string, id: number, prop: string, val: string) {
-    return fetch('/api/deck/'+id, {
-    method: 'PUT',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    },
-    body: JSON.stringify({'prop': prop, 'val': val})
-    })
-    .then((data: any) => {
-        if(data.status >= 400) {
-            throw new Error(data.message);
-        }
-        return data.json();
-    })
+    return apiPut(`deck/${id}`, { token, body: { prop, val } });
   }
 
   async function sendDeleteDeckRequest(token: string, id: number) {
-    return fetch('/api/deck/remove/'+id, {
-    method: 'PUT',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        } else if (data.status === 204) {
-            return [];
-        }
-        return data.json();
-    })
+    return apiPut(`deck/remove/${id}`, { token });
 }
 
 export interface DeckDetailsProps {
@@ -76,10 +37,6 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
     const [ctimer, setCtimer] = useState<any | null>(null);
     const [printingList, setPrintingList] = useState<any | null>([]);
 
-    useEffect(() => {
-        fetchDeckInfo();
-    },[])
-
     function fetchDeckInfo() {
         getDeckInfo(userToken, deckid).then((item) => {
             setDeckInfo(item.deck);
@@ -96,6 +53,10 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
             console.log(item);
         });
     }
+
+    useEffect(() => {
+        fetchDeckInfo();
+    },[])
 
     function sendDeckUpdate(prop: string, val: string) {
         updateDeck(userToken, deckid, prop, val).then(() => {

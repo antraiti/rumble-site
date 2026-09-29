@@ -1,44 +1,20 @@
+import { proxyFetch } from "../../../util/apiProxy";
+import { parseBody } from "../../../util/validate";
+import { z } from "zod";
+
+const deckUpdateSchema = z.object({
+    prop: z.string().min(1),
+    val: z.string(),
+});
+
 export async function GET(request: Request, { params }: { params: Promise<{ deckid: string }>}) {
     const { deckid } = await params;
-    const res = await fetch(process.env.API_URL+`/deck/v2/${deckid}`, {
-        method: 'GET',
-        headers: request.headers})
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("Server responds with error!");
-            } else if (data.status === 204) {
-                return [];
-            }
-            return data.json();
-        })
-    if(res.ok) {
-        return Response.json(await res.json());
-    }
-    else {
-        //this is currently broken and always going here
-        return Response.json(res);
-    }
+    return proxyFetch(request, `/deck/v2/${deckid}`);
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ deckid: string }> }) {
     const { deckid } = await params;
-    const res = await fetch(process.env.API_URL+`/deck/v2/${deckid}`, {
-        method: 'PUT',
-        headers: request.headers,
-        body: JSON.stringify(await request.json())})
-        .then(data => {
-            if(data.status >= 400) {
-                throw new Error("Server responds with error!");
-            } else if (data.status === 204) {
-                return [];
-            }
-            return data.json();
-        })
-    if(res.ok) {
-        return Response.json(await res.json());
-    }
-    else {
-        //this is currently broken and always going here
-        return Response.json(res);
-    }
+    const parsed = await parseBody(request, deckUpdateSchema);
+    if ("error" in parsed) return parsed.error;
+    return proxyFetch(request, `/deck/v2/${deckid}`, { body: parsed.data });
 }

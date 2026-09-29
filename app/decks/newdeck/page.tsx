@@ -2,41 +2,20 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import userData from "../../util/UserData"
+import { apiGet, apiPost } from "../../util/apiClient";
+import type { User } from "../../types";
 
 
 async function getUsers(token: string) {
-    return fetch('/api/users', {
-    method: 'GET',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    }})
-    .then(data => {
-        if(data.status >= 400) {
-            throw new Error("Server responds with error!");
-        }
-        return data.json();
-    })
+    return apiGet<User[]>('users');
   }
 
   async function SubmitDeck(token: string, di: any) {
-    console.log("submitting deck")
-    return fetch('/api/deck', {
-    method: 'POST',
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'x-access-token': token
-    },
-    body: JSON.stringify(di)
-    })
-    .then((data: any) => {
-        return data.json();
-    })
+    return apiPost('deck', { token, body: di });
 }
 
 export default function NewDeck() {
-    const [users, setUsers] = useState([]);
+    const [users, setUsers] = useState<User[]>([]);
     const router = useRouter();
     const { userToken, userId } = userData();
     const [deckList, setDeckList] = useState("");
