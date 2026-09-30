@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import userData from "../../util/UserData"
 import { apiGet, apiPost } from "../../util/apiClient";
 import PageHeader from "../../components/PageHeader";
-import { CardPreviewRow, CategoryHeading, ManaSymbols, StatusIcon } from "../../components/CardList";
+import { CardImage, CardPreviewRow, CategoryHeading, ManaSymbols, StatusIcon } from "../../components/CardList";
 import { DeckName, PlayerName, useDeckName } from "../../components/DemoMode";
 import type { User } from "../../types";
 
@@ -119,8 +119,7 @@ export default function DeckView({ params }: { params: Promise<{ deckid: number 
 
     const { deck, legality } = deckData;
     const printings = deckData.printings ?? [];
-    const imageFor = (card: DeckCardInfo) => printings.find(printing => printing.cardid === card.id)?.cardimage
-        ?? `https://api.scryfall.com/cards/named?format=image&version=normal&exact=${encodeURIComponent(card.name)}`;
+    const imageFor = (card: DeckCardInfo) => printings.find(printing => printing.cardid === card.id)?.cardimage;
     const commanderNames = [deck.commander, deck.partner].map(id => deckData.cardlist?.find(([, card]) => card.id === id)?.[1].name);
     const owner = users.find(user => user.id === deck.userid);
     const canEdit = !!userToken && (Number(userId) === deck.userid || !!isAdmin);
@@ -325,7 +324,7 @@ export default function DeckView({ params }: { params: Promise<{ deckid: number 
                     <p className="text-sm text-base-content/70">{deckName(deck, commanderNames)} · {library.length - hand.length} cards left in library</p>
                     <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7">
                         {hand.map((card, index) => (
-                            <img key={`${card.id}-${index}`} src={imageFor(card)} alt={card.name} title={card.name} loading="lazy" className="w-full rounded-[4.75%/3.5%] shadow" />
+                            <CardImage key={`${card.id}-${index}`} image={imageFor(card)} name={card.name} className="w-full rounded-[4.75%/3.5%] shadow" />
                         ))}
                     </div>
                     <div className="modal-action">
