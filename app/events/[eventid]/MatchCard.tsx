@@ -72,7 +72,7 @@ export default function MatchCard(props: MatchCardProps) {
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                     {!match.end && performances.length > 1 && (
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => props.randomizeTurnOrder(match.id)}>Randomise turn order</button>
+                        <button type="button" className="btn btn-ghost btn-sm" disabled={!!match.start} title={match.start ? "Turn order can't change after the game starts" : undefined} onClick={() => props.randomizeTurnOrder(match.id)}>Randomise turn order</button>
                     )}
                     {match.start && <span className="text-sm text-base-content/70">Started {new Date(match.start).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>}
                     {match.start && !match.end && <span className="font-mono text-lg" aria-label="Elapsed time">{formatElapsed(elapsed)}</span>}
