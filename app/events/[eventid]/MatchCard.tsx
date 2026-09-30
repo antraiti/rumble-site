@@ -37,6 +37,7 @@ export default function MatchCard(props: MatchCardProps) {
         .map(normalizeDeckEntry)
         .filter((deck: NormalizedDeckEntry | null): deck is NormalizedDeckEntry => deck !== null);
     const nameOf = (deck: Record<string, any>) => deckName(deck, [deck.commandername, deck.partnername]);
+    const updatedAt = (deck: Record<string, any>) => (deck.lastupdated ? Date.parse(deck.lastupdated) : NaN) || 0;
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
@@ -95,7 +96,7 @@ export default function MatchCard(props: MatchCardProps) {
                         const player = playerName(performance.userid, performance.username);
                         const playerDecks = decks
                             .filter(entry => entry.deck.userid == performance.userid && (themed || entry.deck.islegal || entry.deck.id == performance.deckid))
-                            .sort((first, second) => nameOf(first.deck).localeCompare(nameOf(second.deck)));
+                            .sort((first, second) => updatedAt(second.deck) - updatedAt(first.deck) || nameOf(first.deck).localeCompare(nameOf(second.deck)));
                         const winner = performance.placement == 1;
                         return (
                             <li key={performance.id} className={`grid grid-cols-[4rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-box border bg-base-200/60 p-2 md:grid-cols-[5rem_8rem_minmax(0,2fr)_6rem_6rem_minmax(0,1fr)_2.5rem] ${winner ? "border-amber-300" : "border-transparent"}`}>

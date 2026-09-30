@@ -79,9 +79,9 @@ export default function EventPage({ params }: { params: Promise<{ eventid: numbe
     }
 
     const updateMatch = (e: { target: { name: string; value: string } }, perfid: number) => run(updatePerformance(userToken, perfid, e.target.name, e.target.value));
-    const requestNewMatch = () => run(apiPost('match', { token: userToken, body: eventid }));
+    const requestNewMatch = () => run(apiPost('match', { token: userToken, body: Number(eventid) }));
     const requestMatchTimestampUpdate = (matchid: number, prop: string) => run(apiPut('match', { token: userToken, body: { prop, matchid } }));
-    const requestNewPerformance = (userid: string, matchid: number) => run(apiPost('performance', { token: userToken, body: { userid, matchid } }));
+    const requestNewPerformance = (userid: string, matchid: number) => run(apiPost('performance', { token: userToken, body: { userid: Number(userid), matchid } }));
     const requestMatchJoin = (matchid: number) => run(apiPost('performance', { token: userToken, body: { userid: userId, matchid } }));
     const setMatchPower = (matchid: number, power: string) => run(apiPut('match', { token: userToken, body: { prop: power, matchid } }));
     const randomizeTurnOrder = (matchid: number) => {

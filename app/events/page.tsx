@@ -61,7 +61,7 @@ export default function Events() {
     setNewEventDetails((prev) => {
       return {
       ...prev,
-      [e.target.name]: e.target.type == "checkbox" ? e.target.checked : e.target.value,
+      [e.target.name]: e.target.type == "checkbox" ? e.target.checked : e.target.name == "themeid" ? Number(e.target.value) : e.target.value,
       };
     });
   }
