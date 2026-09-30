@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ColorPlayCounts, ColorWinRates, SeatStat } from "../../types";
 import { PlayerName } from "../../components/DemoMode";
+import SteadyAura from "../../components/SteadyAura";
 
 export const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
 export const ratio = (part: number, total: number) => (total > 0 ? part / total : 0);
@@ -81,7 +82,7 @@ export function ColorTable({ plays, winrates }: { plays: ColorPlayCounts; winrat
           return (
             <li key={color.key} className="min-w-0">
               {best.has(color.key)
-                ? <div className={`aura block h-full w-full [--aura-radius:var(--radius-box)] ${color.ring}`}>{tile}</div>
+                ? <SteadyAura className={`block h-full w-full [--aura-radius:var(--radius-box)] ${color.ring}`}>{tile}</SteadyAura>
                 : tile}
             </li>
           );

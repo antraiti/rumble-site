@@ -5,6 +5,7 @@ import userData from "../util/UserData"
 import DeckCard, { type DeckStats, type DeckSummary } from "./DeckCard";
 import { apiGet } from "../util/apiClient";
 import { useDeckName } from "../components/DemoMode";
+import PageHeader from "../components/PageHeader";
 import type { Color, DeckWithCards, Performance } from "../types";
 
 type ColorKey = "white" | "blue" | "black" | "red" | "green";
@@ -92,13 +93,7 @@ export default function Decks() {
 
     return (
         <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
-            <header className="flex flex-wrap items-end justify-between gap-4 border-b border-base-content/15 pb-5">
-                <div>
-                    <p className="text-sm font-bold uppercase text-primary">Rumble / Decks</p>
-                    <h1 className="mt-1 text-3xl font-bold">My decks</h1>
-                </div>
-                <Link href="/decks/newdeck" className="btn btn-primary">New deck</Link>
-            </header>
+            <PageHeader eyebrow="Rumble / Decks" title="My decks" actions={<Link href="/decks/newdeck" className="btn btn-primary">New deck</Link>} />
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
                 <label className="input w-full sm:w-80">
@@ -148,7 +143,7 @@ export default function Decks() {
                     <>
                         <p className="mb-3 text-sm text-base-content/60">{visible.length} of {summaries.length} decks</p>
                         <div className="grid gap-4 lg:grid-cols-2">
-                            {visible.map(summary => <DeckCard key={summary.deck.id} summary={summary} />)}
+                            {visible.map(summary => <DeckCard key={summary.deck.id} summary={summary} colors={colors} />)}
                         </div>
                     </>
                 )}

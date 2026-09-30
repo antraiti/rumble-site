@@ -5,6 +5,7 @@ import type { Color } from "../types";
 import { FALLBACK_IMAGE, identityAura, identityColors } from "../decks/DeckCard";
 import CopyDecklistButton from "./CopyDecklistButton";
 import PageHeader from "../components/PageHeader";
+import SteadyAura from "../components/SteadyAura";
 import { fetchPublic } from "../util/publicApi";
 import { openGraph } from "../util/siteMetadata";
 
@@ -90,8 +91,10 @@ function StarterDeckCard({ data, tagline, tags, color }: { data: DecklistRespons
     }).join(", ");
 
     return (
-        <article
-            className="aura block h-full [background-image:none] not-hover:[animation:none] hover:[background-image:var(--deck-aura)] has-focus-visible:[background-image:var(--deck-aura)]"
+        <SteadyAura
+            as="article"
+            hoverOnly
+            className="block h-full [background-image:none] hover:[background-image:var(--deck-aura)] has-focus-visible:[background-image:var(--deck-aura)]"
             style={{ "--deck-aura": color ? identityAura(color) : undefined } as CSSProperties}
         >
             <div className="card relative h-full overflow-hidden bg-base-100 shadow-md">
@@ -135,6 +138,6 @@ function StarterDeckCard({ data, tagline, tags, color }: { data: DecklistRespons
                     </div>
                 </div>
             </div>
-        </article>
+        </SteadyAura>
     );
 }

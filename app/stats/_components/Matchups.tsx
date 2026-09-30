@@ -4,6 +4,7 @@ import UserData from "../../util/UserData";
 import type { PlayerCount, PlayerMatchups } from "../../types";
 import { useStatsOptions } from "./StatsShell";
 import { useStatsFetch } from "./useStatsFetch";
+import SteadyAura from "../../components/SteadyAura";
 import { EmptyRow, ErrorState, Panel, PlayerLink, SeatChart, formatDuration, percent, ratio } from "./StatsUi";
 
 const times = (count: number) => `${count} ${count === 1 ? "time" : "times"}`;
@@ -132,7 +133,7 @@ function RivalCard({ label, tone, rivals, line, highlight = false }: {
       ) : <p className="text-base-content/60">No knockouts recorded yet.</p>}
     </InsightCard>
   );
-  return top && highlight ? <div className={`aura block h-full ${tones[tone].text}`}>{card}</div> : card;
+  return top && highlight ? <SteadyAura className={`block h-full ${tones[tone].text}`}>{card}</SteadyAura> : card;
 }
 
 function Streak({ label, value }: { label: string; value: number | string }) {

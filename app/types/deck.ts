@@ -12,6 +12,7 @@ export interface DeckCommander {
   id: string;
   name: string;
   image?: string;
+  identityid?: number;
 }
 
 /** [deckInfo, commander, partner, companion] tuple returned by /api/decks. */

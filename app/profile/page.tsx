@@ -6,6 +6,7 @@ import { useDemoMode } from "../components/DemoMode";
 import PageHeader from "../components/PageHeader";
 import Cookies from "js-cookie";
 import { apiGet, apiPost, apiPut } from "../util/apiClient";
+import { getShowDeckOwner, setShowDeckOwner } from "../util/adminPrefs";
 import type { BulkProcessReport, User } from "../types";
 
 type BulkJobStatus = { running: boolean; stage?: string; started_at?: string; finished_at?: string; error?: string; report?: BulkProcessReport };
@@ -60,6 +61,12 @@ export default function Profile() {
     const [selectedTheme, setSelectedTheme] = useState<string>(storedTheme || "default");
     const ThemeSetter = useContext(SetThemeContext);
     const demoMode = useDemoMode();
+    const [showDeckOwner, setShowDeckOwnerState] = useState(false);
+
+    useEffect(() => {
+        // localStorage is unavailable during SSR; read after mount to avoid hydration mismatch
+        setShowDeckOwnerState(getShowDeckOwner());
+    }, []);
 
     function loadUsers() {
         if (!isAdmin || !userToken) return;
@@ -349,6 +356,14 @@ export default function Profile() {
                                 {checkingLegality && <span className="loading loading-spinner loading-sm" aria-hidden="true" />}
                                 {checkingLegality ? "Checking…" : "Recheck all decks"}
                             </button>
+                        </Card>
+
+                        <Card title="New deck owner" description="Saved on this device.">
+                            <label className="label cursor-pointer justify-start gap-3 whitespace-normal text-base text-base-content">
+                                <input type="checkbox" className="toggle toggle-warning" checked={showDeckOwner} onChange={e => { setShowDeckOwner(e.target.checked); setShowDeckOwnerState(e.target.checked); }} />
+                                Show owner picker on New deck
+                            </label>
+                            <p className="text-base-content/70">Lets you create a deck for another player. When off, new decks are always yours.</p>
                         </Card>
                     </div>
 
