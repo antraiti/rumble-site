@@ -42,7 +42,6 @@ export async function downloadImage(imageUrl: string, filename = 'missing_name.p
 
     // 5. Revoke the object URL to free up memory.
     URL.revokeObjectURL(objectUrl);
-    console.log('Image download initiated successfully.');
 
   } catch (error) {
     console.error('Error downloading the image:', error);

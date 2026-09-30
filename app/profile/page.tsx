@@ -2,6 +2,7 @@
 import { useContext, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import userData from "../util/UserData"
 import SetThemeContext from "../components/ThemeContext";
+import { useDemoMode } from "../components/DemoMode";
 import PageHeader from "../components/PageHeader";
 import Cookies from "js-cookie";
 import { apiGet, apiPost, apiPut } from "../util/apiClient";
@@ -49,6 +50,8 @@ export default function Profile() {
     const [creatingUser, setCreatingUser] = useState(false);
 
     const [bulkAction, setBulkAction] = useState<"idle" | "preview" | "update">("idle");
+    const [legalityStatus, setLegalityStatus] = useState<Status>(null);
+    const [checkingLegality, setCheckingLegality] = useState(false);
     const [bulkReport, setBulkReport] = useState<BulkProcessReport | null>(null);
     const [bulkMessage, setBulkMessage] = useState("");
     const [bulkError, setBulkError] = useState("");
@@ -56,6 +59,7 @@ export default function Profile() {
 
     const [selectedTheme, setSelectedTheme] = useState<string>(storedTheme || "default");
     const ThemeSetter = useContext(SetThemeContext);
+    const demoMode = useDemoMode();
 
     function loadUsers() {
         if (!isAdmin || !userToken) return;
@@ -138,6 +142,26 @@ export default function Profile() {
             setCreateStatus({ kind: "error", text: errorText(error, "Unable to create user.") });
         } finally {
             setCreatingUser(false);
+        }
+    }
+
+    async function refreshLegality() {
+        if (!userToken) return;
+        setCheckingLegality(true);
+        setLegalityStatus(null);
+        try {
+            const result = await apiPost<{ checked: number; nowlegal: number; nowillegal: number }>("admin/decklegality", { token: userToken });
+            const changed = result.nowlegal + result.nowillegal;
+            setLegalityStatus({
+                kind: "success",
+                text: changed
+                    ? `Checked ${result.checked} decks: ${result.nowlegal} now legal, ${result.nowillegal} now not legal.`
+                    : `Checked ${result.checked} decks. Nothing changed.`,
+            });
+        } catch (error) {
+            setLegalityStatus({ kind: "error", text: errorText(error, "Couldn't recheck decks.") });
+        } finally {
+            setCheckingLegality(false);
         }
     }
 
@@ -228,7 +252,7 @@ export default function Profile() {
 
     return (
         <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
-            <PageHeader eyebrow="Rumble / Profile" title={<span className="flex flex-wrap items-center gap-3">{userName}{isAdmin && <span className="badge badge-warning">Admin</span>}</span>}>
+            <PageHeader eyebrow="Rumble / Profile" title={<span className="flex flex-wrap items-center gap-3">{demoMode.hidePlayerNames ? "Profile" : userName}{isAdmin && <span className="badge badge-warning">Admin</span>}</span>}>
                 Manage your password and how the site looks.
             </PageHeader>
 
@@ -261,6 +285,19 @@ export default function Profile() {
                         {["bg-primary", "bg-secondary", "bg-accent", "bg-neutral", "bg-base-300"].map(swatch => <span key={swatch} className={`size-8 rounded-field ${swatch}`} />)}
                         <span className="ml-2 text-sm text-base-content/70">Preview</span>
                     </div>
+                </Card>
+
+                <Card title="Demo mode" description="Saved on this device. Handy when showing the site to others.">
+                    <label className="label cursor-pointer justify-start gap-3 whitespace-normal text-base text-base-content">
+                        <input type="checkbox" className="toggle toggle-primary" checked={demoMode.hideDeckNames} onChange={e => demoMode.setHideDeckNames(e.target.checked)} />
+                        Hide deck names
+                    </label>
+                    <p className="text-base-content/70">Decks show their commander and last updated date instead of their custom name. Starter decks keep their names.</p>
+                    <label className="label cursor-pointer justify-start gap-3 whitespace-normal text-base text-base-content">
+                        <input type="checkbox" className="toggle toggle-primary" checked={demoMode.hidePlayerNames} onChange={e => demoMode.setHidePlayerNames(e.target.checked)} />
+                        Hide player names
+                    </label>
+                    <p className="text-base-content/70">Players show as &ldquo;Player&nbsp;#&rdquo; on events, stats, and decks.</p>
                 </Card>
             </div>
 
@@ -304,6 +341,14 @@ export default function Profile() {
                                 <StatusMessage status={resetStatus} />
                                 <button type="submit" className="btn btn-warning" disabled={resetting || !resetUser}>{resetting ? "Resetting…" : "Reset password"}</button>
                             </form>
+                        </Card>
+
+                        <Card title="Deck legality" description="Recheck every deck against the current rules and banlist, and update the Legal / Not legal badges. Run this after changing the banlist.">
+                            <StatusMessage status={legalityStatus} />
+                            <button type="button" className="btn btn-warning btn-outline self-start" disabled={checkingLegality} onClick={refreshLegality}>
+                                {checkingLegality && <span className="loading loading-spinner loading-sm" aria-hidden="true" />}
+                                {checkingLegality ? "Checking…" : "Recheck all decks"}
+                            </button>
                         </Card>
                     </div>
 
@@ -369,6 +414,8 @@ function BulkReportSummary({ report, onDownload }: { report: BulkProcessReport; 
         { label: "Card backs", value: report.new_card_backs },
         { label: "Printings", value: report.new_printings },
         { label: "Token links", value: report.new_card_tokens },
+        { label: writes ? "Ban groups set" : "Ban groups (proposed)", value: report.ban_group_updates ?? 0 },
+        { label: writes ? "Power/toughness filled" : "Power/toughness (proposed)", value: report.power_updates ?? 0 },
         { label: "Warnings", value: `${report.warnings.length}${report.warnings_truncated ? "+" : ""}` },
     ];
     return (

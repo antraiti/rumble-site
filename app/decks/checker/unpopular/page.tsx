@@ -44,7 +44,6 @@ export default function UnpopularChecker() {
 
     useEffect(() => {
         getCardsStats(userToken, userId).then(items => {
-            console.dir(items["cards"])
             const filteredCards: Array<any> = []
             items["cards"]
                 .sort((a:any,b:any) => b[1]["count"]-a[1]["count"])

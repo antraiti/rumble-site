@@ -4,25 +4,42 @@ import userData from "../../util/UserData"
 import { ttsCard, ttsCustomDeck, ttsDeck, ttsDeckCustom } from "@/models/tts/tts_deckmodel";
 import { downloadImage, downloadJsonFile } from "@/app/util/utils";
 import { apiGet, apiPost } from "@/app/util/apiClient";
+import { DeckName, useDeckName } from "@/app/components/DemoMode";
+import PageHeader from "@/app/components/PageHeader";
+import Link from "next/link";
+
+type ExportEntry = { cardid?: string; count?: number; iscommander?: boolean; iscompanion?: boolean; issideboard?: boolean; istoken?: boolean; id?: string };
+type ExportCard = { id: string; name?: string; typeline?: string; oracletext?: string; transform?: boolean };
+type ExportRow = [ExportEntry, ExportCard];
+type Printing = { id: string; cardid: string; cardimage: string };
+type ExportDeckResponse = {
+    deck: { id: number; name: string; commander: string | null; partner: string | null; lastupdated?: string | null };
+    cardlist: ExportRow[] | null;
+    printings: Printing[] | null;
+    tokens: string[] | null;
+    cardbacks: ExportCard[] | null;
+};
 
 async function getDeckInfo(token: string, id: number) {
-    return apiGet(`deck/${id}`, { token });
+    return apiGet<ExportDeckResponse>(`deck/${id}`, { token });
 }
 
 async function getFavoritePrintings(token: string) {
-    return apiGet('cards/printfavorite', { token });
+    return apiGet<FavoritePrinting[]>('cards/printfavorite', { token });
 }
 
 async function setFavoritePrinting(token: string, cardid: string, printingid: string) {
     return apiPost('cards/printfavorite', { token, body: {"card": cardid, "print": printingid} });
 }
 
+const dialog = (id: string) => document.getElementById(id) as HTMLDialogElement | null;
+
 export interface DeckViewPageProps {
     deckid: number;
 }
 
 interface DeckCardPrinting {
-    card: any;
+    card: ExportRow;
     printingid: string;
     printing: string;
 }
@@ -38,21 +55,20 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
     const {deckid} = use(params);
     const { userToken } = userData();
 
-    const [deckData, setDeckData] = useState<any | null>();
-    const [cards, setCards] = useState<any[]>([]);
-    const [printings, setPrintings] = useState<any[]>([]);
+    const [deckData, setDeckData] = useState<ExportDeckResponse | null>(null);
+    const [cards, setCards] = useState<ExportRow[]>([]);
+    const [printings, setPrintings] = useState<Printing[]>([]);
     const [favoritePrintings, setFavoritePrintings] = useState<FavoritePrinting[]>([]);
-    const [tokens, setTokens] = useState<any[]>([]);
-    const [selectedCard, setSelectedCard] = useState<any>();
+    const [tokens, setTokens] = useState<string[]>([]);
+    const [selectedCard, setSelectedCard] = useState<ExportRow>();
     const [cardPrintings, setCardPrintings] = useState<Map<string, DeckCardPrinting>>(new Map<string, DeckCardPrinting>());
     const [cardBack, setCardBack] = useState<string>("https://static.wikia.nocookie.net/mtgsalvation_gamepedia/images/f/f8/Magic_card_back.jpg");
-
-    useEffect(() => {
-        const cardbackInput = document.getElementById('cardback-url') as HTMLInputElement | null;
-        cardbackInput?.addEventListener('focus', function() {
-            this.select();
-        });
-    }, [])
+    const [loadError, setLoadError] = useState(false);
+    const deckName = useDeckName();
+    const commanderNames = deckData
+        ? [deckData.deck.commander, deckData.deck.partner].map(id => deckData.cardlist?.find(card => card[1].id === id)?.[1].name)
+        : [];
+    const displayName = deckData ? deckName(deckData.deck, commanderNames) : "";
 
     function updateFavorites() {
         if (!userToken) return;
@@ -81,7 +97,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
             if ((cp.card[1].id as string).endsWith("/back")) return; //skip card backs
             logString += `Processing: ${cp.card[1].id}`
 
-            for (let i = 0; i < cp.card[0].count; i++) {
+            for (let i = 0; i < (cp.card[0].count ?? 0); i++) {
                 const stringId: string = counter.toString();
                 const numId: number = counter * 100; //i hate TTS
 
@@ -93,7 +109,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                 //make new ttsCard object with custdeck on it
                 const tCard: ttsCard = new ttsCard();
                 tCard.Nickname = `${cp.card[1].name} \n${cp.card[1].typeline}`;
-                tCard.Description = cp.card[1].oracletext;
+                tCard.Description = cp.card[1].oracletext ?? "";
                 tCard.CardID = numId;
                 tCard.CustomDeck[stringId] = tCDeck;
 
@@ -109,7 +125,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
 
                     const tBackCard: ttsCard = new ttsCard();
                     tBackCard.Nickname = `${tBackCardPrint.card[1].name} \n${tBackCardPrint.card[1].typeline}`;
-                    tBackCard.Description = tBackCardPrint.card[1].oracletext;
+                    tBackCard.Description = tBackCardPrint.card[1].oracletext ?? "";
                     tBackCard.CardID = backNumId;
                     tBackCard.CustomDeck[backStringId] = tBackCDeck;
 
@@ -175,8 +191,8 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
             })
         }
 
-        downloadJsonFile(JSON.stringify(tDeck, null, 4), deckData?.deck.name);
-        (document?.getElementById('export_info') as any).showModal();
+        downloadJsonFile(JSON.stringify(tDeck, null, 4), displayName);
+        dialog('export_info')?.showModal();
     }
 
     useEffect(() => {
@@ -188,68 +204,69 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
             setFavoritePrintings(e)
 
             getDeckInfo(userToken, deckid).then((item) => {
-                console.log(item)
-
+                const itemPrintings = item.printings ?? [];
                 setDeckData(item);
-                setPrintings(item.printings)
-                setTokens(item.tokens)
-                item.tokens.map((token: any) => {
+                setPrintings(itemPrintings)
+                setTokens(item.tokens ?? [])
+                ;(item.tokens ?? []).forEach(token => {
                     const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == token)
-                    const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == token)
-                    if (!printing) console.log("no printing found for token " + token)
+                    const printing = favoritePrint ? itemPrintings.find(p => p.id == favoritePrint.printingid) : itemPrintings.find(p => p.cardid == token)
+                    if (!printing) console.warn("no printing found for token " + token)
                     cardPrintings.set(token, {
                         card: [{id: token, count: 1, istoken: true}, {id: token, name: "token", oracletext: "sorry i didnt setup this info"}],
-                        printing: printing.cardimage,
-                        printingid: printing.id
+                        printing: printing?.cardimage ?? "",
+                        printingid: printing?.id ?? ""
                     })
                 })
 
                 setCards([]);
-                item.cardlist.map((card: any) => {
+                ;(item.cardlist ?? []).forEach(card => {
                     const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == card[0].cardid)
-                    if(favoritePrint) console.log(favoritePrint)
-                    const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == card[1].id)
-                    cardPrintings.set(card[0].cardid, {
+                    const printing = favoritePrint ? itemPrintings.find(p => p.id == favoritePrint.printingid) : itemPrintings.find(p => p.cardid == card[1].id)
+                    cardPrintings.set(card[1].id, {
                         card: card,
-                        printing: printing.cardimage,
-                        printingid: printing.id
+                        printing: printing?.cardimage ?? "",
+                        printingid: printing?.id ?? ""
                     })
                     setCards(prev => [...prev, card])
                     if (card[1].transform) {
-                        const backcard = item.cardbacks.find((cb: any) => cb.id == card[0].cardid+"/back");
-                        console.log(card[0].cardid+"/back")
+                        const backcard = item.cardbacks?.find(cb => cb.id == card[1].id + "/back");
                         //const favoritePrint = e.find((p: FavoritePrinting) => p.cardid == backcard.id)
-                        if (!backcard) console.log("no back card found for " + card[0].cardid)
-                        const printing = favoritePrint ? item.printings.find((p: any) => p.id == favoritePrint.printingid) : item.printings.find((p: any) => p.cardid == backcard.id)
-                        if (!printing) console.log("no printing found for token " + backcard.id)
+                        if (!backcard) {
+                            console.warn("no back card found for " + card[0].cardid)
+                            return
+                        }
+                        const printing = favoritePrint ? itemPrintings.find(p => p.id == favoritePrint.printingid) : itemPrintings.find(p => p.cardid == backcard.id)
+                        if (!printing) console.warn("no printing found for card back " + backcard.id)
                         setCards(prev => [...prev, [{}, backcard]])
                         cardPrintings.set(backcard.id, {
                             card: [{}, backcard],
-                            printing: printing.cardimage,
-                            printingid: printing.id
+                            printing: printing?.cardimage ?? "",
+                            printingid: printing?.id ?? ""
                         })
                     }
                 })
-            });
+            }).catch(() => setLoadError(true));
                 })
             }, [deckid, userToken])
 
     
-    function CardDisplay(card: any) {
+    function CardDisplay(card: ExportRow) {
         const favorited: boolean = favoritePrintings.find(e => e.printingid == cardPrintings.get(card[1].id)?.printingid) != null
         return (
             <div 
-                className="hover-3d group cursor-pointer w-75 relative" 
+                className="hover-3d group relative w-full cursor-pointer" 
                 key={card[1].id}
             >
                 <figure 
                     className="max-w-100 rounded-2xl" 
                 >
-                    <div 
+                    {userToken && <button
+                        type="button"
                         className="absolute w-12 h-12 bg-gray-800/0 hover:bg-gradient-to-br from-gray-800/90 to-gray-800/0 p-2 hover:p-1"
                         title={favorited ? "Remove from favorites" : "Add to favorites"}
+                        aria-label={`${favorited ? "Remove" : "Save"} ${card[1].name ?? "card"} printing ${favorited ? "from" : "as"} favorite`}
                         onClick={()=> {
-                            if (!userToken) return;
                             const request = favorited
                                 ? setFavoritePrinting(userToken, card[1].id, "")
                                 : setFavoritePrinting(userToken, card[1].id, cardPrintings.get(card[1].id)?.printingid ?? "");
@@ -267,18 +284,18 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
                             <path d="M1306.181 1110.407c-28.461 20.781-40.32 57.261-29.477 91.03l166.136 511.398-435.05-316.122c-28.686-20.781-67.086-20.781-95.66 0l-435.05 316.122 166.25-511.623c10.842-33.544-1.017-70.024-29.591-90.805L178.577 794.285h537.825c35.351 0 66.523-22.701 77.365-56.245l166.25-511.51 166.136 511.397a81.155 81.155 0 0 0 77.365 56.358h537.939l-435.276 316.122Zm609.77-372.819c-10.956-33.656-42.014-56.244-77.365-56.244h-612.141l-189.064-582.1C1026.426 65.589 995.367 43 960.017 43c-35.351 0-66.523 22.588-77.365 56.245L693.475 681.344H81.335c-35.351 0-66.41 22.588-77.366 56.244-10.842 33.657 1.017 70.137 29.591 90.918l495.247 359.718-189.29 582.211c-10.842 33.657 1.017 70.137 29.704 90.918 14.23 10.39 31.059 15.586 47.661 15.586 16.829 0 33.657-5.195 47.887-15.699l495.248-359.718 495.02 359.718c28.575 20.894 67.088 20.894 95.775.113 28.574-20.781 40.433-57.261 29.59-91.03l-189.289-582.1 495.247-359.717c28.687-20.781 40.546-57.261 29.59-90.918Z" fillRule="evenodd"/>
                         </svg>
                     }
-                    </div>
+                    </button>}
                     <img 
                         src={cardPrintings.get(card[1].id)?.printing} 
-                        alt="3D card"
-                        onClick={()=> {setSelectedCard(card); (document?.getElementById('card_style_selector') as any).showModal();}}
+                        alt={card[1].name ? `${card[1].name}, click to choose a printing` : "Token, click to choose a printing"}
+                        onClick={()=> {setSelectedCard(card); dialog('card_style_selector')?.showModal();}}
                     />
                 </figure>
             </div>
         )
     }
 
-    function UpdatePrinting(card: any, newPrint: string, newPrintId: string) {
+    function UpdatePrinting(card: ExportRow, newPrint: string, newPrintId: string) {
         const cardPrints: Map<string, DeckCardPrinting> = new Map(cardPrintings);
         if (cardPrintings.has(card[1].id)) { //this should always be true
             const oldPrinting = cardPrintings.get(card[1].id)!
@@ -297,71 +314,93 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
         setCardPrintings(cardPrints);
     }
 
+    if (loadError) {
+        return (
+            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+                <div role="alert" className="alert alert-error">Couldn&apos;t load this deck. Try refreshing the page.</div>
+            </main>
+        );
+    }
+
+    if (!deckData) {
+        return (
+            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8" aria-busy="true">
+                <div className="skeleton h-24 w-full" />
+                <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{[0, 1, 2, 3].map(index => <div key={index} className="skeleton aspect-[5/7] w-full" />)}</div>
+            </main>
+        );
+    }
+
+    const gridClass = "grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4";
+
     return(
-    <div className="mx-auto m-5 p-5 max-w-7xl">
-        <div className="flex items-center justify-between">
-            <h1 className="text-4xl italic font-bold">{deckData ? deckData?.deck.name : "loading"}</h1>
-            <div className="flex">
-                <div className="flex flex-col">
-                    <h1 className="text-center w-full">Card Back</h1>
-                    <input 
-                        type="text"
-                        id="cardback-url"
-                        placeholder="Cardback URL" 
-                        className="input input-bordered max-w-m" 
-                        value={cardBack} 
-                        onChange={e => {setCardBack(e.target.value);}}
-                    />
-                </div>
-                <img className="h-24 px-5 object-contain" src={cardBack}/>
-            </div>
-            <div className="flex gap-2">
-                <div className="tooltip" data-tip="Copy Decklist to Clipboard">
-                    <button className="btn btn-primary" onClick={() => downloadDeck()}>Download TTS</button>
-                </div>
-            </div>
+    <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+        <PageHeader
+            eyebrow="Rumble / Deck / Export"
+            title={<DeckName deck={deckData.deck} commanders={commanderNames} />}
+            actions={<>
+                <button type="button" className="btn btn-primary" onClick={() => downloadDeck()}>Download for TTS</button>
+                <Link href={`/deck/${deckid}`} className="btn btn-outline">Back to deck</Link>
+            </>}
+        >
+            Click a card to pick its printing.{userToken ? " Star a printing to use it by default in every deck." : ""}
+        </PageHeader>
+        <div className="mt-6 flex flex-wrap items-center gap-4 rounded-box bg-base-100 p-4 shadow-sm">
+            <img className="h-24 object-contain" src={cardBack} alt="Card back preview" />
+            <label className="floating-label min-w-64 flex-1">
+                <span>Card back image URL</span>
+                <input 
+                    type="url"
+                    id="cardback-url"
+                    placeholder="Card back image URL" 
+                    className="input w-full" 
+                    value={cardBack} 
+                    onFocus={e => e.currentTarget.select()}
+                    onChange={e => {setCardBack(e.target.value);}}
+                />
+            </label>
         </div>
-        <div className="pt-5">
-            <h1 className="text-xl">Commander / Companion</h1>
-            <div className="grid grid-cols-4 gap-4">
+        <section className="pt-8">
+            <h2 className="mb-3 text-xl font-bold">Commander / Companion</h2>
+            <div className={gridClass}>
                 {cards.filter(c => c[0].iscommander || c[0].iscompanion).map(c => CardDisplay(c))}
             </div>
-        </div>
-        <div className="pt-5">
-            <h1 className="text-xl">Deck</h1>
-            <div className="grid grid-cols-4 gap-4">
+        </section>
+        <section className="pt-8">
+            <h2 className="mb-3 text-xl font-bold">Deck</h2>
+            <div className={gridClass}>
                 {cards.filter(c => !c[0].iscommander && !c[0].iscompanion && !c[0].issideboard).map(c => CardDisplay(c))}
             </div>
-        </div>
-        {cards.filter(c => c[0].issideboard).length > 0 && <div className="pt-5">
-            <h1 className="text-xl">Sideboard</h1>
-            <div className="grid grid-cols-4 gap-4">
+        </section>
+        {cards.filter(c => c[0].issideboard).length > 0 && <section className="pt-8">
+            <h2 className="mb-3 text-xl font-bold">Sideboard</h2>
+            <div className={gridClass}>
                 {cards.filter(c => c[0].issideboard).map(c => CardDisplay(c))}
             </div>
-        </div>}
-        {tokens.length > 0 && <div className="pt-5">
-            <h1 className="text-xl">Tokens</h1>
-            <div className="grid grid-cols-4 gap-4">
+        </section>}
+        {tokens.length > 0 && <section className="pt-8">
+            <h2 className="mb-3 text-xl font-bold">Tokens</h2>
+            <div className={gridClass}>
                 {tokens.map(c => CardDisplay([{}, {id:c}]))}
             </div>
-        </div>}
+        </section>}
 
         <dialog id="card_style_selector" className="modal">
             {selectedCard && <div className="modal-box w-11/12 max-w-5xl max-h-3/4 pt-18">
                 <form method="dialog">
-                    <h1 className="absolute left-6 top-6 text-xl italic font-bold">{selectedCard[1].name}</h1>
-                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    <h2 className="absolute left-6 top-6 text-xl font-bold">{selectedCard[1].name ?? "Token"}</h2>
+                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" aria-label="Close">✕</button>
                 </form>
-                <div className="grid grid-cols-4 gap-4">
+                <div className={gridClass}>
                     {printings.filter(p => p.cardid == selectedCard[1].id).map(printing => {
                         return (
                             <div 
                                 className="hover-3d cursor-pointer"
                                 key={printing.cardimage}
-                                onClick={_ => {UpdatePrinting(selectedCard, printing.cardimage, printing.id); (document?.getElementById('card_style_selector') as any).close()}}
+                                onClick={() => {UpdatePrinting(selectedCard, printing.cardimage, printing.id); dialog('card_style_selector')?.close()}}
                             >
                                 <figure className="max-w-100 rounded-2xl">
-                                    <img src={printing.cardimage} alt="3D card" />
+                                    <img src={printing.cardimage} alt={`${selectedCard[1].name ?? "Token"} printing`} />
                                 </figure>
                             </div>
                         )
@@ -374,25 +413,25 @@ export default function DeckDetails({ params }: { params: Promise<DeckViewPagePr
         </dialog>
 
         <dialog id="export_info" className="modal">
-            <div className="modal-box max-h-3/4 pt-18">
+            <div className="modal-box">
                 <form method="dialog">
-                    <h1 className="absolute left-6 top-6 text-xl italic font-bold">{deckData?.deck.name}</h1>
-                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                    <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" aria-label="Close">✕</button>
                 </form>
-                <div className="flex flex-col h-72 gap-5">
-                    <h1 className="text-center text-xl">{`Your deck has been downloaded and just needs to be moved to your Tabletop Simulator saves folder`}</h1> 
-                    <h1 className="text-center text-sm">{`...\\Documents\\My Games\\Tabletop Simulator\\Saves\\Saved Objects`}</h1>
-                    <h1 className="pt-6 text-center text-2xl">Dont Forget To Download an Image</h1>
-                    <h1 className="text-center text-sm">{`TTS uses image files alongside the json for the icons in the ingame browser. It needs to be alongside the deck json and have the same name.`}</h1>
-                    <button className="btn" onClick={_ => {
-                        downloadImage(cardBack, deckData?.deck.name + ".png");
-                    }
-                    }>Download Cardback Image</button>
+                <h2 className="text-xl font-bold">{displayName} downloaded</h2>
+                <ol className="mt-4 list-decimal space-y-3 pl-5">
+                    <li>
+                        Move the file to your Tabletop Simulator saved objects folder:
+                        <code className="mt-1 block break-all text-sm">{`Documents\\My Games\\Tabletop Simulator\\Saves\\Saved Objects`}</code>
+                    </li>
+                    <li>Download the card back image too. TTS uses it as the icon in the in-game browser; keep it next to the deck file with the same name.</li>
+                </ol>
+                <div className="modal-action">
+                    <button className="btn btn-primary" onClick={() => downloadImage(cardBack, displayName + ".png")}>Download card back image</button>
                 </div>
             </div>
             <form method="dialog" className="modal-backdrop">
                 <button>close</button>
             </form>
         </dialog>
-    </div>);
+    </main>);
 }

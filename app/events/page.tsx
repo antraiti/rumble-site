@@ -3,6 +3,7 @@ import {useEffect, useState} from 'react';
 import userData from '../util/UserData';
 import EventCard from './EventCard';
 import { apiGet, apiPost } from '../util/apiClient';
+import PageHeader from '../components/PageHeader';
 import type { EventInfo, Theme } from '../types';
 
 interface NewEventData {
@@ -32,23 +33,28 @@ const isToday = (someDate: string) => {
     parsed.getFullYear() === today.getFullYear()
 }
 
+const eventModal = () => document.getElementById('new_event_modal') as HTMLDialogElement | null;
+
 export default function Events() {
   const { userToken } = userData();
-  const [events, setEvents]  = useState<any>([]);
-  const [themeList, setThemeList]  = useState<any>([]);
+  const [events, setEvents]  = useState<EventInfo[] | null>(null);
+  const [loadError, setLoadError] = useState(false);
+  const [themeList, setThemeList]  = useState<Theme[]>([]);
   const [newEventDetails, setNewEventDetails] = useState<NewEventData>({weekly: true, themed: false, themeid: -1, name: ""} as NewEventData);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState("");
 
   const getEventList = () => {
-    getEvents(userToken).then(items => {
-      setEvents(items);
-    });
+    getEvents(userToken)
+      .then(items => { setEvents(items ?? []); setLoadError(false); })
+      .catch(() => setLoadError(true));
   }
 
   useEffect(() => {
       getEventList();
       getThemes(userToken).then(items => {
-        setThemeList(items);
-      });
+        setThemeList(items ?? []);
+      }).catch(() => setThemeList([]));
     }, []);
 
   const updateEventDetails = (e: any) => {
@@ -61,29 +67,47 @@ export default function Events() {
   }
 
   const createNewEvent = () => {
-    createEvent(userToken, newEventDetails).then(res => {
-      getEventList();
-      (document?.getElementById('new_event_modal') as any | null).close() //this is really something... i hope it works
-    })
-  } 
+    setCreating(true);
+    setCreateError("");
+    createEvent(userToken, newEventDetails)
+      .then(() => {
+        getEventList();
+        eventModal()?.close();
+      })
+      .catch(error => setCreateError(error instanceof Error && error.message ? error.message : "Couldn't create the event."))
+      .finally(() => setCreating(false));
+  }
 
-  const sortedEvents = [...events].sort((first: EventInfo, second: EventInfo) => Date.parse(second.time) - Date.parse(first.time));
+  const sortedEvents = [...(events ?? [])].sort((first: EventInfo, second: EventInfo) => Date.parse(second.time) - Date.parse(first.time));
   const currentEvent = sortedEvents.find((event: EventInfo) => isToday(event.time));
   const archiveEvents = sortedEvents.filter((event: EventInfo) => event.id !== currentEvent?.id);
 
   return (
     <main className="mx-auto min-h-screen w-full max-w-5xl px-5 py-8 sm:px-8">
-      <header className="border-b border-base-content/15 pb-5">
-        <p className="text-sm font-bold uppercase text-primary">Rumble / Community</p>
-        <h1 className="mt-1 text-3xl font-bold">Events</h1>
-      </header>
+      <PageHeader
+        eyebrow="Rumble / Community"
+        title="Events"
+        actions={userToken && <button type="button" className="btn btn-primary" onClick={() => eventModal()?.showModal()}>Create event</button>}
+      >
+        Game nights and themed events. Open today&apos;s event to track matches live.
+      </PageHeader>
 
+      {loadError ? (
+        <div role="alert" className="alert alert-error mt-6">
+          <span>Couldn&apos;t load events.</span>
+          <button type="button" className="btn btn-sm" onClick={getEventList}>Try again</button>
+        </div>
+      ) : events === null ? (
+        <div className="mt-6 space-y-2" aria-busy="true">
+          {[0, 1, 2, 3].map(index => <div key={index} className="skeleton h-14 w-full" />)}
+        </div>
+      ) : <>
       <section aria-labelledby="today-heading" className="pt-6">
         <h2 id="today-heading" className="mb-3 text-lg font-semibold">Today</h2>
         {currentEvent ? <EventCard eventInfo={currentEvent} current /> : (
           <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-dashed border-base-content/20 px-4 py-5">
             <p className="text-sm text-base-content/70">No event scheduled today.</p>
-            <button className="btn btn-outline btn-success btn-sm" onClick={() => (document.getElementById('new_event_modal') as HTMLDialogElement | null)?.showModal()}>
+            <button className="btn btn-outline btn-success btn-sm" onClick={() => eventModal()?.showModal()}>
               Create event
             </button>
           </div>
@@ -101,8 +125,8 @@ export default function Events() {
           </div>
         ) : <p className="rounded-lg border border-dashed border-base-content/20 px-4 py-5 text-sm text-base-content/60">No archived events yet.</p>}
       </section>
+      </>}
 
-      {/* Should move this to its own component to avoid the code bloat here */}
       <dialog id="new_event_modal" className="modal">
         <div className="modal-box">
           <form method="dialog">
@@ -124,7 +148,7 @@ export default function Events() {
               <span className="label-text">Theme</span>
               <select name="themeid" value={newEventDetails?.themeid} onChange={e => updateEventDetails(e)} className="select select-bordered w-full max-w-xs">
                 <option value={-1}>Select Theme</option>
-                {themeList.map((theme: any) =>{
+                {themeList.map(theme =>{
                   return <option key={theme.id} value={theme.id}>{theme.name}</option>
                 })}
               </select>
@@ -136,7 +160,11 @@ export default function Events() {
               </label>
               <div className="divider"></div>
             </div>}
-            <button className='btn btn-success m-5' onClick={() => createNewEvent()}>Create</button>
+            {createError && <div role="alert" className="alert alert-error alert-soft mt-3">{createError}</div>}
+            <button className='btn btn-success m-5' onClick={() => createNewEvent()} disabled={creating}>
+              {creating && <span className="loading loading-spinner loading-sm" aria-hidden="true" />}
+              Create
+            </button>
           </div>
         </div>
       </dialog>

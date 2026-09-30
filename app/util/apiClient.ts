@@ -1,4 +1,6 @@
 // Shared client-side fetch helper for calling this app's own /api/* routes from page components.
+import Cookies from 'js-cookie';
+
 interface ApiOptions {
   token?: string;
   body?: unknown;
@@ -16,6 +18,11 @@ async function request<T>(method: string, path: string, opts?: ApiOptions): Prom
   });
   if (res.status >= 400) {
     const body = await res.json().catch(() => null);
+    // Expired or revoked session: drop the stale cookie and send the user to sign in again.
+    if (res.status === 401 && opts?.token && body?.code === 'invalid_token') {
+      Cookies.remove('userdata');
+      window.location.href = '/login';
+    }
     throw new Error(body?.error || body?.message || `Server responds with error! (${res.status})`);
   }
   if (res.status === 204) return [] as unknown as T;

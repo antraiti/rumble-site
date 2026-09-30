@@ -18,9 +18,10 @@ No local database in this repo.
   assumed to validate `x-access-token`.
 
 ## Realtime
-`app/api/ws/route.tsx` uses `next-ws` to implement a raw WebSocket broadcast relay:
-any connected client's message is broadcast to all other connected clients.
-No auth/scoping is applied at this layer. Client side wraps the app in
+`app/api/ws/route.tsx` uses `next-ws` to implement a raw WebSocket relay:
+any connected client's message is forwarded to every *other* open client.
+No auth is applied at this layer. Messages are JSON `{ "type": "event-updated", "eventId": n }`;
+the event page ignores anything that isn't an update for the event it shows. Client side wraps the app in
 `WebSocketProvider` via [app/components/WebhookWrapper.tsx](../app/components/WebhookWrapper.tsx),
 connecting to `ws://${HOST_URL}/api/ws`.
 

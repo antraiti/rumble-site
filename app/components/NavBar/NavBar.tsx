@@ -3,11 +3,14 @@ import Link from "next/link";
 import userData from "../../util/UserData"
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useDemoMode } from "../DemoMode";
 
 export default function NavBar() {
     const { userName, removeUserData, user} = userData();
     const [username, setUsername] = useState();
     const router = useRouter();
+    const { hidePlayerNames } = useDemoMode();
+    const profileLabel = hidePlayerNames ? "Profile" : username;
     
     useEffect(() => {
         // cookie-derived value is unavailable during SSR; set after mount to avoid hydration mismatch
@@ -40,7 +43,7 @@ export default function NavBar() {
                         <Link href="/events" className="btn btn-ghost justify-start">Events</Link>
                         <Link href="/decks" className="btn btn-ghost justify-start">Decks</Link>
                         <Link href="/stats" className="btn btn-ghost justify-start">Stats</Link> 
-                        <Link href="/profile" className="btn btn-ghost justify-start">{username}</Link>
+                        <Link href="/profile" className="btn btn-ghost justify-start">{profileLabel}</Link>
                         <div onClick={handleSignout} className="btn btn-ghost">Sign Out</div>
                         </div>}
                     </ul>
@@ -62,7 +65,7 @@ export default function NavBar() {
                 <Link href="/events" className="btn btn-ghost">Events</Link>
                 <Link href="/decks" className="btn btn-ghost">Decks</Link>
                 <Link href="/stats" className="btn btn-ghost">Stats</Link> 
-                <Link href="/profile" className="btn btn-ghost">{username}</Link>
+                <Link href="/profile" className="btn btn-ghost">{profileLabel}</Link>
                 <div onClick={handleSignout} className="btn btn-ghost">Sign Out</div>
                 </div>}
             </div>

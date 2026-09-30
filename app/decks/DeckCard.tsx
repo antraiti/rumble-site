@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { Color, DeckCommander, DeckInfo } from "../types";
+import { DeckName, useDeckName, useDemoMode } from "../components/DemoMode";
 
 export const FALLBACK_IMAGE = 'https://cards.scryfall.io/art_crop/front/0/e/0eb0e8e7-266f-441e-b1cd-12b8ec3f7d71.jpg'; // Imp's Mischief UwU
 
@@ -51,6 +52,9 @@ export default function DeckCard({ summary }: { summary: DeckSummary }) {
     const colorless = color?.name === "colorless";
     const colorLabel = colorless ? "Colorless" : colorPips.map(pip => pip.label).join(", ");
     const leaders = [commander, partner].filter((card): card is DeckCommander => !!card);
+    const { hideDeckNames: namesHidden } = useDemoMode();
+    const deckName = useDeckName();
+    const leaderNames = leaders.map(card => card.name);
 
     const aura = auraGradient(colorless ? [COLORLESS_AURA] : colorPips.map(pip => pip.aura));
 
@@ -76,11 +80,11 @@ export default function DeckCard({ summary }: { summary: DeckSummary }) {
             </div>
             <div className="card-body min-w-0 gap-2 p-4">
                 <div className="flex items-start justify-between gap-2">
-                    <h2 className="card-title min-w-0 truncate text-lg" title={deck.name}>{deck.name}</h2>
+                    <h2 className="card-title min-w-0 truncate text-lg" title={deckName(deck, leaderNames)}><DeckName deck={deck} commanders={leaderNames} /></h2>
                     {!deck.islegal && <span className="badge badge-error badge-outline shrink-0">Not legal</span>}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                    {leaders.map(card => <span key={card.id} className="badge badge-outline max-w-full truncate">{card.name}</span>)}
+                    {!namesHidden && leaders.map(card => <span key={card.id} className="badge badge-outline max-w-full truncate">{card.name}</span>)}
                     {companion && <span className="badge badge-ghost max-w-full truncate">Companion: {companion.name}</span>}
                 </div>
                 <dl className="mt-auto grid grid-cols-3 gap-2 pt-2 text-center">

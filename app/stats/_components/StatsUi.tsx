@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { ColorPlayCounts, ColorWinRates, SeatStat } from "../../types";
+import { PlayerName } from "../../components/DemoMode";
 
 export const percent = (value: number) => `${(value * 100).toFixed(1)}%`;
 export const ratio = (part: number, total: number) => (total > 0 ? part / total : 0);
@@ -239,7 +240,7 @@ export function IdentityPips({ identity }: { identity: { white: boolean; blue: b
 }
 
 export function PlayerLink({ id, name, className = "font-semibold" }: { id: number; name: string; className?: string }) {
-  return <Link href={`/stats/users/${id}`} className={`hover:text-primary hover:underline ${className}`}>{name}</Link>;
+  return <Link href={`/stats/users/${id}`} className={`hover:text-primary hover:underline ${className}`}><PlayerName id={id} name={name} /></Link>;
 }
 
 export function LoadingState({ rows = 4 }: { rows?: number }) {

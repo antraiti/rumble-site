@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import userData from "../util/UserData"
 import DeckCard, { type DeckStats, type DeckSummary } from "./DeckCard";
 import { apiGet } from "../util/apiClient";
+import { useDeckName } from "../components/DemoMode";
 import type { Color, DeckWithCards, Performance } from "../types";
 
 type ColorKey = "white" | "blue" | "black" | "red" | "green";
@@ -28,6 +29,7 @@ export default function Decks() {
     const [search, setSearch] = useState("");
     const [selectedColors, setSelectedColors] = useState<ColorKey[]>([]);
     const [sort, setSort] = useState<SortKey>("recent");
+    const deckName = useDeckName();
 
     useEffect(() => {
         let active = true;
@@ -65,9 +67,10 @@ export default function Decks() {
     const visible = useMemo(() => {
         const term = search.trim().toLowerCase();
         const winRate = (summary: DeckSummary) => (summary.stats.games ? summary.stats.wins / summary.stats.games : -1);
+        const nameOf = (summary: DeckSummary) => deckName(summary.deck, [summary.commander?.name, summary.partner?.name]);
         return summaries
             .filter(summary => {
-                const text = [summary.deck.name, summary.commander?.name, summary.partner?.name, summary.companion?.name].filter(Boolean).join(" ").toLowerCase();
+                const text = [nameOf(summary), summary.commander?.name, summary.partner?.name, summary.companion?.name].filter(Boolean).join(" ").toLowerCase();
                 if (term && !text.includes(term)) return false;
                 if (selectedColors.length === 0) return true;
                 // Exact color identity match, as before.
@@ -75,13 +78,13 @@ export default function Decks() {
             })
             .sort((a, b) => {
                 switch (sort) {
-                    case "name": return a.deck.name.localeCompare(b.deck.name);
+                    case "name": return nameOf(a).localeCompare(nameOf(b));
                     case "games": return b.stats.games - a.stats.games;
                     case "winrate": return winRate(b) - winRate(a);
                     default: return b.deck.id - a.deck.id;
                 }
             });
-    }, [summaries, search, selectedColors, sort]);
+    }, [summaries, search, selectedColors, sort, deckName]);
 
     function toggleColor(key: ColorKey) {
         setSelectedColors(prev => (prev.includes(key) ? prev.filter(item => item !== key) : [...prev, key]));

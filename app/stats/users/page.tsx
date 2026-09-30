@@ -5,6 +5,7 @@ import UserData from "../../util/UserData";
 import type { PlayerSummaryEntry } from "../../types";
 import { useStatsFetch } from "../_components/useStatsFetch";
 import { EmptyRow, ErrorState, LoadingState, SortHeader, type SortState, nextSort, ratio, sortBy } from "../_components/StatsUi";
+import { PlayerName } from "../../components/DemoMode";
 
 type SortKey = "name" | "games" | "kills" | "kpg";
 
@@ -44,7 +45,7 @@ export default function StatsUsers() {
           {rows.length === 0 ? <EmptyRow colSpan={4}>No players yet.</EmptyRow>
             : rows.map(([id, player]) => (
               <tr key={id} className={player.gamesPlayed ? "" : "text-base-content/50"}>
-                <td><Link className="font-medium hover:text-primary hover:underline" href={`/stats/users/${id}`}>{player.username}</Link></td>
+                <td><Link className="font-medium hover:text-primary hover:underline" href={`/stats/users/${id}`}><PlayerName id={id} name={player.username} /></Link></td>
                 <td className="text-right font-mono">{player.gamesPlayed}</td>
                 <td className="text-right font-mono">{player.kills}</td>
                 <td className="text-right font-mono">{player.gamesPlayed ? ratio(player.kills, player.gamesPlayed).toFixed(2) : "—"}</td>

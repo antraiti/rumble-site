@@ -33,6 +33,8 @@ export interface BulkProcessReport {
   new_card_backs: number;
   new_printings: number;
   new_card_tokens: number;
+  ban_group_updates?: number;
+  power_updates?: number;
   unresolved_token_cards: number;
   unresolved_token_details: { card_oracle_id: string; missing_token_ids: string[] }[];
   added_card_ids: string[];

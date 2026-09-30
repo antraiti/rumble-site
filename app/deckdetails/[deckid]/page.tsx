@@ -4,6 +4,7 @@ import { use, useEffect, useState, type ReactNode } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
 import { apiGet, apiPut } from "../../util/apiClient";
+import { DeckName, useDeckName, useDemoMode } from "../../components/DemoMode";
 
 type DeckEntry = { cardid: string; issideboard?: boolean };
 type DeckCard = { name: string; typeline?: string; custom?: boolean };
@@ -11,7 +12,7 @@ type CardListItem = [DeckEntry, DeckCard];
 type Printing = { cardid: string; artcrop: string };
 type CustomCard = { id: string; name: string };
 type DeckDetailsResponse = {
-    deck: { id: number; name: string; image?: string; commander?: string | null; partner?: string | null; companion?: string | null };
+    deck: { id: number; name: string; image?: string; commander?: string | null; partner?: string | null; companion?: string | null; lastupdated?: string | null };
     cardlist: CardListItem[] | null;
     legality: { legal: boolean; messages: string[] | null };
     performances: unknown[] | null;
@@ -28,7 +29,7 @@ function isLegendary(card: DeckCard, types: string[]) {
 }
 
 async function getDeckInfo(token: string, id: number) {
-    return apiGet<DeckDetailsResponse>(`deck/${id}`, { token });
+    return apiGet<DeckDetailsResponse>(`deck/${id}?customcards=true`, { token });
   }
 
   async function updateDeck(token: string, id: number, prop: string, val: string) {
@@ -62,6 +63,8 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
     const [loadError, setLoadError] = useState(false);
     const [updateError, setUpdateError] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const { hideDeckNames: namesHidden } = useDemoMode();
+    const displayName = useDeckName();
 
     function fetchDeckInfo() {
         getDeckInfo(userToken, deckid).then((item) => {
@@ -137,13 +140,15 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
     const customToAdd = customCards.filter(cc => !cc.id.endsWith("/back") && !cardList.some(([entry]) => entry.cardid === cc.id));
     const artOptions = printingList.filter(p => p.cardid === deckCommander || p.cardid === deckPartner);
     const cardName = (id: string) => cardList.find(([entry]) => entry.cardid === id)?.[1].name ?? "Card";
+    const nameDeck = { name: deckName, lastupdated: deckInfo.lastupdated };
+    const commanderNames = [deckCommander, deckPartner].map(id => id ? cardName(id) : null);
 
     return (
         <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
             <header className="flex flex-wrap items-end justify-between gap-4 border-b border-base-content/15 pb-5">
                 <div className="min-w-0">
                     <p className="text-sm font-bold uppercase text-primary"><Link href="/decks" className="link link-hover">Rumble / Decks</Link></p>
-                    <h1 className="mt-1 break-words text-3xl font-bold">{deckName || "Untitled deck"}</h1>
+                    <h1 className="mt-1 break-words text-3xl font-bold"><DeckName deck={nameDeck} commanders={commanderNames} /></h1>
                     <div className="mt-2 flex flex-wrap gap-2">
                         <span className={`badge badge-soft ${deckLegality ? "badge-success" : "badge-error"}`}>{deckLegality ? "Legal" : "Not legal"}</span>
                         <span className="badge badge-ghost">{played ? `${gamesPlayed} ${gamesPlayed === 1 ? "game" : "games"} played` : "Not played yet"}</span>
@@ -176,7 +181,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
                 <Panel title="Deck art" description="Pick a printing of your commander or partner.">
                     <figure className="aspect-[4/3] overflow-hidden rounded-box bg-base-200">
                         {deckInfo.image
-                            ? <img src={deckInfo.image} alt={`${deckName} art`} className="h-full w-full object-contain" />
+                            ? <img src={deckInfo.image} alt={`${displayName(nameDeck, commanderNames)} art`} className="h-full w-full object-contain" />
                             : <div className="grid h-full place-items-center text-base-content/60">No art selected</div>}
                     </figure>
                     {artOptions.length > 0 && (
@@ -204,7 +209,9 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
                     <Panel title="Setup">
                         <fieldset className="fieldset">
                             <legend className="fieldset-legend">Deck name</legend>
-                            <input type="text" placeholder="Deck name" className="input input-lg w-full text-xl font-semibold" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>
+                            {namesHidden
+                                ? <p className="text-base-content/70">Deck names are hidden. Turn off demo mode in your <Link href="/profile" className="link">profile</Link> to rename this deck.</p>
+                                : <input type="text" placeholder="Deck name" className="input input-lg w-full text-xl font-semibold" value={deckName} onChange={e => {setDeckName(e.target.value); changeDelay("name", e.target.value);}}/>}
                         </fieldset>
                         <div className="rounded-box bg-base-200 p-4">
                             <h3 className="text-xs font-bold uppercase tracking-wide text-base-content/60">Command zone</h3>

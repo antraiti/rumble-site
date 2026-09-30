@@ -1,6 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import PageHeader from "../components/PageHeader";
+import { openGraph } from "../util/siteMetadata";
+
+export const metadata: Metadata = {
+    title: "Quick start",
+    description: "New to Rumble? The three numbers that matter and how Rumble differs from Commander/EDH.",
+    openGraph: openGraph("Rumble quick start", "How Rumble differs from Commander/EDH, in a minute."),
+};
 
 const differences: { stat: string; title: string; body: ReactNode; accent: string }[] = [
     { stat: "60", title: "Card singleton decks", body: "One copy of each card, except basic lands.", accent: "bg-info" },

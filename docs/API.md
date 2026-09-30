@@ -16,9 +16,9 @@ be legacy `[deck, commanderCard]` tuples or new plain deck objects; use
 | `/api/users` | GET | `/user` | List users |
 | `/api/decks` | GET | `/userdeckswithcards` | |
 | `/api/deck` | POST | `/deck/v2` | |
-| `/api/deck/[deckid]` | GET/etc | | |
+| `/api/deck/[deckid]` | GET/PUT | `/deck/v2/:id` | GET forwards `?customcards=true` only |
 | `/api/deck/[deckid]/steal` | POST | | |
-| `/api/deck/checker` | GET | | Deck legality checker |
+| `/api/deck/checker` | POST | `/checker` | Deck legality check (rules + banlist) |
 | `/api/deck/remove/[deckid]` | DELETE | | |
 | `/api/decks` | GET | | |
 | `/api/events` | GET/POST | `/event` | List / create events |
@@ -39,6 +39,7 @@ be legacy `[deck, commanderCard]` tuples or new plain deck objects; use
 | `/api/admin/bulktokens` | POST | `/bulktokens` | Admin-only local bulk processing (legacy route) |
 | `/api/admin/bulkprocess/dry-run` | POST | `/bulkprocess/dry-run` | Admin-only preview of local bulk file; no database writes |
 | `/api/admin/bulkupdate` | POST | `/bulkupdate` | Admin-only download from Scryfall and database update |
+| `/api/admin/decklegality` | POST | `/deck/legality/refresh` | Admin-only: recheck and store `islegal` for every deck |
 | `/api/ws` | GET (dummy) + `SOCKET` | n/a | Raw WS broadcast relay, no auth |
 
 ## Standard proxy pattern (current, duplicated per-route)

@@ -9,7 +9,8 @@ const deckUpdateSchema = z.object({
 
 export async function GET(request: Request, { params }: { params: Promise<{ deckid: string }>}) {
     const { deckid } = await params;
-    return proxyFetch(request, `/deck/v2/${deckid}`);
+    const customCards = new URL(request.url).searchParams.get("customcards") === "true";
+    return proxyFetch(request, `/deck/v2/${encodeURIComponent(deckid)}${customCards ? "?customcards=true" : ""}`);
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ deckid: string }> }) {

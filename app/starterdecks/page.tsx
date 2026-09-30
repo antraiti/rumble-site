@@ -1,18 +1,23 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import type { Color } from "../types";
 import { FALLBACK_IMAGE, identityAura, identityColors } from "../decks/DeckCard";
 import CopyDecklistButton from "./CopyDecklistButton";
 import PageHeader from "../components/PageHeader";
 import { fetchPublic } from "../util/publicApi";
+import { openGraph } from "../util/siteMetadata";
 
 export const revalidate = 600;
 
-// Curated starter decks, shown in this order.
-const STARTER_DECKS: { id: number; tagline: string; tags: string[] }[] = [
-    { id: 838, tagline: "Flood the board with elves and turn them into a mountain of mana.", tags: ["Elves", "Ramp", "Go wide"] },
-    { id: 734, tagline: "Every creature that enters burns your opponents.", tags: ["Tokens", "Burn", "Aggro"] },
-];
+export const metadata: Metadata = {
+    title: "Starter decks",
+    description: "Ready-to-play Rumble decks. Browse the lists, export to Tabletop Simulator, or copy them into your deck builder.",
+    openGraph: openGraph("Rumble starter decks", "Ready-to-play Rumble decks for new players."),
+};
+
+// The curated list (order, taglines, tags) lives in the API so guest deck-name hiding can exempt the same decks.
+type StarterDeck = { id: number; tagline: string; tags: string[] };
 
 type DecklistEntry = { cardid: string; count: number; issideboard: boolean };
 type DecklistCard = { id: string; name: string };
@@ -35,10 +40,11 @@ function summarize({ deck, cardlist }: DecklistResponse) {
 }
 
 export default async function StarterDecks() {
-    const [colors, decks] = await Promise.all([
+    const [colors, starters] = await Promise.all([
         fetchPublic<Color[]>("/colors", 600),
-        Promise.all(STARTER_DECKS.map(async starter => ({ starter, data: await fetchPublic<DecklistResponse>(`/decklist/${starter.id}`, 600) }))),
+        fetchPublic<StarterDeck[]>("/starterdecks", 600),
     ]);
+    const decks = await Promise.all((starters ?? []).map(async starter => ({ starter, data: await fetchPublic<DecklistResponse>(`/decklist/${starter.id}`, 600) })));
 
     return (
         <main className="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
@@ -54,6 +60,11 @@ export default async function StarterDecks() {
             </PageHeader>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
+                {!starters && (
+                    <div role="alert" className="alert alert-warning alert-soft lg:col-span-2">
+                        Starter decks couldn&apos;t be loaded right now. Try again later.
+                    </div>
+                )}
                 {decks.map(({ starter, data }) => data
                     ? <StarterDeckCard key={starter.id} data={data} tagline={starter.tagline} tags={starter.tags} color={colors?.find(color => color.id === data.deck.identityid)} />
                     : (

@@ -6,10 +6,12 @@ import { useStatsOptions } from "./StatsShell";
 import { useStatsFetch } from "./useStatsFetch";
 import Matchups from "./Matchups";
 import { ArtThumb, CardName, ColorTable, EmptyRow, ErrorState, LoadingState, StatTiles, percent, ratio } from "./StatsUi";
+import { usePlayerName } from "../../components/DemoMode";
 
 export default function PlayerStats({ userId, fallbackName, isSelf }: { userId: string | number | null; fallbackName?: string; isSelf: boolean }) {
   const { userToken } = UserData();
   const { includeThemed } = useStatsOptions();
+  const playerName = usePlayerName();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -25,7 +27,8 @@ export default function PlayerStats({ userId, fallbackName, isSelf }: { userId: 
   if (primary.loading) return <LoadingState />;
 
   const stats = isSelf ? summary.data : undefined;
-  const name = commanders.data?.user?.username ?? fallbackName;
+  const rawName = commanders.data?.user?.username ?? fallbackName;
+  const name = rawName ? playerName(userId, rawName) : undefined;
   const list = Array.isArray(commanders.data?.commanders) ? commanders.data.commanders : [];
   const columns = isSelf ? 5 : 3;
 

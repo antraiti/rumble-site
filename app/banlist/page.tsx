@@ -1,9 +1,17 @@
+import type { Metadata } from "next";
 import PageHeader from "../components/PageHeader";
 import { fetchPublic } from "../util/publicApi";
+import { openGraph } from "../util/siteMetadata";
 import BanlistBrowser, { type ListedCard } from "./BanlistBrowser";
 import { FALLBACK_BANLIST } from "./fallbackBanlist";
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+    title: "Banlist",
+    description: "Cards banned in Rumble, plus the watchlist of cards under review.",
+    openGraph: openGraph("Rumble banlist", "Cards banned in Rumble, plus the watchlist of cards under review."),
+};
 
 const alsoBanned = [
     { label: "Silver-bordered cards", href: "https://scryfall.com/search?as=full&q=border%3Asilver" },

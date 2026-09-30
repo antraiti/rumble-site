@@ -1,276 +1,349 @@
 'use client'
-import { use, useEffect, useState } from "react";
-import userData from "../../util/UserData"
+import Link from "next/link";
+import { use, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import userData from "../../util/UserData"
 import { apiGet, apiPost } from "../../util/apiClient";
+import PageHeader from "../../components/PageHeader";
 import { CardPreviewRow, CategoryHeading, ManaSymbols, StatusIcon } from "../../components/CardList";
+import { DeckName, PlayerName, useDeckName } from "../../components/DemoMode";
+import type { User } from "../../types";
 
-async function getDeckInfo(token: string, id: number) {
-    return apiGet(`deck/${id}`, { token });
+type DeckEntry = { cardid: string; count: number; iscommander: boolean; iscompanion: boolean; issideboard: boolean };
+type DeckCardInfo = { id: string; name: string; typeline: string; cost?: string; mv: number; watchlist?: boolean; banned?: boolean };
+type CardRow = [DeckEntry, DeckCardInfo];
+type HistoryEntry = { matchid: number; eventid: number; eventname: string; themed: boolean; start: string | null; players: number; placement?: number | null };
+type DeckResponse = {
+    deck: { id: number; userid: number; name: string; commander: string | null; partner: string | null; lastupdated?: string | null };
+    cardlist: CardRow[] | null;
+    printings: { id: string; cardid: string; cardimage: string }[] | null;
+    legality: { legal: boolean; messages: string[] | null };
+    history?: HistoryEntry[] | null;
+};
+
+// Checked in order; a card lands in the first category its type line matches.
+const TYPE_CATEGORIES = [
+    ["Creatures", "creature"],
+    ["Planeswalkers", "planeswalker"],
+    ["Battles", "battle"],
+    ["Sorceries", "sorcery"],
+    ["Instants", "instant"],
+    ["Artifacts", "artifact"],
+    ["Enchantments", "enchantment"],
+    ["Lands", "land"],
+] as const;
+const CURVE_BUCKETS = ["0", "1", "2", "3", "4", "5", "6", "7+"];
+const HAND_SIZE = 7;
+
+const count = (rows: CardRow[]) => rows.reduce((total, [entry]) => total + entry.count, 0);
+const isLand = (card: DeckCardInfo) => card.typeline.toLowerCase().includes("land");
+
+function shuffle<T>(items: T[]) {
+    const result = [...items];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
 }
 
-  async function getUsers(token: string) {
-    return apiGet('users', { token });
-  }
-    async function stealDeck(token: string, id: number) {
-        return apiPost(`deck/${id}/steal`, { token });
-    }   
-
-export interface DeckPageProps {
-    deckid: number;
-}
-
-export default function DeckDetails({ params }: { params: Promise<DeckPageProps>}) {
-    const {deckid} = use(params);
-    const { userToken } = userData();
+export default function DeckView({ params }: { params: Promise<{ deckid: number }> }) {
+    const { deckid } = use(params);
+    const { userToken, userId, isAdmin } = userData();
     const router = useRouter();
-    const [deckData, setDeckData] = useState<any | null>();
-    const [commanders, setCommanders] = useState<any[]>([]);
-    const [companions, setCompanions] = useState<any[]>([]);
-    const [creatures, setCreatures] = useState<any[]>([]);
-    const [planeswalkers, setPlaneswalkers] = useState<any[]>([]);
-    const [sorceries, setSorceries] = useState<any[]>([]);
-    const [instants, setInstants] = useState<any[]>([]);
-    const [artifacts, setArtifacts] = useState<any[]>([]);
-    const [enchantments, setEnchantments] = useState<any[]>([]);
-    const [lands, setLands] = useState<any[]>([]);
-    const [sideboard, setSideboard] = useState<any[]>([]);
-    const [printings, setPrintings] = useState<any[]>([]);
-    const [userlist, setUserlist] = useState<any | null>();
-
-    const sendToClipboard = () => {
-        var decktext = "";
-        
-        deckData.cardlist.map((card: any) => {
-            if (!card[0].issideboard) {
-                decktext += `${card[0].count} ${card[1].name}\n`
-            }
-        })
-
-        if (sideboard.length > 0) {
-            decktext += `\nSideboard:\n`
-            sideboard.map((card: any) => {
-                decktext += `${card[0].count} ${card[1].name}\n`
-            })
-        }
-
-        copyToClipboard(decktext)
-    }
-
-    //https://stackoverflow.com/questions/51805395/navigator-clipboard-is-undefined
-    async function copyToClipboard(textToCopy: string) {
-        // Navigator clipboard api needs a secure context (https)
-        if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(textToCopy);
-        } else {
-            // Use the 'out of viewport hidden text area' trick
-            const textArea = document.createElement("textarea");
-            textArea.value = textToCopy;
-                
-            // Move textarea out of the viewport so it's not visible
-            textArea.style.position = "absolute";
-            textArea.style.left = "-999999px";
-                
-            document.body.prepend(textArea);
-            textArea.select();
-    
-            try {
-                document.execCommand('copy');
-            } catch (error) {
-                console.error(error);
-            } finally {
-                textArea.remove();
-            }
-        }
-    }
+    const deckName = useDeckName();
+    const [deckData, setDeckData] = useState<DeckResponse | null>(null);
+    const [loadError, setLoadError] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const [copied, setCopied] = useState(false);
+    const [actionError, setActionError] = useState("");
+    const [library, setLibrary] = useState<DeckCardInfo[]>([]);
+    const [handSize, setHandSize] = useState(HAND_SIZE);
 
     useEffect(() => {
-        getDeckInfo(userToken, deckid).then((item) => {
-            console.dir(item)
-            setCommanders([]);
-            setCompanions([]);
-            setCreatures([]);
-            setPlaneswalkers([]);
-            setSorceries([]);
-            setInstants([]);
-            setArtifacts([]);
-            setEnchantments([]);
-            setLands([]);
-            setSideboard([]);
-            setDeckData(item);
-            setPrintings(item.printings)
-            item.cardlist.map((card: any) => {
-                if (card[0].issideboard) {
-                    setSideboard(prev => [...prev, card])
-                    return;
-                }
-                if (card[0].iscommander) {
-                    setCommanders(prev => [...prev, card])
-                    return;
-                }
-                if (card[0].iscompanion) {
-                    setCompanions(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("creature")) {
-                    setCreatures(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("planeswalker")) {
-                    setPlaneswalkers(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("sorcery")) {
-                    setSorceries(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("instant")) {
-                    setInstants(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("artifact")) {
-                    setArtifacts(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("enchantment")) {
-                    setEnchantments(prev => [...prev, card])
-                    return;
-                }
-                if (card[1].typeline.toLowerCase().includes("land")) {
-                    setLands(prev => [...prev, card])
-                    return;
-                }
-            })
-        });
-        // The user list needs a login; signed-out visitors can still view the deck.
-        if (userToken) getUsers(userToken).then(items => {
-            setUserlist(items);
-        }).catch(() => {});
-      }, [])
+        apiGet<DeckResponse>(`deck/${deckid}`, { token: userToken }).then(setDeckData).catch(() => setLoadError(true));
+        // The owner's name needs a login; signed-out visitors can still view the deck.
+        if (userToken) apiGet<User[]>("users", { token: userToken }).then(setUsers).catch(() => {});
+    }, [deckid, userToken]);
 
-    
-    function CardDisplay(card: any) {
-        const [decklistEntry, cardInfo] = card;
-        const cardImage = printings.find((printing: any) => printing.cardid == cardInfo.id)?.cardimage;
-        const roleClass = decklistEntry.iscommander
-            ? "border-l-warning bg-warning/5"
-            : decklistEntry.iscompanion
-                ? "border-l-info bg-info/5"
-                : "border-l-transparent";
+    const groups = useMemo(() => {
+        const cards = deckData?.cardlist ?? [];
+        const main = cards.filter(([entry]) => !entry.issideboard);
+        const commanders = main.filter(([entry]) => entry.iscommander);
+        const companions = cards.filter(([entry]) => entry.iscompanion);
+        const rest = main.filter(([entry]) => !entry.iscommander && !entry.iscompanion);
+        const byType = TYPE_CATEGORIES.map(([label, type]) => ({
+            label,
+            rows: rest.filter(([, card]) => TYPE_CATEGORIES.find(([, t]) => card.typeline.toLowerCase().includes(t))?.[1] === type),
+        }));
+        const other = rest.filter(([, card]) => !TYPE_CATEGORIES.some(([, type]) => card.typeline.toLowerCase().includes(type)));
+        return {
+            main,
+            commanders,
+            companions,
+            categories: [...byType, { label: "Other", rows: other }].filter(group => group.rows.length > 0),
+            sideboard: cards.filter(([entry]) => entry.issideboard && !entry.iscompanion),
+        };
+    }, [deckData]);
 
+    const stats = useMemo(() => {
+        const curve = CURVE_BUCKETS.map(() => 0);
+        let spells = 0, totalMv = 0;
+        for (const [entry, card] of groups.main) {
+            if (isLand(card)) continue;
+            curve[Math.min(card.mv, 7)] += entry.count;
+            spells += entry.count;
+            totalMv += card.mv * entry.count;
+        }
+        const lands = count(groups.main.filter(([, card]) => isLand(card)));
+        return { curve, spells, lands, averageMv: spells ? totalMv / spells : 0, total: count(groups.main) };
+    }, [groups]);
+
+    if (loadError) {
         return (
-            <CardPreviewRow key={cardInfo.id} image={cardImage} name={cardInfo.name}>
+            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+                <div role="alert" className="alert alert-error">Couldn&apos;t load this deck. It may have been deleted, or the server is unavailable.</div>
+            </main>
+        );
+    }
+
+    if (!deckData) {
+        return (
+            <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8" aria-busy="true">
+                <div className="skeleton h-24 w-full" />
+                <div className="mt-6 grid gap-4 md:grid-cols-3">{[0, 1, 2].map(index => <div key={index} className="skeleton h-40" />)}</div>
+                <div className="skeleton mt-6 h-96 w-full" />
+            </main>
+        );
+    }
+
+    const { deck, legality } = deckData;
+    const printings = deckData.printings ?? [];
+    const imageFor = (card: DeckCardInfo) => printings.find(printing => printing.cardid === card.id)?.cardimage
+        ?? `https://api.scryfall.com/cards/named?format=image&version=normal&exact=${encodeURIComponent(card.name)}`;
+    const commanderNames = [deck.commander, deck.partner].map(id => deckData.cardlist?.find(([, card]) => card.id === id)?.[1].name);
+    const owner = users.find(user => user.id === deck.userid);
+    const canEdit = !!userToken && (Number(userId) === deck.userid || !!isAdmin);
+    const history = deckData.history ?? [];
+    const showPlacement = history.some(entry => entry.placement != null);
+    const hand = library.slice(0, handSize);
+
+    function listText() {
+        const line = ([entry, card]: CardRow) => `${entry.count} ${card.name}`;
+        const main = groups.main.map(line).join("\n");
+        const side = groups.sideboard.map(line).join("\n");
+        return side ? `${main}\n\nSideboard\n${side}` : main;
+    }
+
+    async function copyList() {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(listText());
+            } else {
+                // The Clipboard API needs HTTPS; fall back to a hidden textarea on plain-HTTP hosts.
+                const textArea = document.createElement("textarea");
+                textArea.value = listText();
+                textArea.style.position = "absolute";
+                textArea.style.left = "-999999px";
+                document.body.prepend(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                textArea.remove();
+            }
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+            setActionError("Couldn't copy to the clipboard.");
+        }
+    }
+
+    function steal() {
+        setActionError("");
+        apiPost(`deck/${deckid}/steal`, { token: userToken })
+            .then(() => router.push("/decks"))
+            .catch(error => setActionError(error instanceof Error ? error.message : "Couldn't copy this deck."));
+    }
+
+    function newHand() {
+        const cards = groups.main
+            .filter(([entry]) => !entry.iscommander && !entry.iscompanion)
+            .flatMap(([entry, card]) => Array.from({ length: entry.count }, () => card));
+        setLibrary(shuffle(cards));
+        setHandSize(HAND_SIZE);
+        (document.getElementById("sample_hand") as HTMLDialogElement | null)?.showModal();
+    }
+
+    function CardDisplay([entry, card]: CardRow) {
+        const roleClass = entry.iscommander ? "border-l-warning bg-warning/5" : entry.iscompanion ? "border-l-info bg-info/5" : "border-l-transparent";
+        return (
+            <CardPreviewRow key={card.id} image={printings.find(printing => printing.cardid === card.id)?.cardimage} name={card.name}>
                 <article className={`flex min-h-9 w-full items-center gap-1.5 overflow-hidden rounded-md border border-base-300 border-l-2 bg-base-100 px-1 py-1 transition-colors hover:border-primary/50 hover:bg-base-200 ${roleClass}`}>
-                    <span aria-label={`${decklistEntry.count} copies`} title={`${decklistEntry.count} in deck`} className="flex w-8 shrink-0 self-stretch items-center justify-center border-r border-base-content/10 font-mono text-base font-bold text-base-content/75">
-                        {decklistEntry.count}
+                    <span aria-label={`${entry.count} copies`} title={`${entry.count} in deck`} className="flex w-8 shrink-0 self-stretch items-center justify-center border-r border-base-content/10 font-mono text-base font-bold text-base-content/75">
+                        {entry.count}
                     </span>
-                    <a
-                        className="min-w-0 flex-1 truncate text-sm font-medium leading-snug hover:text-primary hover:underline"
-                        href={`https://scryfall.com/search?q=oracleid=${cardInfo.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        title={cardInfo.name}
-                    >
-                        {cardInfo.name.split("//")[0].trim()}
+                    <a className="min-w-0 flex-1 truncate text-sm font-medium leading-snug hover:text-primary hover:underline" href={`https://scryfall.com/search?q=oracleid=${card.id}`} target="_blank" rel="noreferrer" title={card.name}>
+                        {card.name.split("//")[0].trim()}
                     </a>
                     <div className="flex shrink-0 items-center gap-1">
-                        {decklistEntry.iscommander && <StatusIcon src="/crown-svgrepo-com.svg" label="Commander" color="bg-warning" />}
-                        {decklistEntry.iscompanion && <StatusIcon src="/person-team.svg" label="Companion" color="bg-info" />}
-                        {cardInfo.watchlist && <StatusIcon src="/star-svgrepo-com.svg" label="On watchlist" color="bg-warning" />}
-                        {cardInfo.banned && <StatusIcon src="/alert-svgrepo.svg" label="Banned card" color="bg-error" />}
+                        {entry.iscommander && <StatusIcon src="/crown-svgrepo-com.svg" label="Commander" color="bg-warning" />}
+                        {entry.iscompanion && <StatusIcon src="/person-team.svg" label="Companion" color="bg-info" />}
+                        {card.watchlist && <StatusIcon src="/star-svgrepo-com.svg" label="On watchlist" color="bg-warning" />}
+                        {card.banned && <StatusIcon src="/alert-svgrepo.svg" label="Banned card" color="bg-error" />}
                     </div>
-                    <ManaSymbols cost={cardInfo.cost} />
+                    <ManaSymbols cost={card.cost} />
                 </article>
-            </CardPreviewRow>);
+            </CardPreviewRow>
+        );
     }
 
-    const trueCount = (cardList: Array<any>) => {
-        return cardList.reduce((accumulator, currentValue) => {return accumulator + currentValue[0].count}, 0)
-    }
+    const peak = Math.max(1, ...stats.curve);
 
-    return(
-    <div className="mx-auto m-5 p-5 max-w-7xl">
-        <div className="flex justify-between">
-            <h1 className="text-4xl italic font-bold">{deckData ? deckData?.deck.name : "loading"}</h1>
-            <div className="flex gap-2">
-            <div className="tooltip" data-tip="Copy Decklist to Clipboard">
-                <button className="btn btn-primary" onClick={() => sendToClipboard()}>Clipboard</button>
-            </div>
-                {userToken && <div className="tooltip" data-tip="Creates a Copy of this Deck on Your Account">
-                    <button className="btn btn-primary" onClick={() => stealDeck(userToken, deckid).then(_ => router.push("/decks"))}>Steal</button>
-                </div>}
-            </div>
-        </div>
-        <h2>{deckData && userlist && userlist.includes((user: any) => user.id == deckData.deck.userid)?.username}</h2>
-        <div className="pt-5">
-            <h1 className="mb-2 text-xl font-bold">Mainboard</h1>
-            <div className="columns-1 gap-3 md:columns-2 xl:columns-3">
-                <CategoryHeading label={`Commander${commanders.length > 1 ? "s" : ""}`} count={trueCount(commanders)} />
-                {deckData && commanders.map((card: any) => {
-                    return CardDisplay(card);
-                })}
+    return (
+        <main className="mx-auto w-full max-w-7xl px-5 py-8 sm:px-8">
+            <PageHeader
+                eyebrow="Rumble / Deck"
+                title={<DeckName deck={deck} commanders={commanderNames} />}
+                actions={<>
+                    <button type="button" className="btn btn-primary" onClick={copyList}>{copied ? "Copied!" : "Copy decklist"}</button>
+                    <button type="button" className="btn btn-outline" onClick={newHand}>Sample hand</button>
+                    <Link href={`/exportdeck/${deck.id}`} className="btn btn-outline">Export for TTS</Link>
+                    {canEdit && <Link href={`/deckdetails/${deck.id}`} className="btn btn-outline">Edit deck</Link>}
+                    {userToken && <button type="button" className="btn btn-ghost" title="Creates a copy of this deck on your account" onClick={steal}>Steal a copy</button>}
+                </>}
+            >
+                <span className="flex flex-wrap items-center gap-2 text-base">
+                    {owner && <span>By <PlayerName id={owner.id} name={owner.username} /></span>}
+                    <span className={`badge badge-soft ${legality.legal ? "badge-success" : "badge-error"}`}>{legality.legal ? "Legal" : "Not legal"}</span>
+                </span>
+            </PageHeader>
 
-                {(deckData && companions.length > 0) && <CategoryHeading label="Companion" count={trueCount(companions)} />}
-                {(deckData && companions.length > 0) && companions.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && creatures.length > 0) && <CategoryHeading label="Creatures" count={trueCount(creatures)} />}
-                {(deckData && creatures.length > 0) && creatures.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && planeswalkers.length > 0) && <CategoryHeading label="Planeswalkers" count={trueCount(planeswalkers)} />}
-                {(deckData && planeswalkers.length > 0) && planeswalkers.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && sorceries.length > 0) && <CategoryHeading label="Sorceries" count={trueCount(sorceries)} />}
-                {(deckData && sorceries.length > 0) && sorceries.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && instants.length > 0) && <CategoryHeading label="Instants" count={trueCount(instants)} />}
-                {(deckData && instants.length > 0) && instants.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && artifacts.length > 0) && <CategoryHeading label="Artifacts" count={trueCount(artifacts)} />}
-                {(deckData && artifacts.length > 0) && artifacts.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && enchantments.length > 0) && <CategoryHeading label="Enchantments" count={trueCount(enchantments)} />}
-                {(deckData && enchantments.length > 0) && enchantments.map((card: any) => {
-                    return CardDisplay(card);
-                })}
-
-                {(deckData && lands.length > 0) && <CategoryHeading label="Lands" count={trueCount(lands)} />}
-                {(deckData && lands.length > 0) && lands.map((card: any) => {
-                    return CardDisplay(card);
-                })}
+            {actionError && <div role="alert" className="alert alert-warning alert-soft mt-5">{actionError}</div>}
+            {!legality.legal && (legality.messages?.length ?? 0) > 0 && (
+                <div role="alert" className="alert alert-error alert-soft mt-5">
+                    <ul className="list-disc pl-5">{legality.messages!.map(message => <li key={message}>{message}</li>)}</ul>
                 </div>
-            {sideboard.length > 0 && <>
-                <div className="divider"></div>
+            )}
+
+            <section aria-label="Deck overview" className="mt-6 grid gap-4 md:grid-cols-3">
+                <div className="card bg-base-100 shadow-sm md:col-span-2">
+                    <div className="card-body gap-3 p-5">
+                        <h2 className="card-title text-lg">Mana curve</h2>
+                        <div className="flex h-36 items-end gap-2" role="img" aria-label={`Mana curve: ${CURVE_BUCKETS.map((bucket, index) => `${stats.curve[index]} at ${bucket}`).join(", ")}`}>
+                            {stats.curve.map((value, index) => (
+                                <div key={CURVE_BUCKETS[index]} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+                                    <span className="text-sm font-bold">{value || ""}</span>
+                                    <div className="w-full rounded-t bg-primary" style={{ height: value ? `${(value / peak) * 100}%` : "2px" }} />
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex gap-2 text-center text-sm text-base-content/60">
+                            {CURVE_BUCKETS.map(bucket => <span key={bucket} className="flex-1">{bucket}</span>)}
+                        </div>
+                    </div>
+                </div>
+                <div className="card bg-base-100 shadow-sm">
+                    <div className="card-body gap-3 p-5">
+                        <h2 className="card-title text-lg">At a glance</h2>
+                        <dl className="grid grid-cols-3 gap-2 text-center">
+                            <Stat label="Cards" value={stats.total} />
+                            <Stat label="Lands" value={stats.lands} />
+                            <Stat label="Avg. MV" value={stats.averageMv.toFixed(2)} />
+                        </dl>
+                        <ul className="space-y-1">
+                            {groups.categories.map(group => (
+                                <li key={group.label} className="flex items-center justify-between gap-3">
+                                    <span>{group.label}</span>
+                                    <span className="font-mono text-base-content/70">{count(group.rows)}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-labelledby="mainboard-heading" className="mt-8">
+                <h2 id="mainboard-heading" className="mb-2 text-xl font-bold">Mainboard</h2>
                 <div className="columns-1 gap-3 md:columns-2 xl:columns-3">
-                    <CategoryHeading label="Sideboard" count={trueCount(sideboard)} />
-                    {sideboard.map((card: any) => {
-                    return CardDisplay(card);
-                    })}
+                    <CategoryHeading label={`Commander${groups.commanders.length > 1 ? "s" : ""}`} count={count(groups.commanders)} />
+                    {groups.commanders.map(CardDisplay)}
+                    {groups.companions.length > 0 && <CategoryHeading label="Companion" count={count(groups.companions)} />}
+                    {groups.companions.map(CardDisplay)}
+                    {groups.categories.map(group => (
+                        <div key={group.label} className="contents">
+                            <CategoryHeading label={group.label} count={count(group.rows)} />
+                            {group.rows.map(CardDisplay)}
+                        </div>
+                    ))}
                 </div>
-            </>}
-        </div>
-    </div>);
+            </section>
+
+            {groups.sideboard.length > 0 && (
+                <section aria-labelledby="sideboard-heading" className="mt-8">
+                    <h2 id="sideboard-heading" className="mb-2 text-xl font-bold">Sideboard <span className="font-mono text-base font-normal text-base-content/60">{count(groups.sideboard)}</span></h2>
+                    <div className="columns-1 gap-3 md:columns-2 xl:columns-3">{groups.sideboard.map(CardDisplay)}</div>
+                </section>
+            )}
+
+            {userToken && (
+                <section aria-labelledby="history-heading" className="card mt-8 bg-base-100 shadow-sm">
+                    <div className="card-body gap-3 p-5">
+                        <h2 id="history-heading" className="card-title text-lg">Match history</h2>
+                        {history.length === 0 ? <p className="text-base-content/60">Not played yet.</p> : (
+                            <div className="overflow-x-auto">
+                                <table className="table text-base">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Event</th>
+                                            <th className="text-right">Players</th>
+                                            {showPlacement && <th className="text-right">Placed</th>}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {history.map(entry => (
+                                            <tr key={entry.matchid}>
+                                                <td>{entry.start ? new Date(entry.start).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "Not started"}</td>
+                                                <td><Link href={`/events/${entry.eventid}`} className="hover:text-primary hover:underline">{entry.eventname}</Link>{entry.themed && <span className="badge badge-info badge-outline badge-sm ml-2">Themed</span>}</td>
+                                                <td className="text-right font-mono">{entry.players}</td>
+                                                {showPlacement && <td className="text-right font-mono">{entry.placement ?? "—"}</td>}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            <dialog id="sample_hand" className="modal">
+                <div className="modal-box w-11/12 max-w-6xl">
+                    <form method="dialog">
+                        <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" aria-label="Close">✕</button>
+                    </form>
+                    <h2 className="text-xl font-bold">Sample hand</h2>
+                    <p className="text-sm text-base-content/70">{deckName(deck, commanderNames)} · {library.length - hand.length} cards left in library</p>
+                    <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+                        {hand.map((card, index) => (
+                            <img key={`${card.id}-${index}`} src={imageFor(card)} alt={card.name} title={card.name} loading="lazy" className="w-full rounded-[4.75%/3.5%] shadow" />
+                        ))}
+                    </div>
+                    <div className="modal-action">
+                        <button type="button" className="btn btn-outline" disabled={hand.length >= library.length} onClick={() => setHandSize(size => size + 1)}>Draw a card</button>
+                        <button type="button" className="btn btn-primary" onClick={newHand}>New hand</button>
+                    </div>
+                </div>
+                <form method="dialog" className="modal-backdrop"><button>close</button></form>
+            </dialog>
+        </main>
+    );
 }
 
-// function CardDisplay(card: any) {
-//     return (<div className={`flex bg-base-100 h-6 w-64 tooltip rounded-md m-1 ${card[0].iscommander ? "border-yellow-500 border " : ""}`} key={card[1].name}>
-//         <div className="tooltip-content">
-//             <img src={printings.}></img>
-//         </div>
-//                             <div className="px-2">{card[0].count}</div>
-//                             <a className="hover:font-bold" href={`https://scryfall.com/search?q=oracleid=${card[1].id}`}target="_blank">{card[1].name.split("//")[0]}</a>
-//                             {card[1].watchlist && <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#fff700" stroke="#fff700"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>This Card is on the Watchlist</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Alert"> <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="24" height="24"> </rect> <line x1="12" y1="13" x2="12" y2="9" id="Path" stroke="#fff700" stroke-width="2" stroke-linecap="round"> </line> <line x1="12" y1="16.5" x2="12" y2="16.63" id="Path" stroke="#fff700" stroke-width="2" stroke-linecap="round"> </line> <path d="M10.2679,5.0000025 C11.0377,3.66667 12.9622,3.66667 13.732,5.0000025 L20.6602,17.0000025 C21.43,18.3333 20.4678,20.0000025 18.9282,20.0000025 L5.07177,20.0000025 C3.53217,20.0000025 2.56992,18.3333 3.33972,17.0000025 L10.2679,5.0000025 Z" id="Path" stroke="#fff700" stroke-width="2" stroke-linecap="round"> </path> </g> </g> </g></svg>}
-//                             {card[1].banned && <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#ff0000" stroke="#ff0000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <title>This Card Is BANNED</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="Alert"> <rect id="Rectangle" fill-rule="nonzero" x="0" y="0" width="24" height="24"> </rect> <line x1="12" y1="13" x2="12" y2="9" id="Path" stroke="#ff0000" stroke-width="2" stroke-linecap="round"> </line> <line x1="12" y1="16.5" x2="12" y2="16.63" id="Path" stroke="#ff0000" stroke-width="2" stroke-linecap="round"> </line> <path d="M10.2679,5.0000025 C11.0377,3.66667 12.9622,3.66667 13.732,5.0000025 L20.6602,17.0000025 C21.43,18.3333 20.4678,20.0000025 18.9282,20.0000025 L5.07177,20.0000025 C3.53217,20.0000025 2.56992,18.3333 3.33972,17.0000025 L10.2679,5.0000025 Z" id="Path" stroke="#ff0000" stroke-width="2" stroke-linecap="round"> </path> </g> </g> </g><div className="tooltip" data-tip="hello"></div></svg>}
-//                         </div>);
-// }
+function Stat({ label, value }: { label: string; value: number | string }) {
+    return (
+        <div className="flex flex-col-reverse rounded-field bg-base-200 p-2">
+            <dt className="text-sm text-base-content/60">{label}</dt>
+            <dd className="text-2xl font-bold">{value}</dd>
+        </div>
+    );
+}

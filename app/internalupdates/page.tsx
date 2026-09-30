@@ -1,3 +1,7 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = { title: "Site updates" };
+
 export default function InternalUpdate() {
     return (
         <div className="flex-col justify-start items-center min-h-screen bg-base-200 mx-auto max-w-3xl">

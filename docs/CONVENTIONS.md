@@ -69,9 +69,13 @@ theme list (in `app/profile/page.tsx`) as the single source — don't duplicate.
 
 ## Env vars
 See `.env.example`. `API_URL` (external backend base URL), `HOST_URL`
-(websocket host). `LOCAL_URL` exists in `.env` but is currently unused in code
+(websocket host), `SITE_URL` (public origin for absolute link-preview URLs;
+without it Next falls back to localhost). `LOCAL_URL` exists in `.env` but is currently unused in code
 — confirm before relying on it. Access only via `process.env.*`; do not
 hardcode.
+
+Page metadata: build `openGraph` with `openGraph()` from `app/util/siteMetadata.ts` so every
+page carries the shared `/og-image` preview (a child's `openGraph` replaces the parent's entirely).
 
 ## Linting / formatting
 Run `npm run lint` and `npm run format` before committing. Prettier config is
@@ -90,3 +94,17 @@ Players must never see another player's wins, win rate, or placements.
 - Other players (`/stats/users/{id}`, Players list) show only non-performance data: games played, kills, commanders played, last played.
 - Enforced in the API (`canViewPrivateStats` in `RumbleAPI/routes/stats.go`): `/stats/user/:id/simple` returns 403 for other users, `/stats/users/:id` omits commander `wins`, and `/stats/users` never includes wins. Admins can view all.
 - Aggregate card/global stats (no per-player breakdown) are fine to show.
+
+## Deck legality (product rule)
+Implemented in `RumbleAPI/routes/legality.go` (`evaluateLegality`), used by saved decks, the deck checker, and the admin "Recheck all decks" action.
+- One or two commanders, each legendary. They count toward the deck and set the combined color identity.
+- Main deck exactly 60 cards including commanders; 80 if Yorion, Sky Nomad is the companion. Other companion deckbuilding conditions are not enforced.
+- One copy of each card except basic lands (and cards whose text allows any number / up to N copies).
+- Every card (main, sideboard, companion) within the commanders' color identity.
+- Sideboard at most 7 cards; the companion takes one of those slots.
+- No banned cards (`banned` or any `bangroup`).
+- Rulebreaker commanders (oracle text "*Rulebreaker* —") relax these; each is coded by name in the `rulebreakers` map. Add new ones there with a test in `legality_test.go`.
+
+## Deck name privacy (product rule)
+Visitors without a valid login never see a deck's custom name; the public deck endpoints (`/deck/v2/:id`, `/deckdetails/:id`, `/decklist/:id`, `/deck/tts/:id`) return "Commander (& Partner) - Mon D, YYYY" (from `lastupdated`) instead. Starter decks are exempt; the curated list lives in the API (`starterDecks` in `RumbleAPI/routes/deck_endpoints.go`, served at `GET /starterdecks`).
+- Profile "Demo mode" applies the same format client-side for logged-in users (`hidedecknames` cookie) and can also show players as "Player #" (`hideplayernames` cookie). Render deck and player names through `DeckName` / `useDeckName` and `PlayerName` / `usePlayerName` from `app/components/DemoMode.tsx`, never `deck.name` / `username` directly.

@@ -1,6 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import PageHeader from "../components/PageHeader";
+import { openGraph } from "../util/siteMetadata";
+
+export const metadata: Metadata = {
+    title: "Rules",
+    description: "Full Rumble rules: deck construction, game setup, and a glossary of terms.",
+    openGraph: openGraph("Rumble rules", "Deck construction, game setup, and a glossary for the Rumble Magic format."),
+};
 
 const deckRules: ReactNode[] = [
     "60 card deck.",
