@@ -14,7 +14,10 @@ async function request<T>(method: string, path: string, opts?: ApiOptions): Prom
     },
     body: opts?.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
-  if (res.status >= 400) throw new Error("Server responds with error!");
+  if (res.status >= 400) {
+    const body = await res.json().catch(() => null);
+    throw new Error(body?.error || body?.message || `Server responds with error! (${res.status})`);
+  }
   if (res.status === 204) return [] as unknown as T;
   return res.json();
 }

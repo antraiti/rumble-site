@@ -3,6 +3,7 @@ import { use, useEffect, useState } from "react";
 import userData from "../../util/UserData"
 import { useRouter } from "next/navigation";
 import { apiGet, apiPost } from "../../util/apiClient";
+import { CardPreviewRow, CategoryHeading, ManaSymbols, StatusIcon } from "../../components/CardList";
 
 async function getDeckInfo(token: string, id: number) {
     return apiGet(`deck/${id}`, { token });
@@ -15,53 +16,8 @@ async function getDeckInfo(token: string, id: number) {
         return apiPost(`deck/${id}/steal`, { token });
     }   
 
-    function getManaSymbolUrl(symbol: string) {
-        const fileName = symbol === "∞" ? "INFINITY" : symbol === "½" ? "HALF" : symbol.replaceAll("/", "");
-        return `https://svgs.scryfall.io/card-symbols/${fileName}.svg`;
-    }
-
-    function StatusIcon({ src, label, color }: { src: string; label: string; color: string }) {
-        return <span
-            role="img"
-            aria-label={label}
-            title={label}
-            className={`size-4 shrink-0 ${color}`}
-            style={{
-                maskImage: `url('${src}')`,
-                WebkitMaskImage: `url('${src}')`,
-                maskPosition: "center",
-                WebkitMaskPosition: "center",
-                maskRepeat: "no-repeat",
-                WebkitMaskRepeat: "no-repeat",
-                maskSize: "contain",
-                WebkitMaskSize: "contain",
-            }}
-        />;
-    }
-
 export interface DeckPageProps {
     deckid: number;
-}
-
-// Mounts the card image on first hover/focus so a deck view doesn't download every card image up front.
-function CardPreviewRow({ image, name, children }: { image?: string; name: string; children: React.ReactNode }) {
-    const [showPreview, setShowPreview] = useState(false);
-    const reveal = () => setShowPreview(true);
-    return (
-        <div className="tooltip tooltip-top mb-1 w-full break-inside-avoid" onMouseEnter={reveal} onFocus={reveal}>
-            {image && showPreview && <div className="tooltip-content z-50 bg-transparent p-0 shadow-none">
-                <img className="h-72 w-52 rounded-xl object-contain" src={image} alt={`${name} card art`} />
-            </div>}
-            {children}
-        </div>
-    );
-}
-
-function CategoryHeading({ label, count }: { label: string; count: number }) {
-    return <h2 className="mb-1 mt-3 flex items-center gap-2 border-b border-base-content/15 pb-1 text-xs font-bold uppercase text-base-content/70">
-        <span>{label}</span>
-        <span className="font-mono text-[11px] text-base-content/45">{count}</span>
-    </h2>;
 }
 
 export default function DeckDetails({ params }: { params: Promise<DeckPageProps>}) {
@@ -186,15 +142,15 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
                 }
             })
         });
-        getUsers(userToken).then(items => {
+        // The user list needs a login; signed-out visitors can still view the deck.
+        if (userToken) getUsers(userToken).then(items => {
             setUserlist(items);
-        });
+        }).catch(() => {});
       }, [])
 
     
     function CardDisplay(card: any) {
         const [decklistEntry, cardInfo] = card;
-        const manaSymbols = cardInfo.cost?.match(/\{([^}]+)\}/g)?.map((symbol: string) => symbol.slice(1, -1)) ?? [];
         const cardImage = printings.find((printing: any) => printing.cardid == cardInfo.id)?.cardimage;
         const roleClass = decklistEntry.iscommander
             ? "border-l-warning bg-warning/5"
@@ -223,18 +179,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckPageProps>
                         {cardInfo.watchlist && <StatusIcon src="/star-svgrepo-com.svg" label="On watchlist" color="bg-warning" />}
                         {cardInfo.banned && <StatusIcon src="/alert-svgrepo.svg" label="Banned card" color="bg-error" />}
                     </div>
-                    <div className="flex shrink-0 items-center gap-0.5" aria-label={cardInfo.cost ? `Mana cost ${cardInfo.cost}` : "No mana cost"}>
-                        {manaSymbols.map((symbol: string, index: number) => (
-                            <img
-                                key={`${symbol}-${index}`}
-                                src={getManaSymbolUrl(symbol)}
-                                alt={`{${symbol}}`}
-                                title={`{${symbol}}`}
-                                className="size-[18px]"
-                                loading="lazy"
-                            />
-                        ))}
-                    </div>
+                    <ManaSymbols cost={cardInfo.cost} />
                 </article>
             </CardPreviewRow>);
     }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import type { Color, DeckCommander, DeckInfo } from "../types";
 
-const FALLBACK_IMAGE = 'https://cards.scryfall.io/art_crop/front/0/e/0eb0e8e7-266f-441e-b1cd-12b8ec3f7d71.jpg'; // Imp's Mischief UwU
+export const FALLBACK_IMAGE = 'https://cards.scryfall.io/art_crop/front/0/e/0eb0e8e7-266f-441e-b1cd-12b8ec3f7d71.jpg'; // Imp's Mischief UwU
 
 // aura values are Tailwind's amber-300, sky-400, red-400, green-400, gray-400.
 const pips: { key: "red" | "blue" | "white" | "green" | "black"; label: string; icon: string; bg: string; aura: string }[] = [
@@ -18,6 +18,15 @@ function auraGradient(colors: string[]) {
     if (colors.length === 0) colors = ["var(--color-primary)"];
     const start = colors.length === 1 ? 225 : 150;
     return `conic-gradient(from var(--aura-angle), transparent ${start}deg, ${colors.join(", ")})`;
+}
+
+export function identityColors(identity: Pick<Color, "white" | "blue" | "black" | "red" | "green">) {
+    const colors = pips.filter(pip => identity[pip.key]).map(pip => pip.aura);
+    return colors.length ? colors : [COLORLESS_AURA];
+}
+
+export function identityAura(identity: Pick<Color, "white" | "blue" | "black" | "red" | "green">) {
+    return auraGradient(identityColors(identity));
 }
 
 export interface DeckStats {
