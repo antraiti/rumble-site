@@ -5,6 +5,7 @@ import SetThemeContext from "../components/ThemeContext";
 import { useDemoMode } from "../components/DemoMode";
 import PageHeader from "../components/PageHeader";
 import Cookies from "js-cookie";
+import Link from "next/link";
 import { apiGet, apiPost, apiPut } from "../util/apiClient";
 import { getShowDeckOwner, setShowDeckOwner } from "../util/adminPrefs";
 import type { BulkProcessReport, User } from "../types";
@@ -65,6 +66,7 @@ export default function Profile() {
 
     useEffect(() => {
         // localStorage is unavailable during SSR; read after mount to avoid hydration mismatch
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Read the browser-only preference after SSR.
         setShowDeckOwnerState(getShowDeckOwner());
     }, []);
 
@@ -367,6 +369,11 @@ export default function Profile() {
                         </Card>
                     </div>
 
+                    <div className="mt-6">
+                        <Card title="Custom cards" description="Create and edit custom cards, rules, both faces, and hosted artwork.">
+                            <Link className="btn btn-primary self-start" href="/admin/customcards">Manage custom cards</Link>
+                        </Card>
+                    </div>
                     <div className="mt-6">
                         <Card title="Card database" description="Import new cards and printings from Scryfall. Preview reads the local bulk file without writing anything. Apply local bulk writes the downloaded file to the database. Fetch and apply downloads a fresh file first.">
                             <div className="flex flex-wrap gap-3">

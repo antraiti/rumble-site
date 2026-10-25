@@ -40,9 +40,30 @@ be legacy `[deck, commanderCard]` tuples or new plain deck objects; use
 | `/api/admin/bulkprocess/dry-run` | POST | `/bulkprocess/dry-run` | Admin-only preview of local bulk file; no database writes |
 | `/api/admin/bulkupdate` | POST | `/bulkupdate` | Admin-only download from Scryfall and database update |
 | `/api/admin/decklegality` | POST | `/deck/legality/refresh` | Admin-only: recheck and store `islegal` for every deck |
-| `/api/ws` | GET (dummy) + `SOCKET` | n/a | Raw WS broadcast relay, no auth |
+| `/api/admin/customcards` | GET/POST | `/admin/customcards` | Admin-only list/create; POST validated with Zod |
+| `/api/admin/customcards/[id]` | GET/PUT | `/admin/customcards/:id` | Admin-only load/edit; PUT validated with Zod |
+| `/api/ws` | GET (dummy) + `UPGRADE` | n/a | Raw WS broadcast relay, no auth; next-ws 2 |
 
 ## Standard proxy pattern (current, duplicated per-route)
+
+### Custom card documents
+
+The Go-only editor at `/admin/customcards` uses
+`{ id, front, back, identityid, banned, watchlist }`. Writes omit `id`.
+Faces contain `{ name, typeline, oracletext, mv, cost, power, toughness,
+cardimage, artcrop }`; `back` is `null` for single-faced cards. URLs are optional
+HTTP(S) image links, at most 256 bytes without credentials. Identity is shared
+by both faces. Creating returns `201`; editing returns `200`. Errors retain
+the upstream status, including `400`, `401`, `403`, `404`, and `409`.
+
+Card/printing writes are atomic; existing IDs, release dates, and extra printings
+are retained. The editor changes the first printing ordered by ID per face.
+Double-faced cards use the existing `<front-id>/back` convention and cannot lose
+an existing back face. Official cards are read-only here. Refresh saved legality
+badges separately through Profile after rules/color/ban changes.
+
+### Legacy proxy example
+
 ```ts
 export async function GET(request: Request) {
   const res = await fetch(process.env.API_URL + '/thing', {

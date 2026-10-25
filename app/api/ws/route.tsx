@@ -4,10 +4,10 @@ import type { WebSocket } from 'ws';
 const clients = new Set<WebSocket>();
 
 // Relays each message to every other open client; pages filter by message type/event themselves.
-export function SOCKET(
+export function UPGRADE(
     client: WebSocket,
-    request: import('http').IncomingMessage,
     server: import('ws').WebSocketServer,
+    request: import('next/server').NextRequest,
   ) {
     clients.add(client);
 

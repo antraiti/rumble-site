@@ -2,7 +2,11 @@
   "name": "rumble-site",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24.22.1 <25"
+  },
   "scripts": {
+    "prepare": "next-ws patch --yes",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -12,23 +16,23 @@
   },
   "dependencies": {
     "js-cookie": "^3.0.5",
-    "next": "^16.0.10",
-    "next-ws": "^1.0.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "ws": "^8.16.0",
+    "next": "^16.4.3",
+    "next-ws": "^2.2.19",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "ws": "^8.22.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.9",
     "@tailwindcss/typography": "^0.5.16",
     "@types/js-cookie": "^3.0.6",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "18.3.27",
     "@types/react-dom": "18.3.7",
     "@types/ws": "^8.5.10",
     "daisyui": "^5.7.46",
-    "eslint-config-next": "^16.0.10",
+    "eslint-config-next": "^16.4.3",
     "eslint-config-prettier": "^10.1.8",
     "postcss": "^8",
     "prettier": "^3.9.7",
@@ -36,6 +40,9 @@
     "typescript": "^5"
   },
   "overrides": {
+    "@tailwindcss/typography": {
+      "postcss-selector-parser": "^7.1.7"
+    },
     "@types/react": "18.3.27",
     "@types/react-dom": "18.3.7"
   }

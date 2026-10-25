@@ -1,6 +1,6 @@
 const MANAFOUNDRY_HOSTS = ["manafoundry.gg", "20q2.github.io"];
 
-function base64UrlToBytes(value: string): Uint8Array {
+function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
     const base64 = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
     return Uint8Array.from(atob(base64), char => char.charCodeAt(0));
 }
@@ -9,7 +9,7 @@ function base64UrlToBytes(value: string): Uint8Array {
 async function decodeManaFoundry(fragment: string): Promise<string> {
     const dot = fragment.indexOf(".");
     const version = fragment.slice(0, dot);
-    let bytes: Uint8Array;
+    let bytes: Uint8Array<ArrayBuffer>;
     try {
         bytes = base64UrlToBytes(fragment.slice(dot + 1));
         if (version === "1") {
