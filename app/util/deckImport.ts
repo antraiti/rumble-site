@@ -1,6 +1,6 @@
 const MANAFOUNDRY_HOSTS = ["manafoundry.gg", "20q2.github.io"];
 
-function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
+function base64UrlToBytes(value: string): Uint8Array {
     const base64 = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
     return Uint8Array.from(atob(base64), char => char.charCodeAt(0));
 }
@@ -9,11 +9,12 @@ function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
 async function decodeManaFoundry(fragment: string): Promise<string> {
     const dot = fragment.indexOf(".");
     const version = fragment.slice(0, dot);
-    let bytes: Uint8Array<ArrayBuffer>;
+    let bytes: Uint8Array;
     try {
         bytes = base64UrlToBytes(fragment.slice(dot + 1));
         if (version === "1") {
-            const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+            // Uint8Array.from allocates a fresh, exactly-sized ArrayBuffer, so the cast is safe.
+            const stream = new Blob([bytes.buffer as ArrayBuffer]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
             bytes = new Uint8Array(await new Response(stream).arrayBuffer());
         } else if (version !== "0") {
             throw new Error();
