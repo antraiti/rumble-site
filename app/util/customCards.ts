@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { Color } from '@/app/types/color';
 
 const imageURL = z
   .string()
@@ -29,7 +30,7 @@ export const customCardFaceSchema = z.object({
 export const customCardSchema = z.object({
   front: customCardFaceSchema,
   back: customCardFaceSchema.nullable(),
-  identityid: z.number().int().min(0).max(31),
+  identityid: z.number().int().min(0).max(32),
   banned: z.boolean(),
   watchlist: z.boolean(),
 });
@@ -55,4 +56,55 @@ export function emptyCustomFace(): CustomCardFace {
 
 export function emptyCustomCard(): CustomCardInput {
   return { front: emptyCustomFace(), back: null, identityid: 0, banned: false, watchlist: false };
+}
+
+const importedCardSchema = z.object({
+  name: z.string().trim().min(1),
+  colorIdentity: z.array(z.enum(['W', 'U', 'B', 'R', 'G'])).default([]),
+  typeLine: z.string().trim().min(1),
+  manaCost: z.string().default(''),
+  manaValue: z.number().int().min(0).default(0),
+  power: z.string().nullish(),
+  toughness: z.string().nullish(),
+  rulesText: z.string().default(''),
+  cardImage: z.string().default(''),
+  artCrop: z.string().default(''),
+});
+
+export const customCardImportSchema = z.array(importedCardSchema).min(1);
+
+/** Converts an exported card list (camelCase, colorIdentity letters) into create requests. */
+export function toCustomCardInputs(
+  cards: z.infer<typeof customCardImportSchema>,
+  colors: Color[]
+): CustomCardInput[] {
+  return cards.map((card) => {
+    const letters = new Set(card.colorIdentity);
+    const identity = colors.find(
+      (color) =>
+        color.white === letters.has('W') &&
+        color.blue === letters.has('U') &&
+        color.black === letters.has('B') &&
+        color.red === letters.has('R') &&
+        color.green === letters.has('G')
+    );
+    if (!identity) throw new Error(`No color identity matches ${card.name}`);
+    return {
+      front: {
+        name: card.name,
+        typeline: card.typeLine,
+        oracletext: card.rulesText,
+        mv: card.manaValue,
+        cost: card.manaCost,
+        power: card.power ?? '',
+        toughness: card.toughness ?? '',
+        cardimage: card.cardImage,
+        artcrop: card.artCrop,
+      },
+      back: null,
+      identityid: identity.id,
+      banned: false,
+      watchlist: false,
+    };
+  });
 }

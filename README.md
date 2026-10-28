@@ -34,6 +34,12 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 
 ## Custom card administration
 
+To add custom cards to a deck, open its deck settings and use **Custom cards**.
+Search by any part of the name (case-insensitive), then choose **Add** beside a
+result. The alphabetized list scrolls independently and keeps your search while
+you add multiple cards. Cards already in the deck and back faces are excluded.
+Custom card additions and removals are locked once the deck has been played.
+
 Sign in as an administrator and open **Profile > Manage custom cards**
 (`/admin/customcards`). Search the catalogue to edit an existing custom card,
 or choose **New custom card**. Supports card rules, mana cost/value, printed

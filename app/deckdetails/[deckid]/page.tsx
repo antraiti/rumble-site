@@ -67,7 +67,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
     const displayName = useDeckName();
 
     function fetchDeckInfo() {
-        getDeckInfo(userToken, deckid).then((item) => {
+        return getDeckInfo(userToken, deckid).then((item) => {
             setDeckInfo(item.deck);
             setDeckName(item.deck.name);
             setDeckCommander(item.deck.commander);
@@ -88,7 +88,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
 
     function sendDeckUpdate(prop: string, val: string) {
         setUpdateError(false);
-        updateDeck(userToken, deckid, prop, val)
+        return updateDeck(userToken, deckid, prop, val)
             .then(() => fetchDeckInfo())
             .catch(() => setUpdateError(true));
     }
@@ -250,10 +250,7 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
                     </Panel>
 
                     <Panel title="Custom cards" description={played ? "Locked because this deck has been played." : undefined}>
-                        <select className="select w-full" value="" disabled={played} aria-label="Add a custom card" onChange={e => sendDeckUpdate("card", e.target.value)}>
-                            <option value="" disabled>Add a card…</option>
-                            {customToAdd.map(card => <option key={card.id} value={card.id}>{card.name}</option>)}
-                        </select>
+                        <CustomCardPicker cards={customToAdd} disabled={played} onAdd={id => sendDeckUpdate("card", id)} />
                         <RemovableCards cards={customInDeck} emptyText="No custom cards." disabled={played} removeLabel="from the deck" onRemove={id => sendDeckUpdate("-card", id)} />
                     </Panel>
 
@@ -278,6 +275,74 @@ export default function DeckDetails({ params }: { params: Promise<DeckDetailsPro
                 </div>
             </div>
         </main>
+    );
+}
+
+function CustomCardPicker({ cards, disabled, onAdd }: {
+    cards: CustomCard[];
+    disabled: boolean;
+    onAdd: (id: string) => Promise<void>;
+}) {
+    const [search, setSearch] = useState("");
+    const [addingID, setAddingID] = useState<string | null>(null);
+    const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const matchingCards = cards
+        .filter(card => terms.every(term => card.name.toLowerCase().includes(term)))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+    async function addCard(id: string) {
+        setAddingID(id);
+        try {
+            await onAdd(id);
+        } finally {
+            setAddingID(null);
+        }
+    }
+
+    return (
+        <div className="grid gap-3">
+            <label className="grid gap-2">
+                <span className="font-medium">Search custom cards</span>
+                <input
+                    type="search"
+                    className="input w-full"
+                    placeholder="Type part of a card name..."
+                    value={search}
+                    disabled={disabled}
+                    onChange={event => setSearch(event.target.value)}
+                    aria-controls="custom-card-results"
+                />
+            </label>
+            <p role="status" className="text-sm text-base-content/70">
+                {matchingCards.length} of {cards.length} available cards
+            </p>
+            <div id="custom-card-results" className="max-h-64 overflow-y-auto rounded-box border border-base-content/15" aria-busy={addingID !== null}>
+                {matchingCards.length > 0 ? (
+                    <ul className="divide-y divide-base-content/10">
+                        {matchingCards.map(card => (
+                            <li key={card.id} className="flex items-center justify-between gap-3 p-3">
+                                <span className="min-w-0 break-words">{card.name}</span>
+                                <button
+                                    type="button"
+                                    className="btn btn-outline btn-success shrink-0"
+                                    disabled={disabled || addingID !== null}
+                                    aria-label={`Add ${card.name} to the deck`}
+                                    onClick={() => addCard(card.id)}
+                                >
+                                    {addingID === card.id ? "Adding..." : "Add"}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <p className="p-4 text-sm text-base-content/70">
+                        {cards.length === 0
+                            ? "No custom cards available to add."
+                            : "No matching custom cards. Try another name."}
+                    </p>
+                )}
+            </div>
+        </div>
     );
 }
 

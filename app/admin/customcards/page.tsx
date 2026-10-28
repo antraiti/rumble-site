@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
 import PageHeader from '@/app/components/PageHeader';
 import userData from '@/app/util/UserData';
 import { apiGet, apiPost, apiPut } from '@/app/util/apiClient';
 import {
+  customCardImportSchema,
   customCardSchema,
   emptyCustomCard,
+  toCustomCardInputs,
   emptyCustomFace,
   type CustomCardDocument,
   type CustomCardFace,
@@ -138,6 +140,70 @@ export default function CustomCards() {
     }
   }
 
+  async function importCards(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file) return;
+    setError('');
+    setMessage('');
+    let inputs: CustomCardInput[];
+    try {
+      const parsed = customCardImportSchema.safeParse(JSON.parse(await file.text()));
+      if (!parsed.success) {
+        setError(
+          'Invalid import file: ' +
+            parsed.error.issues
+              .slice(0, 5)
+              .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+              .join('; ')
+        );
+        return;
+      }
+      inputs = toCustomCardInputs(parsed.data, colors);
+    } catch (error) {
+      setError(error instanceof SyntaxError ? 'Import file is not valid JSON' : errorText(error));
+      return;
+    }
+
+    const known = new Set(cards.map((card) => card.name.toLowerCase()));
+    const created: CustomCardSummary[] = [];
+    const skipped: string[] = [];
+    const failed: string[] = [];
+    setSaving(true);
+    for (const input of inputs) {
+      const name = input.front.name;
+      if (known.has(name.toLowerCase())) {
+        skipped.push(name);
+        continue;
+      }
+      const valid = customCardSchema.safeParse(input);
+      if (!valid.success) {
+        failed.push(`${name} (${valid.error.issues[0]?.message})`);
+        continue;
+      }
+      try {
+        const saved = await apiPost<CustomCardDocument>('admin/customcards', {
+          token: userToken,
+          body: valid.data,
+        });
+        known.add(name.toLowerCase());
+        created.push({ id: saved.id, name: saved.front.name, transform: saved.back !== null });
+      } catch (error) {
+        const text = errorText(error);
+        if (text.includes('already exists')) skipped.push(name);
+        else failed.push(`${name} (${text})`);
+      }
+    }
+    setSaving(false);
+    if (created.length)
+      setCards((current) => [...current, ...created].sort((a, b) => a.name.localeCompare(b.name)));
+    setMessage(
+      `Imported ${created.length} card${created.length === 1 ? '' : 's'}; skipped ${skipped.length} that already exist.` +
+        (created.length ? ' Use Profile > Recheck all decks to refresh legality badges.' : '')
+    );
+    if (failed.length) setError(`Failed to import: ${failed.join('; ')}`);
+  }
+
   if (!mounted)
     return (
       <main className="p-8" role="status">
@@ -208,6 +274,19 @@ export default function CustomCards() {
           >
             New custom card
           </button>
+          <label className="flex flex-col gap-1">
+            Import cards from JSON
+            <input
+              className="file-input w-full"
+              type="file"
+              accept="application/json,.json,.txt"
+              disabled={busy || colors.length === 0}
+              onChange={importCards}
+            />
+            <span className="text-xs text-base-content/60">
+              Cards whose names already exist are skipped.
+            </span>
+          </label>
           <label className="flex flex-col gap-1">
             Search custom cards
             <input
